@@ -1,0 +1,39 @@
+pipeline {
+    agent any
+    options {
+        disableConcurrentBuilds()
+        buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))
+    }
+    stages {
+        stage('Deploy') {
+            when {
+                branch 'master'
+            }
+            steps {
+                withCredentials(
+                [string(credentialsId: 'PODCASTS_SITE_POSTGRES_PASSWORD', variable: 'PODCASTS_SITE_POSTGRES_PASSWORD'),
+                string(credentialsId: 'PODCASTS_SITE_POSTGRES_USER', variable: 'PODCASTS_SITE_POSTGRES_USER'),
+                string(credentialsId: 'PODCASTS_SITE_POSTGRES_DB', variable: 'PODCASTS_SITE_POSTGRES_DB')]
+                ){
+                    sh label: '', script: """bash -c \'
+                        export POSTGRES_DB="'"${PODCASTS_SITE_POSTGRES_DB}"'";
+                        export POSTGRES_USER="'"${PODCASTS_SITE_POSTGRES_USER}"'";
+                        export POSTGRES_PASSWORD="'"${PODCASTS_SITE_POSTGRES_PASSWORD}"'";
+                        export JENKINS="true";
+                        export ENV="PROD";
+                        ./CI/deploy.sh;
+                    \'"""
+                }
+            }
+        }
+    }
+    post {
+      always {
+          script {
+              if (fileExists('test_results/all-unit-tests.xml')){
+                  junit skipPublishingChecks: true, testResults: 'test_results/all-unit-tests.xml'
+              }
+          }
+      }
+  }
+}
