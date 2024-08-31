@@ -85,6 +85,7 @@ class Command(BaseCommand):
                 Episode(
                     title=episode.original_title,
                     media=Media(episode.get_location, size=episode.size),
+                    publication_date=episode.date
                 )
                 for episode in youtube_podcast.youtubepodcastvideo_set.all()
             ]
