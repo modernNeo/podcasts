@@ -1,2 +1,6 @@
-podgen
-Pillow
+Django==5.1
+pillow==10.4.0
+
+podgen==1.1.0
+
+yt-dlp==2024.8.6
