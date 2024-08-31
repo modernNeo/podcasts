@@ -10,6 +10,7 @@ services:  #Services that are needed for the podcasts_site app
             - POSTGRES_PASSWORD
             - COMPOSE_PROJECT_NAME
             - ENV
+            - PROD_HOST
         volumes: #volume are for hot reload
             - logs:/src/app/logs
             - assets:/src/app/assets
