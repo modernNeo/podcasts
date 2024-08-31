@@ -72,7 +72,7 @@ WSGI_APPLICATION = 'podcasts_site.wsgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 ASSETS_FOLDER_NAME = 'assets'
-MEDIA_ROOT = os.path.join(BASE_DIR.parent, f'{ASSETS_FOLDER_NAME}/')
+MEDIA_ROOT = os.path.join(BASE_DIR.parent, ASSETS_FOLDER_NAME)
 Path(MEDIA_ROOT).mkdir(parents=True, exist_ok=True)
 
 # Static files (CSS, JavaScript, Images)
@@ -81,8 +81,13 @@ URL_ROOT = "/"
 STATIC_URL = f"{URL_ROOT}static/"
 
 MEDIA_URL = f'{URL_ROOT}media/'
-print(f'[settings.py] MEDIA_URL set to {MEDIA_URL}')
+
+print(f'[settings.py] ASSETS_FOLDER_NAME set to {ASSETS_FOLDER_NAME}')
 print(f'[settings.py] MEDIA_ROOT set to {MEDIA_ROOT}')
+print(f'[settings.py] URL_ROOT set to {URL_ROOT}')
+print(f'[settings.py] STATIC_URL set to {STATIC_URL}')
+print(f'[settings.py] MEDIA_URL set to {MEDIA_URL}')
+
 PROD_HOST = None
 PROD_ENV = os.environ['ENV'] == "PROD"
 if PROD_ENV:
@@ -141,10 +146,6 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_TZ = True
-
-
-
-
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
