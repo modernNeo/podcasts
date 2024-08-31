@@ -54,8 +54,8 @@ class Command(BaseCommand):
                     # "skip_download" : True, # if doing debug
                 }
                 hostname = "us" if youtube_podcast.country_code == "US" else 'ca'
-                output = subprocess.run(["mullvad", "relay", "set", "location", hostname])
-                print(output)
+                # output = subprocess.run(["mullvad", "relay", "set", "location", hostname])
+                # print(output)
                 with yt_dlp.YoutubeDL(yt_opts) as ydl:
                     ydl.add_post_processor(YouTubeVideoPostProcessor())
                     ydl.download(youtube_podcast.url)
