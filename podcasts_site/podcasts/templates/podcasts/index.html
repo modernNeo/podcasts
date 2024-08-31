@@ -14,7 +14,7 @@
         <h1>{{ podcast }}</h1>
         <input type="number" name="id" value="{{ podcast.id }}" hidden>
         <label>URL:</label><input type="text" name="url" value="{{ podcast.url }}"> <br>
-        <label>Number of Past Items to Process: </label><input type="text" name="index_range" value="{{ podcast.index_range }}"> |
+        <label>Number of Past Items to Process: </label><input type="number" name="index_range" value="{{ podcast.index_range }}"> |
         <label>Substring in Title:</label><input type="text" name="title_substring" value="{{ podcast.front_end_title_substring }}"> |
         <label>Country-Code:</label><input type="text" name="country_code" value="{{ podcast.country_code }}"> | 
         <label>When To Pull: </label><input type="time" name="when_to_pull" value="{{ podcast.front_end_when_to_pull }}" required><br><br>
