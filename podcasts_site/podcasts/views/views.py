@@ -7,7 +7,7 @@ from podcasts.models import YouTubePodcast
 # Create your views here.
 def index(request):
     if request.POST.get("action", False) == "Create":
-        title_substring = request.POST['title_substring'].strip(),
+        title_substring = request.POST['title_substring'].strip()
         country_code = request.POST['country_code'].strip()
         YouTubePodcast(
             url = request.POST['url'], index_range=request.POST['index_range'],
