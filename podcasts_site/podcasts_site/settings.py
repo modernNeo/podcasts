@@ -108,7 +108,10 @@ else:
 
 HOST = PROD_HOST if PROD_ENV else "localhost"
 ALLOWED_HOSTS = [HOST]
-HTTP_AND_FQDN = HOST if PROD_ENV else f"http://{HOST}:8000"
+HTTP_AND_FQDN = f"https://{HOST}" if PROD_ENV else f"http://{HOST}"
+CSRF_TRUSTED_ORIGINS = [HTTP_AND_FQDN]
+if not PROD_ENV:
+    HTTP_AND_FQDN += ":8000"
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
