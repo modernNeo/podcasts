@@ -27,6 +27,7 @@ class YouTubePodcast(models.Model):
     being_processed = models.BooleanField(default=False)
     category = models.CharField(max_length=1000)
     index_range = models.IntegerField()
+    country_code = models.CharField(max_length=5, default="US")
 
     @property
     def front_end_when_to_pull(self):

@@ -49,7 +49,7 @@ class Command(BaseCommand):
                     "ignoreerrors": True, # helpful so that if one video has an issue, the rest will still be attempted to be downloaded
                     "sleep_interval_requests": 15, # to avoid youtube trying to verify the requests are not coming from a bot
                     "playlistend": youtube_podcast.index_range, # stop after the latest 40 videos in a playlist as some playlists contain 2000+ videos to sift through
-                    "geo_bypass_country": "US" # sometimes the videos are reported "unavailable" due to the I.P. address of the host
+                    "geo_bypass_country": youtube_podcast.country_code # sometimes the videos are reported "unavailable" due to the I.P. address of the host
                     # "skip_download" : True, # if doing debug
                 }
                 with yt_dlp.YoutubeDL(yt_opts) as ydl:
