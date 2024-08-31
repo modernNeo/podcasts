@@ -72,8 +72,8 @@ WSGI_APPLICATION = 'podcasts_site.wsgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 ASSETS_FOLDER_NAME = 'assets'
-ASSETS_FOLDER_ABSOLUTE_PATH = BASE_DIR.parent / f'{ASSETS_FOLDER_NAME}'
-Path(ASSETS_FOLDER_ABSOLUTE_PATH).mkdir(parents=True, exist_ok=True)
+MEDIA_ROOT = os.path.join(BASE_DIR.parent, f'{ASSETS_FOLDER_NAME}/')
+Path(MEDIA_ROOT).mkdir(parents=True, exist_ok=True)
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
@@ -81,7 +81,6 @@ URL_ROOT = "/"
 STATIC_URL = f"{URL_ROOT}static/"
 
 MEDIA_URL = f'{URL_ROOT}media/'
-MEDIA_ROOT = os.path.join(BASE_DIR.parent, f'{ASSETS_FOLDER_NAME}/')
 print(f'[settings.py] MEDIA_URL set to {MEDIA_URL}')
 print(f'[settings.py] MEDIA_ROOT set to {MEDIA_ROOT}')
 PROD_HOST = None
@@ -102,7 +101,7 @@ else:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': f'{ASSETS_FOLDER_ABSOLUTE_PATH}/db.sqlite3',
+            'NAME': f'{MEDIA_ROOT}/db.sqlite3',
         }
     }
 

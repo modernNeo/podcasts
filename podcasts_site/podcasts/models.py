@@ -42,16 +42,16 @@ class YouTubePodcast(models.Model):
         return self.name.replace(':', '').replace(' ', '_').replace(',', '').replace('.', '')
 
     @property
-    def video_location(self):
-        return f"{settings.ASSETS_FOLDER_ABSOLUTE_PATH}/{VIDEOS_FOLDER_NAME}/{self.friendly_name}"
+    def video_file_location(self):
+        return f"{settings.MEDIA_ROOT}/{VIDEOS_FOLDER_NAME}/{self.friendly_name}"
 
     @property
     def archive_file_location(self):
-        return f"{settings.ASSETS_FOLDER_ABSOLUTE_PATH}/{ARCHIVE_FOLDER_NAME}/{self.friendly_name}"
+        return f"{settings.MEDIA_ROOT}/{ARCHIVE_FOLDER_NAME}/{self.friendly_name}"
 
     @property
-    def feed_location(self):
-        return f"{settings.ASSETS_FOLDER_ABSOLUTE_PATH}/{RSS_FEED_FOLDER_NAME}/{self.friendly_name}.xml"
+    def feed_file_location(self):
+        return f"{settings.MEDIA_ROOT}/{RSS_FEED_FOLDER_NAME}/{self.friendly_name}.xml"
 
     @property
     def http_feed_location(self):

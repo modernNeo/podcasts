@@ -14,10 +14,10 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         youtube_podcasts = YouTubePodcast.objects.all().filter(url__isnull=False)
         Path(
-            f"{settings.ASSETS_FOLDER_ABSOLUTE_PATH}/{RSS_FEED_FOLDER_NAME}"
+            f"{settings.MEDIA_ROOT}/{RSS_FEED_FOLDER_NAME}"
         ).mkdir(parents=True, exist_ok=True)
         Path(
-            f"{settings.ASSETS_FOLDER_ABSOLUTE_PATH}/{ARCHIVE_FOLDER_NAME}"
+            f"{settings.MEDIA_ROOT}/{ARCHIVE_FOLDER_NAME}"
         ).mkdir(parents=True, exist_ok=True)
         first_run = False
         for youtube_podcast in youtube_podcasts:
@@ -26,7 +26,7 @@ class Command(BaseCommand):
             if not youtube_podcast.name:
                 youtube_podcast.name = "temp"
                 first_run = True
-            Path(youtube_podcast.video_location).mkdir(parents=True, exist_ok=True)
+            Path(youtube_podcast.video_file_location).mkdir(parents=True, exist_ok=True)
             try:
                 def title_filter(info, *, incomplete):
                     title = info.get("title")
@@ -44,7 +44,7 @@ class Command(BaseCommand):
                     # "daterange": DateRange(date_start, date_end),
                     "match_filter": title_filter,
                     "outtmpl": '%(title)s.%(ext)s', # done because if not specified, ytdlp adds the video ID to the filename
-                    "paths": {"home": youtube_podcast.video_location},
+                    "paths": {"home": youtube_podcast.video_file_location},
                     "download_archive": youtube_podcast.archive_file_location, # done so that past downloaded videos are not re-downloaded
                     "ignoreerrors": True, # helpful so that if one video has an issue, the rest will still be attempted to be downloaded
                     "sleep_interval_requests": 15, # to avoid youtube trying to verify the requests are not coming from a bot
@@ -57,11 +57,11 @@ class Command(BaseCommand):
                     ydl.download(youtube_podcast.url)
             except (yt_dlp.utils.ExistingVideoReached, yt_dlp.utils.DownloadError):
                 pass
-            previous_video_location = youtube_podcast.video_location
+            previous_video_file_location = youtube_podcast.video_file_location
             previous_archive_file_location = youtube_podcast.archive_file_location
             youtube_podcast.refresh_from_db()
             if first_run:
-                os.rename(previous_video_location, youtube_podcast.video_location)
+                os.rename(previous_video_file_location, youtube_podcast.video_file_location)
                 os.rename(previous_archive_file_location, youtube_podcast.archive_file_location)
             category = None
             try:
@@ -85,7 +85,7 @@ class Command(BaseCommand):
                 for episode in youtube_podcast.youtubepodcastvideo_set.all()
             ]
             )
-            p.rss_file(youtube_podcast.feed_location)
+            p.rss_file(youtube_podcast.feed_file_location)
             print(f"done with {youtube_podcast.name}")
             youtube_podcast.being_processed = False
             youtube_podcast.save()
