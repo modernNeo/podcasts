@@ -12,6 +12,7 @@ services:  #Services that are needed for the podcasts_site app
             - ENV
         volumes: #volume are for hot reload
             - logs:/src/app/logs
+            - assets:/src/app/assets
         depends_on:   # used to ensure that docker wont start podcasts_site until after it has started the database container
             - "db"
         container_name: "${COMPOSE_PROJECT_NAME}_app"
@@ -33,6 +34,8 @@ services:  #Services that are needed for the podcasts_site app
 volumes:
     logs:
         name: "${COMPOSE_PROJECT_NAME}_logs"
+    assets:
+        name: "${COMPOSE_PROJECT_NAME}_assets"
 
 networks:
     podcasts_site_network:

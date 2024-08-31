@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -24,9 +24,6 @@ SECRET_KEY = 'django-insecure-^22h-87s0x4kcnv7!t05tf=a7fsgzkm6!2wi9arhusj*i_5z8-
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
-ALLOWED_HOSTS = []
-
 
 # Application definition
 
@@ -74,16 +71,44 @@ WSGI_APPLICATION = 'podcasts_site.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-ASSETS_FOLDER = 'assets'
-Path(ASSETS_FOLDER).mkdir(parents=True, exist_ok=True)
+ASSETS_FOLDER_NAME = 'assets'
+ASSETS_FOLDER_ABSOLUTE_PATH = BASE_DIR.parent / f'{ASSETS_FOLDER_NAME}'
+Path(ASSETS_FOLDER_ABSOLUTE_PATH).mkdir(parents=True, exist_ok=True)
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / f'{ASSETS_FOLDER}/db.sqlite3',
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/5.1/howto/static-files/
+URL_ROOT = "/"
+STATIC_URL = f"{URL_ROOT}static/"
+
+MEDIA_URL = f'{URL_ROOT}media/'
+MEDIA_ROOT = os.path.join(BASE_DIR.parent, f'{ASSETS_FOLDER_NAME}/')
+print(f'[settings.py] MEDIA_URL set to {MEDIA_URL}')
+print(f'[settings.py] MEDIA_ROOT set to {MEDIA_ROOT}')
+PROD_HOST = None
+PROD_ENV = os.environ['ENV'] == "PROD"
+if PROD_ENV:
+    PROD_HOST = os.environ['PROD_HOST']
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ['POSTGRES_DB'],
+            'USER': os.environ['POSTGRES_USER'],
+            'PASSWORD': os.environ['POSTGRES_PASSWORD'],
+            'HOST': f"{os.environ['COMPOSE_PROJECT_NAME']}_db",
+            "PORT": "5432",
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': f'{ASSETS_FOLDER_ABSOLUTE_PATH}/db.sqlite3',
+        }
+    }
 
+HOST = PROD_HOST if PROD_ENV else "localhost"
+ALLOWED_HOSTS = [HOST]
+HTTP_AND_FQDN = f"https://{HOST}" if PROD_ENV else f"http://{HOST}:8000"
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -116,10 +141,8 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

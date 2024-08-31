@@ -1,30 +1,30 @@
 <form method="post">
     {% csrf_token %}
     <label>URL:</label><input type="text" name="url">
-    <label>Title:</label><input type="text" name="title">
-    <label>Number of Past Days:</label><input type="number" name="range">
-    <label>Substring in Title:</label><input type="text" name="video_substring">
+    <label>Number of Past Items to Process:</label><input type="number" name="index_range">
+    <label>Substring in Title:</label><input type="text" name="title_substring">
     <label>When To Pull: </label><input type="time" name="when_to_pull" required><br><br>
-    <label>Description</label><textarea name="description"></textarea>
     <button name="action" value="Create" type="submit">Create</button>
 </form>
 
 {%  for podcast in podcasts %}
     <form method="post">
         {% csrf_token %}
-        {{ podcast }}<br>
-        {{ podcast.when_to_pull }}
-        <label>URL: </label><a href="{{ podcast.url }}">Link</a><br>
-        <label>URL: </label><input type="text" name="url" value="{{ podcast.url }}"> <br>
-        <label>Substring: </label><input type="text" name="video_substring" value="{{ podcast.video_substring }}"> |
-        <label>Past Days to Scan: </label><input type="text" name="range" value="{{ podcast.range }}"> |
-        <label>When To Pull: </label><input type="time" name="when_to_pull" value="{{ podcast.front_end_when_to_pull }}" required><br><br>
-        <label>Description</label><textarea name="description">{{ podcast.description }}</textarea>
+        <h1>{{ podcast }}</h1>
         <input type="number" name="id" value="{{ podcast.id }}" hidden>
+        <label>URL:</label><input type="text" name="url" value="{{ podcast.url }}"> <br>
+        <label>Number of Past Items to Process: </label><input type="text" name="index_range" value="{{ podcast.index_range }}"> |
+        <label>Substring in Title:</label><input type="text" name="title_substring" value="{{ podcast.front_end_title_substring }}"> |
+        <label>When To Pull: </label><input type="time" name="when_to_pull" value="{{ podcast.front_end_when_to_pull }}" required><br><br>
+        <label>Description</label>{{ podcast.description|safe|linebreaks }}
         <button name="action" value="Update" type="submit">Update</button>
     </form>
-    {%  for episode in podcast.episode_set.all %}
-        <a href="{{ episode.url }}">{{ episode.number }} - {{ episode.name }}</a><br>
+    <a href="{{ podcast.http_feed_location }}" target="_blank">RSS Feed</a><br>
+    {%  if podcast.youtubepodcastvideo_set.all|length > 0 %}
+        <h2>Videos</h2>
+    {%  endif %}
+    {%  for video in podcast.youtubepodcastvideo_set.all|dictsortreversed:"number"|slice:":3" %}
+        <a href="{{video.get_location}}" target="_blank">{{ video.original_title }}</a> - <a href="{{ video.url }}" target="_blank">YouTube Link</a><br>
     {%  endfor %}
     <br><br>
 {%  endfor %}

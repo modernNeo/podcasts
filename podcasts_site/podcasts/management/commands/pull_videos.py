@@ -1,108 +1,91 @@
-import datetime
 import os
 from pathlib import Path
 
 import yt_dlp
+from django.conf import settings
 from django.core.management import BaseCommand
-from podgen import Podcast, Episode as PodGenEpisode, Media as PodGenMedia
-from yt_dlp import postprocessor
-from yt_dlp.utils._utils import DateRange
+from podgen import Podcast, Episode, Media, Person, Category
 
-from podcasts.models import YouTubePodcast, Episode
+from podcasts.models import YouTubePodcast, RSS_FEED_FOLDER_NAME, ARCHIVE_FOLDER_NAME
+from podcasts.views.YouTubeVideoPostProcessor import YouTubeVideoPostProcessor
 
-
-# playlists that can be automatically ingested cause there is a timestamp in the title
-# LIVE NEWS: BC live streaming news at noon, 6pm and 11pm
-## CBC Vancouver News at 6
-# https://www.youtube.com/playlist?list=PLd9pLwfvcsdSXJufULeZqnduIJ1peUP3B
-#  Bill Burr's the Monday Morning Podcast
-## Thursday Afternoon Monday Morning Podcast 8-22-24
-## Monday Morning Podcast 8-20-24
-# https://www.youtube.com/@BillBurrOfficial/videos
-#  The National | Full Show
-# https://www.youtube.com/playlist?list=PLvntPLkd9IMcbAHH-x19G85v_RE-ScYjk
-# Honestly with Bari Weiss
-# https://www.youtube.com/playlist?list=PL8RMFyRb2PguHhsO2iYsmzn5v-5SXRv3_
-
-class FilenameCollectorPP(postprocessor.common.PostProcessor):
-    def __init__(self):
-        super(FilenameCollectorPP, self).__init__(None)
-
-    def run(self, information):
-        filename = information['filename']
-        first_slash = filename.index("/")+1
-        second_slash = filename[first_slash:].index("/")
-        show = filename[first_slash:second_slash + first_slash]
-        podcast = YouTubePodcast.objects.all().filter(name=show).first()
-        if podcast:
-            start_of_date = first_slash + second_slash + 1
-            number_of_digits_in_timestamp = 10
-            number = filename[start_of_date:start_of_date+number_of_digits_in_timestamp]
-            timestamp = information['release_timestamp'] if information['release_timestamp'] else information['timestamp']
-            timestamp = datetime.datetime.fromtimestamp(timestamp)
-            Episode(
-                name=information['title'], description=information["description"], podcast=podcast,
-                date=timestamp,
-                number=int(number.replace("-","")), url=information['original_url'],
-                image=information['thumbnail'], extension=filename[filename.rfind("."):]
-            ).save()
-        return [], information
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        YouTubePodcast(
-            name= "CBC Vancouver News at 6",
-            url = "https://www.youtube.com/playlist?list=PLd9pLwfvcsdSXJufULeZqnduIJ1peUP3B",
-            range=7, video_substring="CBC Vancouver News at 6",
-            when_to_pull="19:30", description="CBC News"
-        ).save()
-        podcasts_to_inject = YouTubePodcast.objects.all().filter(url__isnull=False)
-        filename_collector = FilenameCollectorPP()
-        Path("assets/feed").mkdir(parents=True, exist_ok=True)
-        Path("assets/archives").mkdir(parents=True, exist_ok=True)
-        for podcast_to_inject in podcasts_to_inject:
-            video_location = f"assets/videos/{podcast_to_inject.name}"
-            archive_file_location = f"assets/archives/{podcast_to_inject.name}"
-            feed_location = f"assets/feed/{podcast_to_inject.name}.xml"
-            Path(video_location).mkdir(parents=True, exist_ok=True)
+        youtube_podcasts = YouTubePodcast.objects.all().filter(url__isnull=False)
+        Path(
+            f"{settings.ASSETS_FOLDER_ABSOLUTE_PATH}/{RSS_FEED_FOLDER_NAME}"
+        ).mkdir(parents=True, exist_ok=True)
+        Path(
+            f"{settings.ASSETS_FOLDER_ABSOLUTE_PATH}/{ARCHIVE_FOLDER_NAME}"
+        ).mkdir(parents=True, exist_ok=True)
+        first_run = False
+        for youtube_podcast in youtube_podcasts:
+            youtube_podcast.being_processed = True
+            youtube_podcast.save()
+            if not youtube_podcast.name:
+                youtube_podcast.name = "temp"
+                first_run = True
+            Path(youtube_podcast.video_location).mkdir(parents=True, exist_ok=True)
             try:
                 def title_filter(info, *, incomplete):
                     title = info.get("title")
                     if (
-                            podcast_to_inject.video_substring is not None and
-                            podcast_to_inject.video_substring not in title):
+                            youtube_podcast.title_substring is not None and
+                            youtube_podcast.title_substring not in title):
                         return f"{title} is not needed"
 
-                today = datetime.datetime.now()
-                date_start = (today - datetime.timedelta(days=podcast_to_inject.range)).strftime("%Y%m%d")
-                date_end = (today + datetime.timedelta(days=1)).strftime("%Y%m%d")
+                # I was previously utilizing the daterange filter, but I switched to playlistend cause when daterange is used, it will check the date of each video in the playlist cause there is no guarantee they are sorted by date and time
+                # today = datetime.datetime.now()
+                # date_start = (today - datetime.timedelta(days=youtube_podcast.range)).strftime("%Y%m%d")
+                # date_end = (today + datetime.timedelta(days=1)).strftime("%Y%m%d")
                 yt_opts = {
-                    'verbose': True,
-                    "daterange": DateRange(date_start, date_end),
+                    'verbose': False,
+                    # "daterange": DateRange(date_start, date_end),
                     "match_filter": title_filter,
-                    "outtmpl": '%(upload_date>%Y-%m-%d)s-%(title)s.%(ext)s',
-                    "paths": {"home": video_location},
-                    "download_archive" : archive_file_location,
-                    "break_on_existing" : True,
+                    "outtmpl": '%(title)s.%(ext)s', # done because if not specified, ytdlp adds the video ID to the filename
+                    "paths": {"home": youtube_podcast.video_location},
+                    "download_archive": youtube_podcast.archive_file_location, # done so that past downloaded videos are not re-downloaded
+                    "ignoreerrors": True, # helpful so that if one video has an issue, the rest will still be attempted to be downloaded
+                    "sleep_interval_requests": 15, # to avoid youtube trying to verify the requests are not coming from a bot
+                    "playlistend": youtube_podcast.index_range, # stop after the latest 40 videos in a playlist as some playlists contain 2000+ videos to sift through
+                    "geo_bypass_country": "US" # sometimes the videos are reported "unavailable" due to the I.P. address of the host
                     # "skip_download" : True, # if doing debug
                 }
                 with yt_dlp.YoutubeDL(yt_opts) as ydl:
-                    ydl.add_post_processor(filename_collector)
-                    ydl.download(podcast_to_inject.url)
-            except yt_dlp.utils.ExistingVideoReached:
-                p = Podcast(
-                    name=podcast_to_inject.name,
-                    website=podcast_to_inject.url,
-                    description=podcast_to_inject.description,
-                    explicit=False
+                    ydl.add_post_processor(YouTubeVideoPostProcessor())
+                    ydl.download(youtube_podcast.url)
+            except (yt_dlp.utils.ExistingVideoReached, yt_dlp.utils.DownloadError):
+                pass
+            previous_video_location = youtube_podcast.video_location
+            previous_archive_file_location = youtube_podcast.archive_file_location
+            youtube_podcast.refresh_from_db()
+            if first_run:
+                os.rename(previous_video_location, youtube_podcast.video_location)
+                os.rename(previous_archive_file_location, youtube_podcast.archive_file_location)
+            category = None
+            try:
+                category = Category(youtube_podcast.category)
+            except ValueError:
+                pass
+            p = Podcast(
+                name=youtube_podcast.name,
+                description=youtube_podcast.description,
+                image=youtube_podcast.image,
+                website=youtube_podcast.url,
+                language=youtube_podcast.language,
+                authors=[Person(youtube_podcast.author)],
+                category=category,
+                explicit=False,
+                episodes=[
+                Episode(
+                    title=episode.original_title,
+                    media=Media(episode.get_location, size=episode.size),
                 )
-                p.episodes = [
-                    PodGenEpisode(
-                        title=episode.name,
-                        media=PodGenMedia(episode.get_location()),
-                        summary=episode.description
-                    )
-                    for episode in podcast_to_inject.episode_set.all()
-                ]
-                p.rss_file(feed_location)
-                print(f"done with {podcast_to_inject.name}")
+                for episode in youtube_podcast.youtubepodcastvideo_set.all()
+            ]
+            )
+            p.rss_file(youtube_podcast.feed_location)
+            print(f"done with {youtube_podcast.name}")
+            youtube_podcast.being_processed = False
+            youtube_podcast.save()
