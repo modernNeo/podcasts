@@ -23,7 +23,7 @@ def index(request):
             podcast.url = request.POST['url']
             podcast.title_substring = None if len(title_substring) == 0 else title_substring
             podcast.country_code = 'US' if len(country_code) == 0 else country_code
-            podcast.range = request.POST['index_range']
+            podcast.index_range = request.POST['index_range']
             podcast.when_to_pull = request.POST['when_to_pull']
             podcast.save()
     template = loader.get_template("podcasts/index.html")
