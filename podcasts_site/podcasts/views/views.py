@@ -17,14 +17,13 @@ def index(request):
     elif request.POST.get("action", False) == "Update":
         podcast = YouTubePodcast.objects.all().filter(id=int(request.POST['id'])).first()
         if podcast:
-            description = request.POST['description'].strip()
+            title_substring = request.POST['title_substring'].strip()
             country_code = request.POST['country_code'].strip()
             podcast.url = request.POST['url']
-            podcast.title_substring = request.POST['title_substring']
+            podcast.title_substring = None if len(title_substring) == 0 else title_substring
+            podcast.country_code = 'US' if len(country_code) == 0 else country_code
             podcast.range = request.POST['range']
             podcast.when_to_pull = request.POST['when_to_pull']
-            podcast.description = None if len(description) == 0 else description
-            podcast.country_code = 'US' if len(country_code) == 0 else country_code
             podcast.save()
     template = loader.get_template("podcasts/index.html")
     context = {
