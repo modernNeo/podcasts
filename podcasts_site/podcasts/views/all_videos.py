@@ -7,8 +7,8 @@ from podcasts.views.showing_videos import showing_videos
 # Create your views here.
 def index(request):
     return HttpResponse(
-        loader.get_template("podcasts/index.html")
+        loader.get_template("podcasts/all_videos.html")
         .render(
-            showing_videos(request, False), request
+            showing_videos(request, True), request
         )
     )

@@ -21,21 +21,18 @@ class YouTubePodcast(models.Model):
     image = models.CharField(max_length=10000)
     language = models.CharField(max_length=5)
     author = models.CharField(max_length=10000)
-    title_substring = models.CharField(max_length=1000, default=None, null=True)
     url = models.CharField(max_length=10000)
     when_to_pull = models.TimeField()
     being_processed = models.BooleanField(default=False)
     category = models.CharField(max_length=1000)
-    index_range = models.IntegerField()
-    country_code = models.CharField(max_length=5, default="US")
+    index_range = models.IntegerField(null=True)
+    information_last_updated = pstdatetimefield.PSTDateTimeField(
+        null=True
+    )
 
     @property
     def front_end_when_to_pull(self):
         return self.when_to_pull.strftime("%H:%M:%S")
-
-    @property
-    def front_end_title_substring(self):
-        return self.title_substring if self.title_substring else ""
 
     @property
     def friendly_name(self):
@@ -60,23 +57,41 @@ class YouTubePodcast(models.Model):
     def __str__(self):
         return self.name
 
+class YouTubePodcastTitleSubString(models.Model):
+    class Meta:
+        constraints = [
+            UniqueConstraint(fields=['podcast', 'priority'], name='unique_podcast_title_substring_priority')
+        ]
+
+    title_substring = models.CharField(max_length=1000, default=None, null=True)
+    podcast = models.ForeignKey(YouTubePodcast, on_delete=models.CASCADE)
+
+    priority = models.IntegerField(
+        default=None
+    )
+
+    def __str__(self):
+        return f"{self.podcast.name} substring {self.title_substring}"
+
+
 class YouTubePodcastVideo(models.Model):
     class Meta:
         constraints = [
             UniqueConstraint(fields=['podcast', 'original_title'], name='unique_title'),
-            UniqueConstraint(fields=['podcast', 'number'], name='unique_number')
+            UniqueConstraint(fields=['podcast', 'identifier_number'], name='unique_date_and_time')
         ]
-
     filename = models.CharField(max_length=1000)
     original_title = models.CharField(max_length=1000)
     description = models.CharField(max_length=5000)
     podcast = models.ForeignKey(YouTubePodcast, on_delete=models.CASCADE)
     date = pstdatetimefield.PSTDateTimeField()
-    number = models.IntegerField()
+    identifier_number = models.PositiveBigIntegerField()
+    grouping_number = models.IntegerField()
     url = models.CharField(max_length=10000)
     extension = models.CharField(max_length=100)
     image = models.ImageField()
     size = models.IntegerField()
+    hide = models.BooleanField(default=False)
 
     @property
     def get_location(self):
@@ -86,3 +101,11 @@ class YouTubePodcastVideo(models.Model):
         return f"{self.date} {self.podcast}: {self.filename}"
 
 
+
+class YouTubePodcastVideoGrouping(models.Model):
+    grouping_number = models.IntegerField()
+    podcast = models.ForeignKey(YouTubePodcast, on_delete=models.CASCADE)
+    podcast_video = models.ForeignKey(YouTubePodcastVideo, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.grouping_number} grouping for {self.podcast.name}"

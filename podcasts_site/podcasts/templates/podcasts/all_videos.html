@@ -24,10 +24,19 @@
         <h2>Videos</h2>
     {%  endif %}
     {{ podcast.stats.shown }} / {{ podcast.stats.total }} Videos<br>
-    {%  for video in podcast.podcast.youtubepodcastvideo_set.all|dictsortreversed:"identifier_number"|slice:":3" %}
-        {% if not video.hide %}
-            <a href="{{video.get_location}}" target="_blank">{{ video.original_title }}</a> - <a href="{{ video.url }}" target="_blank">YouTube Link</a><br>
-        {% endif %}
+    {%  for video in podcast.podcast.youtubepodcastvideo_set.all|dictsortreversed:"identifier_number" %}
+        <form method="post">
+        {% csrf_token %}
+        <input type="number" name="video_id" value="{{ video.id }}" hidden>
+        <a href="{{video.get_location}}" target="_blank">{{ video.original_title }}</a> - <a href="{{ video.url }}" target="_blank">YouTube Link</a>
+        {% if video.hide %}
+            <button name="action" value="Unhide" type="submit">Unhide</button>
+        {%  else %}
+            <button name="action" value="Hide" type="submit">Hide</button>
+        {%  endif %}
+        <br>
+        </form>
     {%  endfor %}
     <br><br>
+
 {%  endfor %}

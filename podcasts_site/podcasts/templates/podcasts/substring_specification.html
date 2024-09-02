@@ -1,0 +1,18 @@
+<a href="/">Home</a><br>
+<form method="post">
+    {%  csrf_token %}
+    <label>Substring:</label><input type="text" name="title_substring" required>
+    <label>Priority</label><input type="number" name="priority" required>
+    <button name="action" value="Create" type="submit">Create</button>
+</form>
+
+{%  for substring in substrings %}
+    <form method="post">
+    {% csrf_token %}
+    <input type="number" name="id" value="{{ substring.id }}" hidden>
+    <label>Substring:</label><input type="text" name="title_substring" value="{{ substring.title_substring }}">
+    <label>Priority</label><input type="number" name="priority" value="{{ substring.priority }}">
+    <button name="action" value="Update" type="submit">Update</button>
+    <button name="action" value="Delete" type="submit">Delete</button>
+    </form>
+{%  endfor %}
