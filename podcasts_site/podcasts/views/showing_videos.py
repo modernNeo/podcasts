@@ -1,7 +1,9 @@
 import os
 import shutil
 
-from podcasts.models import YouTubePodcast, YouTubePodcastVideo
+from django.conf import settings
+
+from podcasts.models import YouTubePodcast, YouTubePodcastVideo, VIDEOS_FOLDER_NAME, ARCHIVE_FOLDER_NAME
 from podcasts.views.generate_rss_file import generate_rss_file
 
 
@@ -33,9 +35,26 @@ def showing_videos(request, show_hidden):
             for video in podcast.youtubepodcastvideo_set.all():
                 video.delete()
             podcast.save()
-            shutil.rmtree(podcast.video_file_location)
-            os.remove(podcast.archive_file_location)
-            os.remove(podcast.feed_file_location)
+            try:
+                shutil.rmtree(podcast.video_file_location)
+            except FileNotFoundError:
+                pass
+            try:
+                shutil.rmtree(f"{settings.MEDIA_ROOT}/{VIDEOS_FOLDER_NAME}/temp")
+            except FileNotFoundError:
+                pass
+            try:
+                os.remove(podcast.archive_file_location)
+            except (FileNotFoundError, IsADirectoryError):
+                pass
+            try:
+                os.remove(f"{settings.MEDIA_ROOT}/{ARCHIVE_FOLDER_NAME}/temp")
+            except FileNotFoundError:
+                pass
+            try:
+                os.remove(podcast.feed_file_location)
+            except FileNotFoundError:
+                pass
     podcasts = []
     for youtube_podcast in YouTubePodcast.objects.all().filter():
         if show_hidden:
