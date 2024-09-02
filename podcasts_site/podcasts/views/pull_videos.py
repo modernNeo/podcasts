@@ -3,6 +3,9 @@ from pathlib import Path
 
 import yt_dlp
 
+from podcasts.models import YouTubeDLPError
+from podcasts.views.Gmail import Gmail
+from podcasts.views.setup_logger import Loggers
 from podcasts.views.youtube_video_post_processor import YouTubeVideoPostProcessor
 from podcasts.views.automatically_hide_videos import automatically_hide_videos
 from podcasts.views.generate_rss_file import generate_rss_file
@@ -16,6 +19,7 @@ def pull_videos(youtube_podcast):
         youtube_podcast.name = "temp"
         first_run = True
     Path(youtube_podcast.video_file_location).mkdir(parents=True, exist_ok=True)
+    youtube_dlp_logger = Loggers.get_logger("youtube_dlp")
     try:
         def title_filter(info, *, incomplete):
             title = info.get("title")
@@ -39,7 +43,7 @@ def pull_videos(youtube_podcast):
         # date_start = (today - datetime.timedelta(days=youtube_podcast.range)).strftime("%Y%m%d")
         # date_end = (today + datetime.timedelta(days=1)).strftime("%Y%m%d")
         yt_opts = {
-            'verbose': False,
+            'verbose': True,
             # "daterange": DateRange(date_start, date_end),
             "match_filter": title_filter,
             "outtmpl": '%(title)s.%(ext)s',  # done because if not specified, ytdlp adds the video ID to the
@@ -52,6 +56,7 @@ def pull_videos(youtube_podcast):
             "sleep_interval_requests": 15,  # to avoid youtube trying to verify the requests are not coming
             # from a bot
             "playlistend": youtube_podcast.index_range,  # stop after the latest 40 videos in a playlist as
+            "logger" : youtube_dlp_logger
             # some playlists contain 2000+ videos to sift through
             # "skip_download" : True, # if doing debug
         }
@@ -60,6 +65,23 @@ def pull_videos(youtube_podcast):
             ydl.download(youtube_podcast.url)
     except (yt_dlp.utils.ExistingVideoReached, yt_dlp.utils.DownloadError):
         pass
+    errors = YouTubeDLPError.objects.all().filter(processed=False)
+    gmail = Gmail()
+    log_sent = []
+    for error in errors:
+        if error.error_file_path in log_sent:
+            error.processed = True
+            error.save()
+            continue
+        log_sent.append(error.error_file_path)
+        gmail.send_email(
+            subject="podcast errors", body="look at attachments", to_email=os.environ['TO_EMAIL'], to_name='modernNeo',
+            attachments=[error.debug_file_path, error.warn_file_path, error.error_file_path]
+        )
+        error.processed = True
+        error.save()
+    gmail.close_connection()
+
     previous_video_file_location = youtube_podcast.video_file_location
     previous_archive_file_location = youtube_podcast.archive_file_location
     youtube_podcast.refresh_from_db()

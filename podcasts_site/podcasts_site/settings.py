@@ -67,6 +67,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'podcasts_site.wsgi.application'
 
+GMAIL_USERNAME = os.environ['GMAIL_USERNAME']
+GMAIL_PASSWORD = os.environ['GMAIL_PASSWORD']
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases

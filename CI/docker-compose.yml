@@ -11,6 +11,9 @@ services:  #Services that are needed for the podcasts_site app
             - COMPOSE_PROJECT_NAME
             - ENV
             - PROD_HOST
+            - TO_EMAIL
+            - GMAIL_USERNAME
+            - GMAIL_PASSWORD
         volumes: #volume are for hot reload
             - logs:/src/app/logs
             - assets:/src/app/assets

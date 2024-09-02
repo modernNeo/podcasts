@@ -80,6 +80,7 @@ class YouTubePodcastVideo(models.Model):
             UniqueConstraint(fields=['podcast', 'original_title'], name='unique_title'),
             UniqueConstraint(fields=['podcast', 'identifier_number'], name='unique_date_and_time')
         ]
+    video_id = models.CharField(max_length=1000)
     filename = models.CharField(max_length=1000)
     original_title = models.CharField(max_length=1000)
     description = models.CharField(max_length=5000)
@@ -109,3 +110,39 @@ class YouTubePodcastVideoGrouping(models.Model):
 
     def __str__(self):
         return f"{self.grouping_number} grouping for {self.podcast.name}"
+
+
+class YouTubeDLPError(models.Model):
+    error_file_path = models.CharField(
+        max_length=500,
+        default=None,
+        null=True
+    )
+    warn_file_path = models.CharField(
+        max_length=500,
+        default=None,
+        null=True
+    )
+    debug_file_path = models.CharField(
+        max_length=500,
+        default=None,
+        null=True
+    )
+    message = models.CharField(
+        max_length=5000
+    )
+    request = models.CharField(
+        max_length=100000,
+        default=None,
+        null=True
+    )
+    fixed = models.BooleanField(
+        default=False
+    )
+
+    processed = models.BooleanField(
+        default=False
+    )
+
+    def __str__(self):
+        return f"Error in file {self.error_file_path}"

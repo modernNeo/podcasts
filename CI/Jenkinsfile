@@ -14,13 +14,19 @@ pipeline {
                 [string(credentialsId: 'PODCASTS_SITE_POSTGRES_PASSWORD', variable: 'PODCASTS_SITE_POSTGRES_PASSWORD'),
                 string(credentialsId: 'PODCASTS_SITE_POSTGRES_USER', variable: 'PODCASTS_SITE_POSTGRES_USER'),
                 string(credentialsId: 'PODCASTS_SITE_POSTGRES_DB', variable: 'PODCASTS_SITE_POSTGRES_DB'),
-                string(credentialsId: 'PODCASTS_SITE_PROD_HOST', variable: 'PODCASTS_SITE_PROD_HOST')]
+                string(credentialsId: 'PODCASTS_SITE_PROD_HOST', variable: 'PODCASTS_SITE_PROD_HOST'),
+                string(credentialsId: 'TO_EMAIL', variable: 'TO_EMAIL'),
+                string(credentialsId: 'GMAIL_USERNAME', variable: 'GMAIL_USERNAME'),
+                string(credentialsId: 'GMAIL_PASSWORD', variable: 'GMAIL_PASSWORD')]
                 ){
                     sh label: '', script: """bash -c \'
                         export POSTGRES_DB="'"${PODCASTS_SITE_POSTGRES_DB}"'";
                         export POSTGRES_USER="'"${PODCASTS_SITE_POSTGRES_USER}"'";
                         export POSTGRES_PASSWORD="'"${PODCASTS_SITE_POSTGRES_PASSWORD}"'";
                         export PROD_HOST="'"${PODCASTS_SITE_PROD_HOST}"'";
+                        export TO_EMAIL="'"${TO_EMAIL}"'";
+                        export GMAIL_USERNAME="'"${GMAIL_USERNAME}"'";
+                        export GMAIL_PASSWORD="'"${GMAIL_PASSWORD}"'";
                         export JENKINS="true";
                         export ENV="PROD";
                         ./CI/deploy.sh;
