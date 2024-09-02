@@ -31,6 +31,7 @@ def showing_videos(request, show_hidden):
             podcast.being_processed = False
             for video in podcast.youtubepodcastvideo_set.all():
                 video.delete()
+            podcast.save()
             os.remove(podcast.video_file_location)
             os.remove(podcast.archive_file_location)
             os.remove(podcast.feed_file_location)
