@@ -21,8 +21,6 @@ class YouTubeVideoPostProcessor(postprocessor.common.PostProcessor):
         if podcast:
             try:
                 current_file_name = full_path[slash_indices[number_of_slashes - 1] + 1:]
-                youtube_dlp_logger.error(f"[youtube_video_post_processor.py run()] current_file_name={current_file_name}")
-                youtube_dlp_logger.warn(f"[youtube_video_post_processor.py run()] current_file_name={current_file_name}")
                 youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] current_file_name={current_file_name}")
                 if CBC_VANCOUVER_NEWS_PREFIX == current_file_name[:len(CBC_VANCOUVER_NEWS_PREFIX)]:
                     # have to do something special for CBC just cause they have an 11 pm news program that gets a timestamp
