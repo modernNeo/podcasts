@@ -1,4 +1,5 @@
 import os
+import shutil
 
 from podcasts.models import YouTubePodcast, YouTubePodcastVideo
 from podcasts.views.generate_rss_file import generate_rss_file
@@ -32,7 +33,7 @@ def showing_videos(request, show_hidden):
             for video in podcast.youtubepodcastvideo_set.all():
                 video.delete()
             podcast.save()
-            os.remove(podcast.video_file_location)
+            shutil.rmtree(podcast.video_file_location)
             os.remove(podcast.archive_file_location)
             os.remove(podcast.feed_file_location)
     podcasts = []
