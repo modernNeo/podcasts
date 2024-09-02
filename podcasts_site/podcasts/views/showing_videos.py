@@ -1,3 +1,5 @@
+import os
+
 from podcasts.models import YouTubePodcast, YouTubePodcastVideo
 from podcasts.views.generate_rss_file import generate_rss_file
 
@@ -23,6 +25,15 @@ def showing_videos(request, show_hidden):
             youtube_video.hide = request.POST.get("action", False) == "Hide"
             youtube_video.save()
             generate_rss_file(youtube_video.podcast)
+    elif request.POST.get("action", False) == "Reset":
+        podcast = YouTubePodcast.objects.all().filter(id=int(request.POST['id'])).first()
+        if podcast:
+            podcast.being_processed = False
+            for video in podcast.youtubepodcastvideo_set.all():
+                video.delete()
+            os.remove(podcast.video_file_location)
+            os.remove(podcast.archive_file_location)
+            os.remove(podcast.feed_file_location)
     podcasts = []
     for youtube_podcast in YouTubePodcast.objects.all().filter(being_processed=False):
         if show_hidden:

@@ -17,6 +17,7 @@
         <label>When To Pull: </label><input type="time" name="when_to_pull" value="{{ podcast.podcast.front_end_when_to_pull }}" required><br><br>
         <label>Description</label>{{ podcast.podcast.description|safe|linebreaks }}
         <button name="action" value="Update" type="submit">Update</button>
+        <button name="action" value="Reset" type="submit">Reset</button>
     </form>
     <a href="/substrings/{{ podcast.podcast.id }}">Specify Substrings</a><br>
     <a href="{{ podcast.podcast.http_feed_location }}" target="_blank">RSS Feed</a><br>
