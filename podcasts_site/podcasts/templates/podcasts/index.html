@@ -11,6 +11,9 @@
     <form method="post">
         {% csrf_token %}
         <h1>{{ podcast.podcast }}</h1>
+        {%  if podcast.podcast.being_processed %}
+            <b>Being Processed</b>
+        {%  endif %}
         <input type="number" name="id" value="{{ podcast.podcast.id }}" hidden>
         <label>URL:</label><input type="text" name="url" value="{{ podcast.podcast.url }}"> <br>
         <label>Number of Past Items to Process: </label><input type="number" name="index_range" value="{{ podcast.podcast.index_range }}"> |

@@ -36,7 +36,7 @@ def showing_videos(request, show_hidden):
             os.remove(podcast.archive_file_location)
             os.remove(podcast.feed_file_location)
     podcasts = []
-    for youtube_podcast in YouTubePodcast.objects.all().filter(being_processed=False):
+    for youtube_podcast in YouTubePodcast.objects.all().filter():
         if show_hidden:
             total_episodes = youtube_podcast.youtubepodcastvideo_set.all().count()
         else:
