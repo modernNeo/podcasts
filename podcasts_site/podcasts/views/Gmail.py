@@ -24,7 +24,7 @@ class Gmail:
         max_number_of_retries -- the maximum number of times to try opening and closing the connection to the smptlib
          server as well as sending the email
         """
-        self.logger = Loggers.get_logger("Gmail")
+        self.logger = Loggers.get_logger("youtube_dlp")
         self.connection_successful = False
         number_of_retries = 0
         if from_email is None:
