@@ -1,4 +1,5 @@
 import os
+import shutil
 from pathlib import Path
 
 import yt_dlp
@@ -65,6 +66,19 @@ def pull_videos(youtube_podcast):
             ydl.download(youtube_podcast.url)
     except (yt_dlp.utils.ExistingVideoReached, yt_dlp.utils.DownloadError):
         pass
+    previous_video_file_location = youtube_podcast.video_file_location
+    previous_archive_file_location = youtube_podcast.archive_file_location
+    youtube_podcast.refresh_from_db()
+    if first_run:
+        if os.path.exists(youtube_podcast.video_file_location):
+            shutil.rmtree(youtube_podcast.video_file_location)
+        os.rename(previous_video_file_location, youtube_podcast.video_file_location)
+        os.rename(previous_archive_file_location, youtube_podcast.archive_file_location)
+
+    automatically_hide_videos(youtube_podcast)
+    generate_rss_file(youtube_podcast)
+    youtube_podcast.being_processed = False
+    youtube_podcast.save()
     errors = YouTubeDLPError.objects.all().filter(processed=False)
     gmail = Gmail()
     log_sent = []
@@ -81,15 +95,3 @@ def pull_videos(youtube_podcast):
         error.processed = True
         error.save()
     gmail.close_connection()
-
-    previous_video_file_location = youtube_podcast.video_file_location
-    previous_archive_file_location = youtube_podcast.archive_file_location
-    youtube_podcast.refresh_from_db()
-    if first_run:
-        os.rename(previous_video_file_location, youtube_podcast.video_file_location)
-        os.rename(previous_archive_file_location, youtube_podcast.archive_file_location)
-
-    automatically_hide_videos(youtube_podcast)
-    generate_rss_file(youtube_podcast)
-    youtube_podcast.being_processed = False
-    youtube_podcast.save()
