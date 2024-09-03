@@ -19,6 +19,9 @@ class YouTubeVideoPostProcessor(postprocessor.common.PostProcessor):
         podcast = YouTubePodcast.objects.all().filter(being_processed=True).first()
         youtube_dlp_logger = Loggers.get_logger("youtube_dlp")
         if podcast:
+            youtube_dlp_logger.info("######################################")
+            youtube_dlp_logger.info(f"Starting Post-Processing video {full_path}")
+            youtube_dlp_logger.info("######################################")
             try:
                 current_file_name = full_path[slash_indices[number_of_slashes - 1] + 1:]
                 youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] current_file_name={current_file_name}")
@@ -119,6 +122,6 @@ class YouTubeVideoPostProcessor(postprocessor.common.PostProcessor):
             except Exception as e:
                 youtube_dlp_logger.error(f"[youtube_video_post_processor.py run()] e={e}")
         youtube_dlp_logger.info("######################################")
-        youtube_dlp_logger.info(f"Finished Processing video {full_path}")
+        youtube_dlp_logger.info(f"Finished Post-Processing video {full_path}")
         youtube_dlp_logger.info("######################################")
         return [], information
