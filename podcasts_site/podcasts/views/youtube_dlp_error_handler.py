@@ -6,8 +6,9 @@ from django.core.exceptions import AppRegistryNotReady
 
 class YoutubeDLPErrorHandler(logging.StreamHandler):
 
-    def __init__(self, stream=None, debug_file_name=None, warn_file_name=None, error_file_name=None):
+    def __init__(self, stream=None, debug_file_name=None, info_file_name=None, warn_file_name=None, error_file_name=None):
         self.debug_file_name = debug_file_name
+        self.info_file_name = info_file_name
         self.warn_file_name = warn_file_name
         self.error_file_name = error_file_name
         super().__init__(stream)

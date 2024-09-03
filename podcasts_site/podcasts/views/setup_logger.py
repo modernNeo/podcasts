@@ -16,15 +16,9 @@ error_logging_level = logging.ERROR
 
 warn_logging_level = logging.WARNING
 
-# class YoutubeDLPWarnStreamHandler(logging.StreamHandler):
-#     def emit(self, record):
-#         if record.levelno < error_logging_level:
-#             super().emit(record)
-#
-#
 class YoutubeDLPDebugStreamHandler(logging.StreamHandler):
     def emit(self, record):
-        if record.levelno < warn_logging_level:
+        if record.levelno < error_logging_level:
             super().emit(record)
 
 class PSTFormatter(logging.Formatter):
@@ -78,12 +72,58 @@ class Loggers:
 
     @classmethod
     def _add_logger(cls, logger):
-        logger = logger[0]
         cls.loggers.insert(0, logger)
         cls.logger_list_indices = {}
         for (index, saved_logger) in enumerate(cls.loggers):
             cls.logger_list_indices[saved_logger.name] = index
         return logger
+
+
+
+    @classmethod
+    def _setup_debug_file_handlers(cls, debug_log_file_absolute_path, logger):
+        debug_filehandler = RotatingFileHandler(
+            debug_log_file_absolute_path, maxBytes=MAX_BYTES_LOG_FILE,
+            backupCount=MAX_NUMBER_OF_LOG_FILES
+        )
+        debug_filehandler.setLevel(logging.DEBUG)
+        debug_filehandler.setFormatter(sys_stream_formatting)
+        logger.addHandler(debug_filehandler)
+
+    @classmethod
+    def _setup_info_file_handlers(cls, info_log_file_absolute_path, logger):
+        info_filehandler = RotatingFileHandler(
+            info_log_file_absolute_path, maxBytes=MAX_BYTES_LOG_FILE,
+            backupCount=MAX_NUMBER_OF_LOG_FILES
+        )
+        info_filehandler.setLevel(logging.INFO)
+        info_filehandler.setFormatter(sys_stream_formatting)
+        logger.addHandler(info_filehandler)
+
+    @classmethod
+    def _setup_warn_file_handlers(cls, warn_log_file_absolute_path, logger):
+        warn_filehandler = RotatingFileHandler(
+            warn_log_file_absolute_path,
+            maxBytes=MAX_BYTES_LOG_FILE,
+            backupCount=MAX_NUMBER_OF_LOG_FILES
+        )
+        warn_filehandler.setFormatter(sys_stream_formatting)
+        warn_filehandler.setLevel(warn_logging_level)
+        logger.addHandler(warn_filehandler)
+
+
+    @classmethod
+    def _setup_error_file_handlers(cls, error_log_file_absolute_path, logger):
+        error_filehandler = RotatingFileHandler(
+            error_log_file_absolute_path,
+            maxBytes=MAX_BYTES_LOG_FILE,
+            backupCount=MAX_NUMBER_OF_LOG_FILES
+        )
+        error_filehandler.setFormatter(sys_stream_formatting)
+        error_filehandler.setLevel(error_logging_level)
+        logger.addHandler(error_filehandler)
+
+
 
     @classmethod
     def _setup_logger(cls, service_name):
@@ -94,44 +134,28 @@ class Loggers:
         :return: the logger
         """
         date = datetime.datetime.now(date_timezone).strftime(date_formatting_in_filename)
-        if not os.path.exists(f"logs/{service_name}"):
-            os.makedirs(f"logs/{service_name}")
-        debug_log_file_absolute_path = f"logs/{service_name}/{date}_debug.log"
-        warn_log_file_absolute_path = f"logs/{service_name}/{date}_warn.log"
-        error_log_file_absolute_path = f"logs/{service_name}/{date}_error.log"
+        if not os.path.exists(f"logs/{date}"):
+            os.makedirs(f"logs/{date}")
+        debug_log_file_absolute_path = f"logs/{date}/debug.log"
+        info_log_file_absolute_path = f"logs/{date}/info.log"
+        warn_log_file_absolute_path = f"logs/{date}/warn.log"
+        error_log_file_absolute_path = f"logs/{date}/error.log"
 
         logger = logging.getLogger(service_name)
         logger.setLevel(logging.DEBUG)
 
 
         # setup debug file handlers
-        debug_filehandler = RotatingFileHandler(
-            debug_log_file_absolute_path, maxBytes=MAX_BYTES_LOG_FILE,
-            backupCount=MAX_NUMBER_OF_LOG_FILES
-        )
-        debug_filehandler.setLevel(logging.DEBUG)
-        debug_filehandler.setFormatter(sys_stream_formatting)
-        logger.addHandler(debug_filehandler)
+        cls._setup_debug_file_handlers(debug_log_file_absolute_path, logger)
 
-        # setup error file handler
-        error_filehandler = RotatingFileHandler(
-            error_log_file_absolute_path,
-            maxBytes=MAX_BYTES_LOG_FILE,
-            backupCount=MAX_NUMBER_OF_LOG_FILES
-        )
-        error_filehandler.setFormatter(sys_stream_formatting)
-        error_filehandler.setLevel(error_logging_level)
-        logger.addHandler(error_filehandler)
+        # setup info file handler
+        cls._setup_info_file_handlers(info_log_file_absolute_path, logger)
 
         # setup warn file handler
-        warn_filehandler = RotatingFileHandler(
-            warn_log_file_absolute_path,
-            maxBytes=MAX_BYTES_LOG_FILE,
-            backupCount=MAX_NUMBER_OF_LOG_FILES
-        )
-        warn_filehandler.setFormatter(sys_stream_formatting)
-        warn_filehandler.setLevel(warn_logging_level)
-        logger.addHandler(warn_filehandler)
+        cls._setup_warn_file_handlers(warn_log_file_absolute_path, logger)
+
+        # setup error file handler
+        cls._setup_error_file_handlers(error_log_file_absolute_path, logger)
 
         # setup stdout stream handler
         sys.stdout = sys.__stdout__
@@ -146,17 +170,16 @@ class Loggers:
         sys_stderr_stream_handler = YoutubeDLPErrorHandler(
             sys.stderr,
             debug_file_name=debug_log_file_absolute_path,
+            info_file_name=info_log_file_absolute_path,
             warn_file_name=warn_log_file_absolute_path,
             error_file_name=error_log_file_absolute_path
         )
         sys_stderr_stream_handler.setFormatter(sys_stream_formatting)
-        sys_stderr_stream_handler.setLevel(logging.ERROR) # change this to ERROR
+        sys_stderr_stream_handler.setLevel(error_logging_level)
         logger.addHandler(sys_stderr_stream_handler)
         sys.stderr = LoggerWriter(logger.error)
 
-        return (
-            logger, debug_log_file_absolute_path, warn_log_file_absolute_path, error_log_file_absolute_path
-        )
+        return logger
 
 
 class LoggerWriter:
