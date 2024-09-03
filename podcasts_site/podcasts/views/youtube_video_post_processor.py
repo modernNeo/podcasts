@@ -61,7 +61,6 @@ class YouTubeVideoPostProcessor(postprocessor.common.PostProcessor):
                     )
                 youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] podcast.information_last_updated={podcast.information_last_updated}")
                 youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] timestamp={timestamp}")
-                youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] podcast.information_last_updated={podcast.information_last_updated}")
                 if podcast.information_last_updated is None or timestamp > podcast.information_last_updated:
                     podcast.name = information['playlist']
                     podcast.description = information['description']
@@ -91,6 +90,10 @@ class YouTubeVideoPostProcessor(postprocessor.common.PostProcessor):
                 youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] information[original_url]={information.get('original_url', None)}")
                 youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] information[thumbnail]={information.get('thumbnail', None)}")
                 youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] information[filesize]={information.get('filesize', None)}")
+                youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] information[filesize_approx]={information.get('filesize_approx', None)}")
+                file_size = information.get('filesize', None)
+                if not file_size:
+                    file_size = information.get('filesize_approx', None)
                 index_of_last_period = new_file_name.rfind('.')
                 youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] new_file_name.rfind(.)={index_of_last_period}")
                 if index_of_last_period != -1:
@@ -103,7 +106,7 @@ class YouTubeVideoPostProcessor(postprocessor.common.PostProcessor):
                     video_id=information['id'],filename=new_file_name, original_title=information['title'],
                     description=information["description"], podcast=podcast, date=timestamp, identifier_number=release_stamp,
                     grouping_number=grouping_release_stamp,url=information['original_url'], image=information['thumbnail'],
-                    size=information['filesize'],extension=new_file_name[index_of_last_period:]
+                    size=file_size,extension=new_file_name[index_of_last_period:]
                 )
                 youtube_podcast_video.save()
                 youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] {youtube_podcast_video} saved")
