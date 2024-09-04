@@ -1,4 +1,11 @@
 <a href="/" >Home</a> | <a href="/all" >All</a><br>
+
+<form method="post">
+    {% csrf_token %}
+    <label>Hour:</label><input type="number" name="hour" value="{{ cron_schedule.hour }}">
+    <label>Minute:</label><input type="number" name="minute" value="{{ cron_schedule.minute }}">
+    <button name="action" value="update_cron" type="submit">Update Cron Time</button>
+</form>
 <form method="post">
     {% csrf_token %}
     <label>URL:</label><input type="text" name="url">

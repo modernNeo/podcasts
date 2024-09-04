@@ -10,6 +10,13 @@ VIDEOS_FOLDER_NAME = "videos"
 ARCHIVE_FOLDER_NAME = "archives"
 RSS_FEED_FOLDER_NAME = 'rss_feed'
 
+class CronSchedule(models.Model):
+    hour = models.IntegerField()
+    minute = models.IntegerField()
+
+    def __str__(self):
+        return f"scheduler for {self.hour} hour and {self.minute} minutes"
+
 class YouTubePodcast(models.Model):
     class Meta:
         constraints = [

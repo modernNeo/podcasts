@@ -3,11 +3,12 @@ import shutil
 
 from django.conf import settings
 
-from podcasts.models import YouTubePodcast, YouTubePodcastVideo, VIDEOS_FOLDER_NAME, ARCHIVE_FOLDER_NAME
+from podcasts.models import YouTubePodcast, YouTubePodcastVideo, VIDEOS_FOLDER_NAME, ARCHIVE_FOLDER_NAME, CronSchedule
 from podcasts.views.generate_rss_file import generate_rss_file
 
 
 def showing_videos(request, show_hidden):
+    cron_schedule = CronSchedule.objects.all().first()
     if request.POST.get("action", False) == "Create":
         index_range = request.POST['index_range'].strip()
         YouTubePodcast(
@@ -55,6 +56,12 @@ def showing_videos(request, show_hidden):
                 os.remove(podcast.feed_file_location)
             except FileNotFoundError:
                 pass
+    elif request.POST.get("action", False) == "update_cron":
+        if cron_schedule is None:
+            cron_schedule = CronSchedule()
+        cron_schedule.hour = request.POST['hour']
+        cron_schedule.minute = request.POST['minute']
+        cron_schedule.save()
     podcasts = []
     for youtube_podcast in YouTubePodcast.objects.all().filter():
         if show_hidden:
@@ -69,5 +76,6 @@ def showing_videos(request, show_hidden):
             }
         })
     return {
-        "podcasts" : podcasts
+        "podcasts" : podcasts,
+        "cron_schedule" : cron_schedule
     }
