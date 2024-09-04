@@ -17,7 +17,8 @@ pipeline {
                 string(credentialsId: 'PODCASTS_SITE_PROD_HOST', variable: 'PODCASTS_SITE_PROD_HOST'),
                 string(credentialsId: 'TO_EMAIL', variable: 'TO_EMAIL'),
                 string(credentialsId: 'GMAIL_USERNAME', variable: 'GMAIL_USERNAME'),
-                string(credentialsId: 'GMAIL_PASSWORD', variable: 'GMAIL_PASSWORD')]
+                string(credentialsId: 'GMAIL_PASSWORD', variable: 'GMAIL_PASSWORD'),
+                string(credentialsId: 'PODCASTS_SITE_SECRET_KEY', variable: 'PODCASTS_SITE_SECRET_KEY')]
                 ){
                     sh label: '', script: """bash -c \'
                         export POSTGRES_DB="'"${PODCASTS_SITE_POSTGRES_DB}"'";
@@ -27,6 +28,7 @@ pipeline {
                         export TO_EMAIL="'"${TO_EMAIL}"'";
                         export GMAIL_USERNAME="'"${GMAIL_USERNAME}"'";
                         export GMAIL_PASSWORD="'"${GMAIL_PASSWORD}"'";
+                        export SECRET_KEY="'"${PODCASTS_SITE_SECRET_KEY}"'";
                         export JENKINS="true";
                         export ENV="PROD";
                         ./CI/deploy.sh;
