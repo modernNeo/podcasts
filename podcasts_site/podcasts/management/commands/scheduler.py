@@ -15,7 +15,7 @@ class Command(BaseCommand):
                 func=pull_latest_youtube_videos, trigger='cron', hour=schedule.hour, minute=schedule.minute,
                 timezone='Canada/Pacific'
             )
-            print("schedular started")
+            print(f"schedular started for cron time {schedule.hour}:{schedule.minute}")
             scheduler.start()
         else:
             print("no schedule found")
