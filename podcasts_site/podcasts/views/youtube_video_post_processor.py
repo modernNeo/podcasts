@@ -29,9 +29,9 @@ def get_index_of_end_of_date(the_file_name):
         f"[youtube_video_post_processor.py get_index_of_end_of_date()] index_of_separator={index_of_separator}"
     )
     number_of_spaces = 0
-    while index_of_out_range(the_file_name, index_of_separator-number_of_spaces) and re.match("\d", the_file_name[index_of_separator-number_of_spaces]) is None:
+    while index_of_out_range(the_file_name, index_of_separator+number_of_spaces) and re.match(r"\d", the_file_name[index_of_separator+number_of_spaces]) is None:
         number_of_spaces -= 1
-    if not index_of_out_range(the_file_name, index_of_separator-number_of_spaces) or re.match("\d", the_file_name[index_of_separator-number_of_spaces]) is None:
+    if not index_of_out_range(the_file_name, index_of_separator+number_of_spaces) or re.match(r"\d", the_file_name[index_of_separator+number_of_spaces]) is None:
         raise Exception(f"could not find the end of the date in file_name [{the_file_name}]")
 
     youtube_dlp_logger.info(
