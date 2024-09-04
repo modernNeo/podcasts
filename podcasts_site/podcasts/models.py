@@ -18,10 +18,10 @@ class CronSchedule(models.Model):
         return f"scheduler for {self.hour} hour and {self.minute} minutes"
 
 class YouTubePodcast(models.Model):
-    class Meta:
-        constraints = [
-            UniqueConstraint(name="one_process_in_progress", fields=['being_processed'], condition=Q(being_processed=True))
-        ]
+    # class Meta:
+    #     constraints = [
+    #         UniqueConstraint(name="one_process_in_progress", fields=['being_processed'], condition=Q(being_processed=True))
+    #     ]
 
     name = models.CharField(max_length=1000)
     description = models.CharField(max_length=5000)
