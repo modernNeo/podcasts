@@ -52,7 +52,7 @@ def pull_videos(youtube_podcast):
             "paths": {"home": youtube_podcast.video_file_location},
             "download_archive": youtube_podcast.archive_file_location,  # done so that past downloaded videos
             # are not re-downloaded
-            "ignoreerrors": True,  # helpful so that if one video has an issue, the rest will still be
+            # "ignoreerrors": True,  # helpful so that if one video has an issue, the rest will still be
             # attempted to be downloaded
             "sleep_interval_requests": 15,  # to avoid youtube trying to verify the requests are not coming
             # from a bot
