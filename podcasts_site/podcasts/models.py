@@ -18,7 +18,7 @@ class YouTubePodcast(models.Model):
 
     name = models.CharField(max_length=1000)
     description = models.CharField(max_length=5000)
-    image = models.CharField(max_length=10000)
+    image = models.CharField(max_length=10000, null=True)
     language = models.CharField(max_length=5)
     author = models.CharField(max_length=10000)
     url = models.CharField(max_length=10000)
@@ -90,7 +90,7 @@ class YouTubePodcastVideo(models.Model):
     grouping_number = models.IntegerField()
     url = models.CharField(max_length=10000)
     extension = models.CharField(max_length=100)
-    image = models.CharField(max_length=10000)
+    image = models.CharField(max_length=10000, null=True)
     size = models.PositiveBigIntegerField()
     hide = models.BooleanField(default=False)
     duration = models.PositiveBigIntegerField()

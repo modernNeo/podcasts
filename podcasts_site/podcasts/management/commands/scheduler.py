@@ -8,6 +8,6 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         scheduler = BlockingScheduler()
         print("starting scheduler")
-        scheduler.add_job(func=pull_latest_youtube_videos, trigger='cron', hour=4, minute="30", timezone='Canada/Pacific')
+        scheduler.add_job(func=pull_latest_youtube_videos, trigger='cron', hour=4, minute="45", timezone='Canada/Pacific')
         print("schedular started")
         scheduler.start()
