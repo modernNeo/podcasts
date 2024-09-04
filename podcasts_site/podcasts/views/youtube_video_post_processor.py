@@ -1,4 +1,5 @@
 import os
+import re
 
 from yt_dlp import postprocessor
 
@@ -7,6 +8,58 @@ from podcasts.views.pstdatetimefield import pstdatetime
 from podcasts.views.setup_logger import Loggers
 
 CBC_VANCOUVER_NEWS_PREFIX = 'CBC Vancouver News at '
+
+def index_of_out_range(name, index):
+    return len(name) >= abs(index)
+
+def get_index_of_end_of_date(the_file_name):
+    youtube_dlp_logger = Loggers.get_logger("youtube_dlp")
+    if ":" in the_file_name:
+        youtube_dlp_logger.info("[youtube_video_post_processor.py get_index_of_end_of_date()] matched first if")
+        index_of_separator = the_file_name.index(":")
+    elif "：" in the_file_name:
+        youtube_dlp_logger.info("[youtube_video_post_processor.py get_index_of_end_of_date()] matched second if")
+        index_of_separator = the_file_name.index("：")
+    elif "-" in the_file_name:
+        youtube_dlp_logger.info("[youtube_video_post_processor.py get_index_of_end_of_date()] matched third if")
+        index_of_separator = the_file_name.index("-")
+    else:
+        raise Exception(f"could not find a separator [: or -] in filename {the_file_name}")
+    youtube_dlp_logger.info(
+        f"[youtube_video_post_processor.py get_index_of_end_of_date()] index_of_separator={index_of_separator}"
+    )
+    number_of_spaces = 0
+    while index_of_out_range(the_file_name, index_of_separator-number_of_spaces) and re.match("\d", the_file_name[index_of_separator-number_of_spaces]) is None:
+        number_of_spaces -= 1
+    if not index_of_out_range(the_file_name, index_of_separator-number_of_spaces) or re.match("\d", the_file_name[index_of_separator-number_of_spaces]) is None:
+        raise Exception(f"could not find the end of the date in file_name [{the_file_name}]")
+
+    youtube_dlp_logger.info(
+        f"[youtube_video_post_processor.py get_index_of_end_of_date()] determined number of spaces to be"
+        f" {number_of_spaces}"
+    )
+    number_of_spaces += 1
+    youtube_dlp_logger.info("[youtube_video_post_processor.py run()] finding index of [:]")
+    return index_of_separator + number_of_spaces
+
+def get_date_from_string(date_from_file_name):
+    youtube_dlp_logger = Loggers.get_logger("youtube_dlp")
+    date_from_file_name.replace("Sept.", "Sep")
+    formats = ["%I, %b %d", "%I%M, %b %d", "%I, %B %d"]
+    timestamp = None
+    for date_format in formats:
+        try:
+            youtube_dlp_logger.info(
+                f"[youtube_video_post_processor.py get_date_from_string()] matching string [{date_from_file_name}] "
+                f"against format [{date_format}]"
+            )
+            timestamp = pstdatetime.strptime(date_from_file_name, date_format)
+            break
+        except ValueError:
+            pass
+    if not timestamp:
+        raise Exception(f"unable to find a format that matches [{date_from_file_name}]")
+    return timestamp
 
 class YouTubeVideoPostProcessor(postprocessor.common.PostProcessor):
     def __init__(self):
@@ -28,24 +81,14 @@ class YouTubeVideoPostProcessor(postprocessor.common.PostProcessor):
                 if CBC_VANCOUVER_NEWS_PREFIX == current_file_name[:len(CBC_VANCOUVER_NEWS_PREFIX)]:
                     # have to do something special for CBC just cause they have an 11 pm news program that gets a timestamp
                     # that is set for the next day instead
-                    try:
-                        youtube_dlp_logger.info("[youtube_video_post_processor.py run()] finding index of [:]")
-                        index_of_colon = current_file_name.index(":")
-                    except ValueError:
-                        youtube_dlp_logger.info("[youtube_video_post_processor.py run()] finding index of [：]")
-                        index_of_colon = current_file_name.index("：")
+                    index_of_separator = get_index_of_end_of_date(current_file_name)
                     youtube_dlp_logger.info(
-                        f"[youtube_video_post_processor.py run()] index_of_colon={index_of_colon}")
-                    date_from_file_name = current_file_name[len(CBC_VANCOUVER_NEWS_PREFIX):index_of_colon]
+                        f"[youtube_video_post_processor.py run()] index_of_separator={index_of_separator}"
+                    )
+                    date_from_file_name = current_file_name[len(CBC_VANCOUVER_NEWS_PREFIX):index_of_separator]
                     youtube_dlp_logger.info(
                         f"[youtube_video_post_processor.py run()] date_from_file_name={date_from_file_name}")
-                    try:
-                        timestamp = pstdatetime.strptime(date_from_file_name, "%I, %b %d")
-                    except ValueError:
-                        try:
-                            timestamp = pstdatetime.strptime(date_from_file_name, "%I%M, %b %d")
-                        except ValueError:
-                            timestamp = pstdatetime.strptime(date_from_file_name, "%I, %B %d")
+                    timestamp = get_date_from_string(date_from_file_name)
                     youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] timestamp={timestamp}")
                     timestamp = pstdatetime(year=pstdatetime.now().year, month=timestamp.month, day=timestamp.day,
                                             hour=timestamp.hour+12,minute=timestamp.minute, second=0,
