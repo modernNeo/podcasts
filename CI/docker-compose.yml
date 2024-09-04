@@ -46,6 +46,9 @@ services:  #Services that are needed for the podcasts_site app
             - GMAIL_USERNAME
             - GMAIL_PASSWORD
             - SECRET_KEY
+        volumes: #volume are for hot reload
+            - logs:/src/app/logs
+            - assets:/src/app/assets
         networks:
             - podcasts_site_network
         restart: unless-stopped
