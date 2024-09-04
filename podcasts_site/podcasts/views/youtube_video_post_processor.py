@@ -44,7 +44,7 @@ def get_index_of_end_of_date(the_file_name):
 
 def get_date_from_string(date_from_file_name):
     youtube_dlp_logger = Loggers.get_logger("youtube_dlp")
-    date_from_file_name.replace("Sept.", "Sep")
+    date_from_file_name = date_from_file_name.replace("Sept.", "Sep")
     formats = ["%I, %b %d", "%I%M, %b %d", "%I, %B %d"]
     timestamp = None
     for date_format in formats:
@@ -87,7 +87,7 @@ class YouTubeVideoPostProcessor(postprocessor.common.PostProcessor):
                     )
                     date_from_file_name = current_file_name[len(CBC_VANCOUVER_NEWS_PREFIX):index_of_separator]
                     youtube_dlp_logger.info(
-                        f"[youtube_video_post_processor.py run()] date_from_file_name={date_from_file_name}")
+                        f"[youtube_video_post_processor.py run()] date_from_file_name=[{date_from_file_name}]")
                     timestamp = get_date_from_string(date_from_file_name)
                     youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] timestamp={timestamp}")
                     timestamp = pstdatetime(year=pstdatetime.now().year, month=timestamp.month, day=timestamp.day,
