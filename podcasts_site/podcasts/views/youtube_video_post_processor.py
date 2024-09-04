@@ -29,8 +29,10 @@ class YouTubeVideoPostProcessor(postprocessor.common.PostProcessor):
                     # have to do something special for CBC just cause they have an 11 pm news program that gets a timestamp
                     # that is set for the next day instead
                     try:
+                        youtube_dlp_logger.info("[youtube_video_post_processor.py run()] finding index of [:]")
                         index_of_colon = current_file_name.index(":")
                     except ValueError:
+                        youtube_dlp_logger.info("[youtube_video_post_processor.py run()] finding index of [：]")
                         index_of_colon = current_file_name.index("：")
                     youtube_dlp_logger.info(
                         f"[youtube_video_post_processor.py run()] index_of_colon={index_of_colon}")
