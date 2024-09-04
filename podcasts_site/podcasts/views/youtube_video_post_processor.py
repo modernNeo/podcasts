@@ -175,7 +175,12 @@ class YouTubeVideoPostProcessor(postprocessor.common.PostProcessor):
                 youtube_podcast_video_grouping.save()
                 youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] {youtube_podcast_video_grouping} saved")
             except Exception as e:
-                youtube_dlp_logger.error(f"[youtube_video_post_processor.py run()] e={e}")
+                youtube_dlp_logger.info("######################################")
+                youtube_dlp_logger.info("######################################")
+                youtube_dlp_logger.error("[youtube_video_post_processor.py run()] ERROR")
+                youtube_dlp_logger.error(f"[youtube_video_post_processor.py run()] {e}")
+                youtube_dlp_logger.info("######################################")
+                youtube_dlp_logger.info("######################################")
         youtube_dlp_logger.info("######################################")
         youtube_dlp_logger.info(f"Finished Post-Processing video {full_path}")
         youtube_dlp_logger.info("######################################")
