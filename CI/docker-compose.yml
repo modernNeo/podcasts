@@ -14,6 +14,7 @@ services:  #Services that are needed for the podcasts_site app
             - TO_EMAIL
             - GMAIL_USERNAME
             - GMAIL_PASSWORD
+            - SECRET_KEY
         volumes: #volume are for hot reload
             - logs:/src/app/logs
             - assets:/src/app/assets
@@ -24,8 +25,34 @@ services:  #Services that are needed for the podcasts_site app
         image: "${COMPOSE_PROJECT_NAME}_app"
         networks:
             - podcasts_site_network
-        stdin_open: true # docker run -i
-        tty: true        # docker run -t
+        ports:
+            -   "8000:8000"
+#        stdin_open: true # docker run -i
+#        tty: true        # docker run -t
+    podcast_youtube_puller:
+        build:
+            context: ../
+            dockerfile: CI/Dockerfile.puller
+        container_name: "${COMPOSE_PROJECT_NAME}_puller"
+        image: "${COMPOSE_PROJECT_NAME}_puller"
+        environment:
+            - POSTGRES_DB
+            - POSTGRES_USER
+            - POSTGRES_PASSWORD
+            - COMPOSE_PROJECT_NAME
+            - ENV
+            - PROD_HOST
+            - TO_EMAIL
+            - GMAIL_USERNAME
+            - GMAIL_PASSWORD
+            - SECRET_KEY
+        networks:
+            - podcasts_site_network
+        restart: unless-stopped
+#        stdin_open: true # docker run -i
+#        tty: true        # docker run -t
+        depends_on:
+            -   db
     db: #declaration of the postgres container
         environment:
             - POSTGRES_DB

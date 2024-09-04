@@ -1,3 +1,5 @@
+import datetime
+
 from podgen import Category, Podcast, Person, Episode, Media
 
 
@@ -15,14 +17,22 @@ def generate_rss_file(youtube_podcast):
         language=youtube_podcast.language,
         authors=[Person(youtube_podcast.author)],
         category=category,
+        # owner=Person(youtube_podcast.author), commenting out cause it needs an email
         explicit=False,
         episodes=[
             Episode(
-                title=episode.original_title,
-                media=Media(episode.get_location, size=episode.size),
-                publication_date=episode.date
+                title=video.original_title,
+                summary=video.description,
+                authors=[Person(youtube_podcast.author)],
+                image=video.image,
+                media=Media(
+                    duration=datetime.timedelta(seconds=video.duration),
+                    size=video.size,
+                    url=video.get_location
+                ),
+                publication_date=video.date,
             )
-            for episode in youtube_podcast.youtubepodcastvideo_set.all().filter(hide=False)
+            for video in youtube_podcast.youtubepodcastvideo_set.all().filter(hide=False)
         ]
     )
     p.rss_file(youtube_podcast.feed_file_location)

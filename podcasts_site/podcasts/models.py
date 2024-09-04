@@ -90,9 +90,10 @@ class YouTubePodcastVideo(models.Model):
     grouping_number = models.IntegerField()
     url = models.CharField(max_length=10000)
     extension = models.CharField(max_length=100)
-    image = models.ImageField()
-    size = models.IntegerField()
+    image = models.CharField(max_length=10000)
+    size = models.PositiveBigIntegerField()
     hide = models.BooleanField(default=False)
+    duration = models.PositiveBigIntegerField()
 
     @property
     def get_location(self):

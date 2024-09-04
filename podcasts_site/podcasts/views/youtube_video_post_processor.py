@@ -64,10 +64,19 @@ class YouTubeVideoPostProcessor(postprocessor.common.PostProcessor):
                     )
                 youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] podcast.information_last_updated={podcast.information_last_updated}")
                 youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] timestamp={timestamp}")
+                thumbnail = information.get('thumbnail', None)
+                if thumbnail is None:
+                    pass
+                if ".png" in thumbnail:
+                    thumbnail = thumbnail[:thumbnail.index(".png")+4]
+                elif ".jpg" in thumbnail:
+                    thumbnail = thumbnail[:thumbnail.index(".jpg") + 4]
+                else:
+                    thumbnail = None
                 if podcast.information_last_updated is None or timestamp > podcast.information_last_updated:
                     podcast.name = information['playlist']
                     podcast.description = information['description']
-                    podcast.image = information['thumbnail']
+                    podcast.image = thumbnail
                     podcast.language = "en-US"
                     podcast.author = information['uploader']
                     podcast.category = information['categories'][0]
@@ -91,9 +100,10 @@ class YouTubeVideoPostProcessor(postprocessor.common.PostProcessor):
                 youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] information[description]={information.get('description', None)}")
                 youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] podcast={podcast}")
                 youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] information[original_url]={information.get('original_url', None)}")
-                youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] information[thumbnail]={information.get('thumbnail', None)}")
+                youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] information[thumbnail]={thumbnail}")
                 youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] information[filesize]={information.get('filesize', None)}")
                 youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] information[filesize_approx]={information.get('filesize_approx', None)}")
+                youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] information[duration]={information.get('duration', None)}")
                 file_size = information.get('filesize', None)
                 if not file_size:
                     file_size = information.get('filesize_approx', None)
@@ -108,8 +118,8 @@ class YouTubeVideoPostProcessor(postprocessor.common.PostProcessor):
                 youtube_podcast_video = YouTubePodcastVideo(
                     video_id=information['id'],filename=new_file_name, original_title=information['title'],
                     description=information["description"], podcast=podcast, date=timestamp, identifier_number=release_stamp,
-                    grouping_number=grouping_release_stamp,url=information['original_url'], image=information['thumbnail'],
-                    size=file_size,extension=new_file_name[index_of_last_period:]
+                    grouping_number=grouping_release_stamp,url=information['original_url'], image=thumbnail,
+                    size=file_size,extension=new_file_name[index_of_last_period:], duration=information['duration']
                 )
                 youtube_podcast_video.save()
                 youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] {youtube_podcast_video} saved")
