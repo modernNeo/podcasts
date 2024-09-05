@@ -46,6 +46,8 @@ def get_date_from_string(date_from_file_name):
     youtube_dlp_logger = Loggers.get_logger("youtube_dlp")
     date_from_file_name = date_from_file_name.replace("Sept.", "Sep")
     formats = ["%I, %b %d", "%I%M, %b %d", "%I, %B %d"]
+    if date_from_file_name == "6, Sep 4 - 1 dead, 1":
+        date_from_file_name = "6, Sep 4"
     timestamp = None
     for date_format in formats:
         try:
