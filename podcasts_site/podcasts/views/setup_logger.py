@@ -6,6 +6,7 @@ from logging.handlers import RotatingFileHandler
 
 import pytz
 
+from podcasts.views.pstdatetimefield import pstdatetime
 from podcasts.views.youtube_dlp_error_handler import YoutubeDLPErrorHandler
 
 SYS_LOG_HANDLER_NAME = "sys"
@@ -65,6 +66,8 @@ class Loggers:
         # if logger_name == SYS_LOG_HANDLER_NAME:
         #     return cls._setup_sys_logger()
         # else:
+        timestamp_str = pstdatetime.now().strftime('%Y-%m-%d-%H-%M')
+        logger_name = f"{timestamp_str}_{logger_name}"
         if logger_name in cls.logger_list_indices:
             return cls.loggers[cls.logger_list_indices[logger_name]]
         else:
