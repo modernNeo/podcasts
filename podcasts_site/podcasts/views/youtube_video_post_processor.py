@@ -1,67 +1,68 @@
 import os
-import re
 
+from django.conf import settings
 from yt_dlp import postprocessor
 
 from podcasts.models import YouTubePodcast, YouTubePodcastVideo, YouTubePodcastVideoGrouping
 from podcasts.views.pstdatetimefield import pstdatetime
 from podcasts.views.setup_logger import Loggers
 
-CBC_VANCOUVER_NEWS_PREFIX = 'CBC Vancouver News at '
-
-def index_of_out_range(name, index):
-    return len(name) >= abs(index)
-
-def get_index_of_end_of_date(the_file_name):
+def normalize_date_string(video_title_after_substring):
     youtube_dlp_logger = Loggers.get_logger("youtube_dlp")
-    if ":" in the_file_name:
-        youtube_dlp_logger.info("[youtube_video_post_processor.py get_index_of_end_of_date()] matched first if")
-        index_of_separator = the_file_name.index(":")
-    elif "：" in the_file_name:
-        youtube_dlp_logger.info("[youtube_video_post_processor.py get_index_of_end_of_date()] matched second if")
-        index_of_separator = the_file_name.index("：")
-    elif "-" in the_file_name:
-        youtube_dlp_logger.info("[youtube_video_post_processor.py get_index_of_end_of_date()] matched third if")
-        index_of_separator = the_file_name.index("-")
-    else:
-        raise Exception(f"could not find a separator [: or -] in filename {the_file_name}")
-    youtube_dlp_logger.info(
-        f"[youtube_video_post_processor.py get_index_of_end_of_date()] index_of_separator={index_of_separator}"
-    )
-    number_of_spaces = 0
-    while index_of_out_range(the_file_name, index_of_separator+number_of_spaces) and re.match(r"\d", the_file_name[index_of_separator+number_of_spaces]) is None:
-        number_of_spaces -= 1
-    if not index_of_out_range(the_file_name, index_of_separator+number_of_spaces) or re.match(r"\d", the_file_name[index_of_separator+number_of_spaces]) is None:
-        raise Exception(f"could not find the end of the date in file_name [{the_file_name}]")
-
-    youtube_dlp_logger.info(
-        f"[youtube_video_post_processor.py get_index_of_end_of_date()] determined number of spaces to be"
-        f" {number_of_spaces}"
-    )
-    number_of_spaces += 1
-    youtube_dlp_logger.info("[youtube_video_post_processor.py run()] finding index of [:]")
-    return index_of_separator + number_of_spaces
-
-def get_date_from_string(date_from_file_name):
-    youtube_dlp_logger = Loggers.get_logger("youtube_dlp")
-    date_from_file_name = date_from_file_name.replace("Sept.", "Sep")
-    formats = ["%I, %b %d", "%I%M, %b %d", "%I, %B %d"]
-    if date_from_file_name == "6, Sep 4 - 1 dead, 1":
-        date_from_file_name = "6, Sep 4"
-    timestamp = None
-    for date_format in formats:
-        try:
+    for date in settings.CBC_NEWS_TITLE_DATE_NORMALIZER.keys():
+        if date in video_title_after_substring:
             youtube_dlp_logger.info(
-                f"[youtube_video_post_processor.py get_date_from_string()] matching string [{date_from_file_name}] "
-                f"against format [{date_format}]"
+                f"[youtube_video_post_processor.py normalize_date_string()] found string [{date}] in "
+                f"video_title_after_substring [{video_title_after_substring}]"
             )
-            timestamp = pstdatetime.strptime(date_from_file_name, date_format)
+            video_title_after_substring = video_title_after_substring.replace(
+                date, settings.CBC_NEWS_TITLE_DATE_NORMALIZER[date]
+            )
+            youtube_dlp_logger.info(
+                f"[youtube_video_post_processor.py normalize_date_string()] video_title_after_substring =  "
+                f"[{video_title_after_substring}]"
+            )
+        else:
+            youtube_dlp_logger.info(
+                f"[youtube_video_post_processor.py normalize_date_string()] did NOT find string [{date}] in "
+                f"video_title_after_substring [{video_title_after_substring}]"
+            )
+    return video_title_after_substring
+
+
+def get_date_from_cbc_videos_title(video_title_after_substring):
+    youtube_dlp_logger = Loggers.get_logger("youtube_dlp")
+    video_title_after_substring = normalize_date_string(video_title_after_substring)
+    timestamp = None
+    for date_format in settings.CBC_NEWS_DATE_FORMAT:
+        index = len(video_title_after_substring)
+        while index > -1  and timestamp is None:
+            try:
+                date_substring = video_title_after_substring[:index]
+                youtube_dlp_logger.info(
+                    f"[youtube_video_post_processor.py get_date_from_cbc_videos_title()] matching string "
+                    f"[{date_substring}] against format [{date_format}]"
+                )
+                timestamp = pstdatetime.strptime(date_substring, date_format)
+            except ValueError:
+                index -= 1
+        if timestamp is not None:
             break
-        except ValueError:
-            pass
-    if not timestamp:
-        raise Exception(f"unable to find a format that matches [{date_from_file_name}]")
+    youtube_dlp_logger.info(
+        f"[youtube_video_post_processor.py get_date_from_cbc_videos_title()] returning timestamp [{timestamp}]"
+    )
     return timestamp
+
+def video_has_national_in_first_chapter(information):
+    if information.get('chapters', None) is None:
+        return False
+    chapters = information['chapters']
+    if len(chapters) < 1:
+        return False
+    first_chapter = information['chapters'][0]
+    if first_chapter.get('title', None) is None:
+        return False
+    return settings.THE_NATIONAL_CHAPTER_PREFIX == first_chapter['title'][:len(settings.THE_NATIONAL_CHAPTER_PREFIX)]
 
 class YouTubeVideoPostProcessor(postprocessor.common.PostProcessor):
     def __init__(self):
@@ -77,26 +78,30 @@ class YouTubeVideoPostProcessor(postprocessor.common.PostProcessor):
             youtube_dlp_logger.info("######################################")
             youtube_dlp_logger.info(f"Starting Post-Processing video {full_path}")
             youtube_dlp_logger.info("######################################")
-            # try:
             current_file_name = full_path[slash_indices[number_of_slashes - 1] + 1:]
             youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] current_file_name={current_file_name}")
-            if CBC_VANCOUVER_NEWS_PREFIX == current_file_name[:len(CBC_VANCOUVER_NEWS_PREFIX)]:
+            if settings.CBC_VANCOUVER_NEWS_PREFIX == current_file_name[:len(settings.CBC_VANCOUVER_NEWS_PREFIX)]:
                 # have to do something special for CBC just cause they have an 11 pm news program that gets a timestamp
                 # that is set for the next day instead
-                index_of_separator = get_index_of_end_of_date(current_file_name)
+                title_substring_with_date = current_file_name[len(settings.CBC_VANCOUVER_NEWS_PREFIX):]
                 youtube_dlp_logger.info(
-                    f"[youtube_video_post_processor.py run()] index_of_separator={index_of_separator}"
+                    f"[youtube_video_post_processor.py run()] passing the substring [{title_substring_with_date}]"
+                    f" instead of [{current_file_name}] to get_date_from_cbc_videos_title"
                 )
-                date_from_file_name = current_file_name[len(CBC_VANCOUVER_NEWS_PREFIX):index_of_separator]
-                youtube_dlp_logger.info(
-                    f"[youtube_video_post_processor.py run()] date_from_file_name=[{date_from_file_name}]")
-                timestamp = get_date_from_string(date_from_file_name)
-                youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] timestamp={timestamp}")
+                timestamp = get_date_from_cbc_videos_title(title_substring_with_date)
+                youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] timestamp=[{timestamp}]")
                 timestamp = pstdatetime(year=pstdatetime.now().year, month=timestamp.month, day=timestamp.day,
                                         hour=timestamp.hour+12,minute=timestamp.minute, second=0,
                                         tzinfo=pstdatetime.PACIFIC_TZ)
                 youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] timestamp={timestamp}")
-
+            elif video_has_national_in_first_chapter(information):
+                date_string = information['chapters'][0]['title'][len(settings.THE_NATIONAL_CHAPTER_PREFIX):]
+                date_string = normalize_date_string(date_string)
+                timestamp = pstdatetime.strptime(date_string, settings.THE_NATIONAL_DATE_FORMAT)
+                youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] timestamp=[{timestamp}]")
+                timestamp = pstdatetime(year=pstdatetime.now().year, month=timestamp.month, day=timestamp.day,
+                                        hour=6+12,minute=0, second=0,
+                                        tzinfo=pstdatetime.PACIFIC_TZ)
             else:
                 youtube_dlp_logger.info(
                     f"[youtube_video_post_processor.py run()] "
@@ -176,13 +181,6 @@ class YouTubeVideoPostProcessor(postprocessor.common.PostProcessor):
             )
             youtube_podcast_video_grouping.save()
             youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] {youtube_podcast_video_grouping} saved")
-            # except Exception as e:
-            #     youtube_dlp_logger.info("######################################")
-            #     youtube_dlp_logger.info("######################################")
-            #     youtube_dlp_logger.error("[youtube_video_post_processor.py run()] ERROR")
-            #     youtube_dlp_logger.error(f"[youtube_video_post_processor.py run()] {e}")
-            #     youtube_dlp_logger.info("######################################")
-            #     youtube_dlp_logger.info("######################################")
         youtube_dlp_logger.info("######################################")
         youtube_dlp_logger.info(f"Finished Post-Processing video {full_path}")
         youtube_dlp_logger.info("######################################")

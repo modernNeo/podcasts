@@ -6,6 +6,7 @@ import yt_dlp
 
 from podcasts.models import YouTubeDLPError
 from podcasts.views.Gmail import Gmail
+from podcasts.views.delete_videos_that_are_not_properly_processed import delete_videos_that_are_not_properly_processed
 from podcasts.views.setup_logger import Loggers
 from podcasts.views.youtube_video_post_processor import YouTubeVideoPostProcessor
 from podcasts.views.automatically_hide_videos import automatically_hide_videos
@@ -75,6 +76,7 @@ def pull_videos(youtube_podcast):
         os.rename(previous_video_file_location, youtube_podcast.video_file_location)
         os.rename(previous_archive_file_location, youtube_podcast.archive_file_location)
 
+    delete_videos_that_are_not_properly_processed(youtube_podcast)
     automatically_hide_videos(youtube_podcast)
     generate_rss_file(youtube_podcast)
     youtube_podcast.being_processed = False

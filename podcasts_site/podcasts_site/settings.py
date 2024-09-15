@@ -142,7 +142,13 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
+CBC_NEWS_TITLE_DATE_NORMALIZER = {
+"Sept.": "Sep"
+}
+THE_NATIONAL_DATE_FORMAT = "%b %d, %Y"
+CBC_NEWS_DATE_FORMAT = ["%I, %b %d", "%I%M, %b %d", "%I, %B %d"]
+CBC_VANCOUVER_NEWS_PREFIX = 'CBC Vancouver News at '
+THE_NATIONAL_CHAPTER_PREFIX = 'The National for '
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 

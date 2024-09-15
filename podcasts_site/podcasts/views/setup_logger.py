@@ -63,11 +63,6 @@ class Loggers:
         :param logger_name: the name to assign to the returned logic
         :return:the logger
         """
-        # if logger_name == SYS_LOG_HANDLER_NAME:
-        #     return cls._setup_sys_logger()
-        # else:
-        timestamp_str = pstdatetime.now().strftime('%Y-%m-%d-%H-%M')
-        logger_name = f"{timestamp_str}_{logger_name}"
         if logger_name in cls.logger_list_indices:
             return cls.loggers[cls.logger_list_indices[logger_name]]
         else:
