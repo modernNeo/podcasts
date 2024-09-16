@@ -30,11 +30,11 @@ def normalize_date_string(video_title_after_substring):
     return video_title_after_substring
 
 
-def get_date_from_cbc_videos_title(video_title_after_substring):
+def get_date_from_cbc_videos_title(video_title_after_substring, date_formats):
     youtube_dlp_logger = Loggers.get_logger("youtube_dlp")
     video_title_after_substring = normalize_date_string(video_title_after_substring)
     timestamp = None
-    for date_format in settings.CBC_NEWS_DATE_FORMAT:
+    for date_format in date_formats:
         index = len(video_title_after_substring)
         while index > -1  and timestamp is None:
             try:
@@ -88,7 +88,7 @@ class YouTubeVideoPostProcessor(postprocessor.common.PostProcessor):
                     f"[youtube_video_post_processor.py run()] passing the substring [{title_substring_with_date}]"
                     f" instead of [{current_file_name}] to get_date_from_cbc_videos_title"
                 )
-                timestamp = get_date_from_cbc_videos_title(title_substring_with_date)
+                timestamp = get_date_from_cbc_videos_title(title_substring_with_date, settings.CBC_VANCOUVER_NEWS_DATE_FORMAT)
                 youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] timestamp=[{timestamp}]")
                 timestamp = pstdatetime(year=pstdatetime.now().year, month=timestamp.month, day=timestamp.day,
                                         hour=timestamp.hour+12,minute=timestamp.minute, second=0,
@@ -96,8 +96,7 @@ class YouTubeVideoPostProcessor(postprocessor.common.PostProcessor):
                 youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] timestamp={timestamp}")
             elif video_has_national_in_first_chapter(information):
                 date_string = information['chapters'][0]['title'][len(settings.THE_NATIONAL_CHAPTER_PREFIX):]
-                date_string = normalize_date_string(date_string)
-                timestamp = pstdatetime.strptime(date_string, settings.THE_NATIONAL_DATE_FORMAT)
+                timestamp = get_date_from_cbc_videos_title(date_string, settings.THE_NATIONAL_DATE_FORMAT)
                 youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] timestamp=[{timestamp}]")
                 timestamp = pstdatetime(year=pstdatetime.now().year, month=timestamp.month, day=timestamp.day,
                                         hour=6+12,minute=0, second=0,
