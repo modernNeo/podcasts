@@ -25,6 +25,6 @@ class YoutubeDLPErrorHandler(logging.StreamHandler):
         except AppRegistryNotReady:
             pass
         except Exception as e:
-            if settings.ENVIRONMENT != "LOCALHOST":
+            if settings.PROD_ENV:
                 raise e
         super().emit(record)
