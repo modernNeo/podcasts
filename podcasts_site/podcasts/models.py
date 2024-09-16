@@ -107,7 +107,7 @@ class YouTubePodcastVideo(models.Model):
         return f"{settings.HTTP_AND_FQDN}{settings.MEDIA_URL}{VIDEOS_FOLDER_NAME}/{self.podcast.friendly_name}/{self.filename}"
 
     def __str__(self):
-        return f"{self.date} {self.podcast}: {self.filename}"
+        return f"{self.date.pst} {self.podcast}: {self.filename}"
 
 
 
@@ -137,7 +137,7 @@ class YouTubeDLPError(models.Model):
         null=True
     )
     message = models.CharField(
-        max_length=5000
+        max_length=10000
     )
     request = models.CharField(
         max_length=100000,
