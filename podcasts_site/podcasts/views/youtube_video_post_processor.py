@@ -1,68 +1,15 @@
 import os
 
-from django.conf import settings
 from yt_dlp import postprocessor
 
 from podcasts.models import YouTubePodcast, YouTubePodcastVideo, YouTubePodcastVideoGrouping
+from podcasts.views.cbc_the_national_timestamp import get_cbc_the_national_timestamp, \
+    video_has_national_in_first_chapter
+from podcasts.views.cbc_vancouver_timestamp import is_cbc_vancouver_video, get_cbc_vancouver_timestamp
+from podcasts.views.get_thumbnails import get_thumbnails
 from podcasts.views.pstdatetimefield import pstdatetime
 from podcasts.views.setup_logger import Loggers
 
-def normalize_date_string(video_title_after_substring):
-    youtube_dlp_logger = Loggers.get_logger("youtube_dlp")
-    for date in settings.CBC_NEWS_TITLE_DATE_NORMALIZER.keys():
-        if date in video_title_after_substring:
-            youtube_dlp_logger.info(
-                f"[youtube_video_post_processor.py normalize_date_string()] found string [{date}] in "
-                f"video_title_after_substring [{video_title_after_substring}]"
-            )
-            video_title_after_substring = video_title_after_substring.replace(
-                date, settings.CBC_NEWS_TITLE_DATE_NORMALIZER[date]
-            )
-            youtube_dlp_logger.info(
-                f"[youtube_video_post_processor.py normalize_date_string()] video_title_after_substring =  "
-                f"[{video_title_after_substring}]"
-            )
-        else:
-            youtube_dlp_logger.info(
-                f"[youtube_video_post_processor.py normalize_date_string()] did NOT find string [{date}] in "
-                f"video_title_after_substring [{video_title_after_substring}]"
-            )
-    return video_title_after_substring
-
-
-def get_date_from_cbc_videos_title(video_title_after_substring, date_formats):
-    youtube_dlp_logger = Loggers.get_logger("youtube_dlp")
-    video_title_after_substring = normalize_date_string(video_title_after_substring)
-    timestamp = None
-    for date_format in date_formats:
-        index = len(video_title_after_substring)
-        while index > -1  and timestamp is None:
-            try:
-                date_substring = video_title_after_substring[:index]
-                youtube_dlp_logger.info(
-                    f"[youtube_video_post_processor.py get_date_from_cbc_videos_title()] matching string "
-                    f"[{date_substring}] against format [{date_format}]"
-                )
-                timestamp = pstdatetime.strptime(date_substring, date_format)
-            except ValueError:
-                index -= 1
-        if timestamp is not None:
-            break
-    youtube_dlp_logger.info(
-        f"[youtube_video_post_processor.py get_date_from_cbc_videos_title()] returning timestamp [{timestamp}]"
-    )
-    return timestamp
-
-def video_has_national_in_first_chapter(information):
-    if information.get('chapters', None) is None:
-        return False
-    chapters = information['chapters']
-    if len(chapters) < 1:
-        return False
-    first_chapter = information['chapters'][0]
-    if first_chapter.get('title', None) is None:
-        return False
-    return settings.THE_NATIONAL_CHAPTER_PREFIX == first_chapter['title'][:len(settings.THE_NATIONAL_CHAPTER_PREFIX)]
 
 class YouTubeVideoPostProcessor(postprocessor.common.PostProcessor):
     def __init__(self):
@@ -80,27 +27,11 @@ class YouTubeVideoPostProcessor(postprocessor.common.PostProcessor):
             youtube_dlp_logger.info("######################################")
             current_file_name = full_path[slash_indices[number_of_slashes - 1] + 1:]
             youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] current_file_name={current_file_name}")
-            if settings.CBC_VANCOUVER_NEWS_PREFIX == current_file_name[:len(settings.CBC_VANCOUVER_NEWS_PREFIX)]:
-                # have to do something special for CBC just cause they have an 11 pm news program that gets a timestamp
-                # that is set for the next day instead
-                title_substring_with_date = current_file_name[len(settings.CBC_VANCOUVER_NEWS_PREFIX):]
-                youtube_dlp_logger.info(
-                    f"[youtube_video_post_processor.py run()] passing the substring [{title_substring_with_date}]"
-                    f" instead of [{current_file_name}] to get_date_from_cbc_videos_title"
-                )
-                timestamp = get_date_from_cbc_videos_title(title_substring_with_date, settings.CBC_VANCOUVER_NEWS_DATE_FORMAT)
-                youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] timestamp=[{timestamp}]")
-                timestamp = pstdatetime(year=pstdatetime.now().year, month=timestamp.month, day=timestamp.day,
-                                        hour=timestamp.hour+12,minute=timestamp.minute, second=0,
-                                        tzinfo=pstdatetime.PACIFIC_TZ)
-                youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] timestamp={timestamp}")
+            cbc_vancouver_news_video = is_cbc_vancouver_video(current_file_name)
+            if cbc_vancouver_news_video:
+                timestamp = get_cbc_vancouver_timestamp(current_file_name)
             elif video_has_national_in_first_chapter(information):
-                date_string = information['chapters'][0]['title'][len(settings.THE_NATIONAL_CHAPTER_PREFIX):]
-                timestamp = get_date_from_cbc_videos_title(date_string, settings.THE_NATIONAL_DATE_FORMAT)
-                youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] timestamp=[{timestamp}]")
-                timestamp = pstdatetime(year=pstdatetime.now().year, month=timestamp.month, day=timestamp.day,
-                                        hour=6+12,minute=0, second=0,
-                                        tzinfo=pstdatetime.PACIFIC_TZ)
+                timestamp = get_cbc_the_national_timestamp(information)
             else:
                 youtube_dlp_logger.info(
                     f"[youtube_video_post_processor.py run()] "
@@ -115,15 +46,7 @@ class YouTubeVideoPostProcessor(postprocessor.common.PostProcessor):
                 )
             youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] podcast.information_last_updated={podcast.information_last_updated}")
             youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] timestamp={timestamp}")
-            thumbnail = information.get('thumbnail', None)
-            if thumbnail is None:
-                pass
-            if ".png" in thumbnail:
-                thumbnail = thumbnail[:thumbnail.index(".png")+4]
-            elif ".jpg" in thumbnail:
-                thumbnail = thumbnail[:thumbnail.index(".jpg") + 4]
-            else:
-                thumbnail = None
+            thumbnail = get_thumbnails(information)
             if podcast.information_last_updated is None or timestamp > podcast.information_last_updated:
                 podcast.name = information['playlist']
                 podcast.description = information['description']
@@ -175,11 +98,12 @@ class YouTubeVideoPostProcessor(postprocessor.common.PostProcessor):
             youtube_podcast_video.save()
             youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] {youtube_podcast_video} saved")
 
-            youtube_podcast_video_grouping = YouTubePodcastVideoGrouping(
-                grouping_number=grouping_release_stamp, podcast=podcast, podcast_video=youtube_podcast_video
-            )
-            youtube_podcast_video_grouping.save()
-            youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] {youtube_podcast_video_grouping} saved")
+            if cbc_vancouver_news_video:
+                youtube_podcast_video_grouping = YouTubePodcastVideoGrouping(
+                    grouping_number=grouping_release_stamp, podcast=podcast, podcast_video=youtube_podcast_video
+                )
+                youtube_podcast_video_grouping.save()
+                youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] {youtube_podcast_video_grouping} saved")
         youtube_dlp_logger.info("######################################")
         youtube_dlp_logger.info(f"Finished Post-Processing video {full_path}")
         youtube_dlp_logger.info("######################################")
