@@ -29,9 +29,9 @@ class YouTubeVideoPostProcessor(postprocessor.common.PostProcessor):
             youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] current_file_name={current_file_name}")
             cbc_vancouver_news_video = is_cbc_vancouver_video(current_file_name)
             if cbc_vancouver_news_video:
-                timestamp = get_cbc_vancouver_timestamp(current_file_name)
+                timestamp = get_cbc_vancouver_timestamp(current_file_name).pst
             elif video_has_national_in_first_chapter(information):
-                timestamp = get_cbc_the_national_timestamp(information)
+                timestamp = get_cbc_the_national_timestamp(information).pst
             else:
                 youtube_dlp_logger.info(
                     f"[youtube_video_post_processor.py run()] "
@@ -43,7 +43,7 @@ class YouTubeVideoPostProcessor(postprocessor.common.PostProcessor):
                 )
                 timestamp = pstdatetime.from_epoch(
                     information['release_timestamp'] if information['release_timestamp'] else information['timestamp']
-                )
+                ).pst
             youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] podcast.information_last_updated={podcast.information_last_updated}")
             youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] timestamp={timestamp}")
             thumbnail = get_thumbnails(information)
