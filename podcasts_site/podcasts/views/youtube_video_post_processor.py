@@ -3,11 +3,8 @@ import os
 from yt_dlp import postprocessor
 
 from podcasts.models import YouTubePodcast, YouTubePodcastVideo, YouTubePodcastVideoGrouping
-from podcasts.views.cbc_the_national_timestamp import get_cbc_the_national_timestamp, \
-    video_has_national_in_first_chapter
-from podcasts.views.cbc_vancouver_timestamp import is_cbc_vancouver_video, get_cbc_vancouver_timestamp
 from podcasts.views.get_thumbnails import get_thumbnails
-from podcasts.views.pstdatetimefield import pstdatetime
+from podcasts.views.get_timestamp import get_timestamp
 from podcasts.views.setup_logger import Loggers
 
 
@@ -27,23 +24,7 @@ class YouTubeVideoPostProcessor(postprocessor.common.PostProcessor):
             youtube_dlp_logger.info("######################################")
             current_file_name = full_path[slash_indices[number_of_slashes - 1] + 1:]
             youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] current_file_name={current_file_name}")
-            cbc_vancouver_news_video = is_cbc_vancouver_video(current_file_name)
-            if cbc_vancouver_news_video:
-                timestamp = get_cbc_vancouver_timestamp(current_file_name).pst
-            elif video_has_national_in_first_chapter(information):
-                timestamp = get_cbc_the_national_timestamp(information).pst
-            else:
-                youtube_dlp_logger.info(
-                    f"[youtube_video_post_processor.py run()] "
-                    f"information[release_timestamp]={information.get('information', None)}"
-                )
-                youtube_dlp_logger.info(
-                    f"[youtube_video_post_processor.py run()] "
-                    f"information[timestamp]={information.get('timestamp', None)}"
-                )
-                timestamp = pstdatetime.from_epoch(
-                    information['release_timestamp'] if information['release_timestamp'] else information['timestamp']
-                ).pst
+            timestamp, cbc_vancouver_news_video = get_timestamp(information, current_file_name)
             youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] podcast.information_last_updated={podcast.information_last_updated}")
             youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] timestamp={timestamp}")
             thumbnail = get_thumbnails(information)
