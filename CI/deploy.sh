@@ -8,7 +8,7 @@ set -e -o xtrace
 export COMPOSE_PROJECT_NAME="podcasts_site"
 
 export prod_container_name="${COMPOSE_PROJECT_NAME}_app"
-export prod_container_puller_name="${COMPOSE_PROJECT_NAME}_puller"
+export prod_container_puller_name="${COMPOSE_PROJECT_NAME}_one_off_puller"
 export prod_container_db_name="${COMPOSE_PROJECT_NAME}_db"
 export docker_compose_file="CI/docker-compose.yml"
 export prod_image_name_lower_case=$(echo "$prod_container_name" | awk '{print tolower($0)}')
