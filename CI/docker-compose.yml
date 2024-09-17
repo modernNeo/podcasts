@@ -29,12 +29,12 @@ services:  #Services that are needed for the podcasts_site app
             -   "8000:8000"
 #        stdin_open: true # docker run -i
 #        tty: true        # docker run -t
-    podcast_youtube_puller:
+    podcast_youtube_one_off_puller:
         build:
             context: ../
-            dockerfile: CI/Dockerfile.puller
-        container_name: "${COMPOSE_PROJECT_NAME}_puller"
-        image: "${COMPOSE_PROJECT_NAME}_puller"
+            dockerfile: CI/Dockerfile.one_off_puller
+        container_name: "${COMPOSE_PROJECT_NAME}_one_off_puller"
+        image: "${COMPOSE_PROJECT_NAME}_one_off__puller"
         environment:
             - POSTGRES_DB
             - POSTGRES_USER
@@ -51,7 +51,6 @@ services:  #Services that are needed for the podcasts_site app
             - assets:/src/app/assets
         networks:
             - podcasts_site_network
-        restart: unless-stopped
 #        stdin_open: true # docker run -i
 #        tty: true        # docker run -t
         depends_on:
