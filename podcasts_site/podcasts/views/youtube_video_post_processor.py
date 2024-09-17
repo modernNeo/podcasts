@@ -4,7 +4,7 @@ from yt_dlp import postprocessor
 
 from podcasts.models import YouTubePodcast, YouTubePodcastVideo, YouTubePodcastVideoGrouping
 from podcasts.views.get_thumbnails import get_thumbnails
-from podcasts.views.get_timestamp import get_timestamp
+from podcasts.views.timestamps.get_timestamp import get_timestamp
 from podcasts.views.setup_logger import Loggers
 
 

@@ -1,6 +1,6 @@
 from django.conf import settings
 
-from podcasts.views.get_date_from_cbc_videos_title import get_date_from_cbc_videos_title
+from podcasts.views.timestamps.get_date_from_cbc_videos_title import get_date_from_cbc_videos_title
 from podcasts.views.pstdatetimefield import pstdatetime
 from podcasts.views.setup_logger import Loggers
 

@@ -1,6 +1,6 @@
-from podcasts.views.cbc_the_national_timestamp import video_has_national_in_first_chapter, \
+from podcasts.views.timestamps.cbc_the_national_timestamp import video_has_national_in_first_chapter, \
     get_cbc_the_national_timestamp
-from podcasts.views.cbc_vancouver_timestamp import is_cbc_vancouver_video, get_cbc_vancouver_timestamp
+from podcasts.views.timestamps.cbc_vancouver_timestamp import is_cbc_vancouver_video, get_cbc_vancouver_timestamp
 from podcasts.views.pstdatetimefield import pstdatetime
 from podcasts.views.setup_logger import Loggers
 
