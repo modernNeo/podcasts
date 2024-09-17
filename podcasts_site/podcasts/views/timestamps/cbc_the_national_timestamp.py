@@ -6,18 +6,29 @@ from podcasts.views.setup_logger import Loggers
 
 
 def video_has_national_in_first_chapter(information):
+    youtube_dlp_logger = Loggers.get_logger("youtube_dlp")
     if information.get('chapters', None) is None:
+        youtube_dlp_logger.info(
+            "[cbc_the_national_timestamp.py video_has_national_in_first_chapter()] could not detect 'chapters' in"
+            " information"
+        )
         return False
     chapters = information['chapters']
     if len(chapters) < 1:
+        youtube_dlp_logger.info(
+            "[cbc_the_national_timestamp.py video_has_national_in_first_chapter()] did not find at least 1 chapter"
+        )
         return False
     first_chapter = information['chapters'][0]
     if first_chapter.get('title', None) is None:
+        youtube_dlp_logger.info(
+            f"[cbc_the_national_timestamp.py video_has_national_in_first_chapter()] did not find 'title' in "
+            f"[{first_chapter}]"
+        )
         return False
     is_national = (
             settings.THE_NATIONAL_CHAPTER_PREFIX == first_chapter['title'][:len(settings.THE_NATIONAL_CHAPTER_PREFIX)]
     )
-    youtube_dlp_logger = Loggers.get_logger("youtube_dlp")
     youtube_dlp_logger.info(
         f"[cbc_the_national_timestamp.py video_has_national_in_first_chapter()] first_chapter[title]="
         f"[{first_chapter['title']}]"
