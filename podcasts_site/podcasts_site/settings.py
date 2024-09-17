@@ -143,12 +143,18 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 CBC_NEWS_TITLE_DATE_NORMALIZER = {
-    "Sept.": "Sep"
+    "Sept.": "Sep",
+    "Aug." : "Aug"
 }
 THE_NATIONAL_DATE_FORMAT = ["%B %d, %Y", "%b %d, %Y"]
 THE_NATIONAL_CHAPTER_PREFIX = 'The National for '
 
-CBC_VANCOUVER_NEWS_DATE_FORMAT = ["%I, %b %d", "%I%M, %b %d", "%I, %B %d"]
+CBC_VANCOUVER_NEWS_DATE_FORMAT = [
+    "%I, %b %d", "%I%M, %b %d", "%I, %B %d",
+    "%I,%B %d", # needed cause of a typo with 2024 July 14's title
+    "%I_%M %p, %B %d", #needed cause of a wierd format with the videos around 2024 July 3rd
+    "%I%M %p, %B %d", #needed cause of wierd format with the videos around 2024 June 22nd
+]
 CBC_VANCOUVER_NEWS_PREFIX = 'CBC Vancouver News at '
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
