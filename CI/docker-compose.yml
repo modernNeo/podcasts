@@ -34,7 +34,7 @@ services:  #Services that are needed for the podcasts_site app
             context: ../
             dockerfile: CI/Dockerfile.one_off_puller
         container_name: "${COMPOSE_PROJECT_NAME}_one_off_puller"
-        image: "${COMPOSE_PROJECT_NAME}_one_off__puller"
+        image: "${COMPOSE_PROJECT_NAME}_one_off_puller"
         environment:
             - POSTGRES_DB
             - POSTGRES_USER
