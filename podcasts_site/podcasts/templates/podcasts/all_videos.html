@@ -37,6 +37,11 @@
         <input type="number" name="video_id" value="{{ video.id }}" hidden>
         <a href="{{video.get_location}}" target="_blank">{{ video.original_title }}</a> - <a href="{{ video.url }}" target="_blank">YouTube Link</a>
         {% if video.hide %}
+            <label>Automatically Hidden</label>
+        {%  else %}
+            <label>Automatically Visible</label>
+        {%  endif %}
+        {% if video.manually_hide %}
             <button name="action" value="Unhide" type="submit">Unhide</button>
         {%  else %}
             <button name="action" value="Hide" type="submit">Hide</button>

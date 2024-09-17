@@ -100,6 +100,7 @@ class YouTubePodcastVideo(models.Model):
     image = models.CharField(max_length=10000, null=True)
     size = models.PositiveBigIntegerField()
     hide = models.BooleanField(default=False)
+    manually_hide = models.BooleanField(default=False)
     duration = models.PositiveBigIntegerField()
 
     @property

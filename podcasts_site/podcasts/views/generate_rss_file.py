@@ -1,5 +1,6 @@
 import datetime
 
+from django.db.models import Q
 from podgen import Category, Podcast, Person, Episode, Media
 
 
@@ -32,7 +33,7 @@ def generate_rss_file(youtube_podcast):
                 ),
                 publication_date=video.date,
             )
-            for video in youtube_podcast.youtubepodcastvideo_set.all().filter(hide=False)
+            for video in youtube_podcast.youtubepodcastvideo_set.all().exclude(Q(hide=True) | Q(manually_hide=True))
         ]
     )
     p.rss_file(youtube_podcast.feed_file_location)

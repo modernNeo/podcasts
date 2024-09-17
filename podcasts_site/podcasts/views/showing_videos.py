@@ -2,6 +2,7 @@ import os
 import shutil
 
 from django.conf import settings
+from django.db.models import Q
 
 from podcasts.models import YouTubePodcast, YouTubePodcastVideo, VIDEOS_FOLDER_NAME, ARCHIVE_FOLDER_NAME, CronSchedule
 from podcasts.views.generate_rss_file import generate_rss_file
@@ -26,7 +27,7 @@ def showing_videos(request, show_hidden):
     elif request.POST.get("action", False) == "Unhide" or request.POST.get("action", False) == "Hide":
         youtube_video = YouTubePodcastVideo.objects.all().filter(id=int(request.POST['video_id'])).first()
         if youtube_video:
-            youtube_video.hide = request.POST.get("action", False) == "Hide"
+            youtube_video.manually_hide = request.POST.get("action", False) == "Hide"
             youtube_video.save()
             generate_rss_file(youtube_video.podcast)
     elif request.POST.get("action", False) == "Reset":
@@ -67,7 +68,9 @@ def showing_videos(request, show_hidden):
         if show_hidden:
             total_episodes = youtube_podcast.youtubepodcastvideo_set.all().count()
         else:
-            total_episodes = youtube_podcast.youtubepodcastvideo_set.all().filter(hide=False).count()
+            total_episodes = youtube_podcast.youtubepodcastvideo_set.all().exclude(
+                Q(hide=True) | Q(manually_hide=True)
+            ).count()
         podcasts.append({
             "podcast" : youtube_podcast,
             "stats" : {
