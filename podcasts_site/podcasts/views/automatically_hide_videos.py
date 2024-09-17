@@ -2,6 +2,7 @@ from podcasts.models import YouTubePodcastVideo
 
 
 def automatically_hide_videos(youtube_podcast):
+    YouTubePodcastVideo.objects.all().update(hide=False)
     groups = youtube_podcast.youtubepodcastvideogrouping_set.all().filter(podcast_video__hide=False)
     occurrences = []
     date_number_with_multiple_occurrences = []
