@@ -16,27 +16,27 @@ class YouTubeVideoPostProcessor(postprocessor.common.PostProcessor):
         full_path = information['filename']
         slash_indices = [index for index, character in enumerate(full_path) if character == "/"]
         number_of_slashes = len(slash_indices)
-        podcast = YouTubePodcast.objects.all().filter(being_processed=True).first()
+        podcast_being_processed = YouTubePodcast.objects.all().filter(being_processed=True).first()
         youtube_dlp_logger = Loggers.get_logger("youtube_dlp")
-        if podcast:
+        if podcast_being_processed:
             youtube_dlp_logger.info("######################################")
             youtube_dlp_logger.info(f"Starting Post-Processing video {full_path}")
             youtube_dlp_logger.info("######################################")
             current_file_name = full_path[slash_indices[number_of_slashes - 1] + 1:]
             youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] current_file_name={current_file_name}")
-            timestamp, cbc_vancouver_news_video = get_timestamp(information, current_file_name)
-            youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] podcast.information_last_updated={podcast.information_last_updated}")
+            timestamp, cbc_vancouver_news_video = get_timestamp(information, current_file_name, podcast_being_processed)
+            youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] podcast.information_last_updated={podcast_being_processed.information_last_updated}")
             youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] timestamp={timestamp}")
             thumbnail = get_thumbnails(information)
-            if podcast.information_last_updated is None or timestamp > podcast.information_last_updated:
-                podcast.name = information['playlist']
-                podcast.description = information['description']
-                podcast.image = thumbnail
-                podcast.language = "en-US"
-                podcast.author = information['uploader']
-                podcast.category = information['categories'][0]
-                podcast.information_last_updated = timestamp
-                podcast.save()
+            if podcast_being_processed.information_last_updated is None or timestamp > podcast_being_processed.information_last_updated:
+                podcast_being_processed.name = information['playlist']
+                podcast_being_processed.description = information['description']
+                podcast_being_processed.image = thumbnail
+                podcast_being_processed.language = "en-US"
+                podcast_being_processed.author = information['uploader']
+                podcast_being_processed.category = information['categories'][0]
+                podcast_being_processed.information_last_updated = timestamp
+                podcast_being_processed.save()
 
             new_file_name = f"{timestamp.strftime('%Y-%m-%d-%H-%M')}-{current_file_name}"
             youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] new_file_name={new_file_name}")
@@ -53,7 +53,7 @@ class YouTubeVideoPostProcessor(postprocessor.common.PostProcessor):
 
             youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] information[title]={information.get('title', None)}")
             youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] information[description]={information.get('description', None)}")
-            youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] podcast={podcast}")
+            youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] podcast={podcast_being_processed}")
             youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] information[original_url]={information.get('original_url', None)}")
             youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] information[thumbnail]={thumbnail}")
             youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] information[filesize]={information.get('filesize', None)}")
@@ -72,7 +72,7 @@ class YouTubeVideoPostProcessor(postprocessor.common.PostProcessor):
 
             youtube_podcast_video = YouTubePodcastVideo(
                 video_id=information['id'],filename=new_file_name, original_title=information['title'],
-                description=information["description"], podcast=podcast, date=timestamp, identifier_number=release_stamp,
+                description=information["description"], podcast=podcast_being_processed, date=timestamp, identifier_number=release_stamp,
                 grouping_number=grouping_release_stamp,url=information['original_url'], image=thumbnail,
                 size=file_size,extension=new_file_name[index_of_last_period:], duration=information['duration']
             )
@@ -81,7 +81,7 @@ class YouTubeVideoPostProcessor(postprocessor.common.PostProcessor):
 
             if cbc_vancouver_news_video:
                 youtube_podcast_video_grouping = YouTubePodcastVideoGrouping(
-                    grouping_number=grouping_release_stamp, podcast=podcast, podcast_video=youtube_podcast_video
+                    grouping_number=grouping_release_stamp, podcast=podcast_being_processed, podcast_video=youtube_podcast_video
                 )
                 youtube_podcast_video_grouping.save()
                 youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] {youtube_podcast_video_grouping} saved")
