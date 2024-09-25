@@ -64,7 +64,7 @@ def showing_videos(request, show_hidden):
         cron_schedule.minute = request.POST['minute']
         cron_schedule.save()
     podcasts = []
-    for youtube_podcast in YouTubePodcast.objects.all().filter():
+    for youtube_podcast in YouTubePodcast.objects.all().order_by("-id"):
         if show_hidden:
             total_episodes = youtube_podcast.youtubepodcastvideo_set.all().count()
         else:
