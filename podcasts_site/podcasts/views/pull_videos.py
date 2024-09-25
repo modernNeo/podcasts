@@ -55,7 +55,7 @@ def pull_videos(youtube_podcast):
             # are not re-downloaded
             "ignoreerrors": True,  # helpful so that if one video has an issue, the rest will still be
             # attempted to be downloaded
-            "sleep_interval_requests": 15,  # to avoid youtube trying to verify the requests are not coming
+            "sleep_interval_requests": 20,  # to avoid youtube trying to verify the requests are not coming
             # from a bot
             "playlistend": youtube_podcast.index_range,  # stop after the latest 40 videos in a playlist as
             "logger" : youtube_dlp_logger
