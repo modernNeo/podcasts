@@ -43,7 +43,7 @@ class YouTubePodcast(models.Model):
 
     @property
     def friendly_name(self):
-        return self.name.replace(':', '').replace(' ', '_').replace(',', '').replace('.', '')
+        return self.name.replace(':', '').replace(' ', '_').replace(',', '').replace('.', '').replace("/", "_")
 
     @property
     def video_file_location(self):
