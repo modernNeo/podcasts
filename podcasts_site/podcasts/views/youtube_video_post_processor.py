@@ -40,7 +40,7 @@ class YouTubeVideoPostProcessor(postprocessor.common.PostProcessor):
 
             new_file_name = (
                 f"{timestamp.strftime('%Y-%m-%d-%H-%M')}-{current_file_name}"
-            ).replace("%", "").replace(";", "")
+            ).replace("%", "").replace(";", "").replace("#", "")
             youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] new_file_name={new_file_name}")
             old_file_path = f"{full_path[:slash_indices[number_of_slashes - 1] + 1]}{current_file_name}"
             youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] old_file_path={old_file_path}")
