@@ -44,7 +44,6 @@
     {{ podcast.stats.shown }} / {{ podcast.stats.total }} Videos<br>
     {%  for video in podcast.podcast.youtubepodcastvideo_set.all|dictsortreversed:"identifier_number"|slice:":3" %}
         {% if not video.hide and not video.manually_hide %}
-            <button name="delete" value="{{ video.id }}" type="submit">Delete Video</button>
             <a href="{{video.get_location}}" target="_blank">{{ video.original_title }}</a> - <a href="{{ video.url }}" target="_blank">YouTube Link</a><br>
         {% endif %}
     {%  endfor %}
