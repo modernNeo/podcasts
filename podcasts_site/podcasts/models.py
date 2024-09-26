@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.core.files.storage import FileSystemStorage
 from django.db import models
 from django.db.models import UniqueConstraint, Q
 
@@ -81,6 +82,23 @@ class YouTubePodcastTitleSubString(models.Model):
         return f"{self.podcast.name} substring {self.title_substring}"
 
 
+class YouTubePodcastTitlePrefix(models.Model):
+    class Meta:
+        constraints = [
+            UniqueConstraint(fields=['podcast', 'priority'], name='unique_podcast_title_prefix_priority')
+        ]
+
+    title_prefix = models.CharField(max_length=1000, default=None, null=True)
+    podcast = models.ForeignKey(YouTubePodcast, on_delete=models.CASCADE)
+
+    priority = models.IntegerField(
+        default=None
+    )
+
+    def __str__(self):
+        return f"{self.podcast.name} prefix {self.title_prefix}"
+
+
 class YouTubePodcastVideo(models.Model):
     class Meta:
         constraints = [
@@ -106,6 +124,19 @@ class YouTubePodcastVideo(models.Model):
     @property
     def get_location(self):
         return f"{settings.HTTP_AND_FQDN}{settings.MEDIA_URL}{VIDEOS_FOLDER_NAME}/{self.podcast.friendly_name}/{self.filename}"
+
+    @property
+    def get_file_location(self):
+        return f'{self.podcast.video_file_location}/{self.filename}'
+
+    def delete(self, *args, **kwargs):
+        fs = FileSystemStorage()
+        fs.delete(self.get_file_location)
+        with open(self.podcast.archive_file_location, 'w') as f:
+            for video in self.podcast.youtubepodcastvideo_set.all():
+                if video.video_id != self.video_id:
+                    f.write(f"youtube {video.video_id}")
+        super(YouTubePodcastVideo, self).delete(*args, **kwargs)
 
     def __str__(self):
         return f"{self.date.pst} {self.podcast}: {self.filename}"

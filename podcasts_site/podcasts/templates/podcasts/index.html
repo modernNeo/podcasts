@@ -30,6 +30,13 @@
         <button name="action" value="Reset" type="submit">Reset</button>
     </form>
     <a href="/substrings/{{ podcast.podcast.id }}">Specify Substrings</a><br>
+    {%  for substring in youtube_podcast.youtubepodcasttitlsubstring_set.all %}
+        <p>{{ substring.title_substring }}</p>
+    {%  endfor %}
+    <a href="/prefixes/{{ podcast.podcast.id }}">Specify Prefixes</a><br>
+    {%  for prefix in youtube_podcast.youtubepodcasttitleprefix_set.all %}
+        <p>{{ prefix.title_prefix }}</p>
+    {%  endfor %}
     <a href="{{ podcast.podcast.http_feed_location }}" target="_blank">RSS Feed</a><br>
     {%  if podcast.stats.total > 0 %}
         <h2>Videos</h2>
@@ -37,6 +44,7 @@
     {{ podcast.stats.shown }} / {{ podcast.stats.total }} Videos<br>
     {%  for video in podcast.podcast.youtubepodcastvideo_set.all|dictsortreversed:"identifier_number"|slice:":3" %}
         {% if not video.hide and not video.manually_hide %}
+            <button name="delete" value="{{ video.id }}" type="submit">Delete Video</button>
             <a href="{{video.get_location}}" target="_blank">{{ video.original_title }}</a> - <a href="{{ video.url }}" target="_blank">YouTube Link</a><br>
         {% endif %}
     {%  endfor %}

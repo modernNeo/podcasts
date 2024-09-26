@@ -29,13 +29,25 @@ def pull_videos(youtube_podcast):
                 youtube_podcast.youtubepodcasttitlesubstring_set.all()
                 .values_list('title_substring', flat=True)
             )
-            if len(substrings) > 0:
-                matches_a_filter = [
+            prefixes = list(
+                youtube_podcast.youtubepodcasttitleprefix_set.all()
+                .values_list('title_prefix', flat=True)
+            )
+            if len(substrings) > 0 or len(prefixes) > 0:
+                matches_substring_filter = [
                     1
                     for substring in substrings
                     if substring in title
                 ]
-                if len(matches_a_filter) == 0:
+                matches_prefix_filter = [
+                    1 for prefix in prefixes
+                    if title[:len(prefix)] == prefix
+                ]
+                if len(matches_substring_filter) > 0:
+                    pass # keep it
+                if len(matches_prefix_filter) > 0:
+                    pass # keep it
+                else:
                     return f"{title} is not needed"
 
         # I was previously utilizing the daterange filter, but I switched to playlistend cause when daterange

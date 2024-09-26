@@ -63,6 +63,11 @@ def showing_videos(request, show_hidden):
         cron_schedule.hour = request.POST['hour']
         cron_schedule.minute = request.POST['minute']
         cron_schedule.save()
+    elif request.POST.get("delete", False):
+        video_id = request.POST['delete']
+        video = YouTubePodcastVideo.objects.all().filter(id=int(video_id)).first()
+        if video:
+            video.delete()
     podcasts = []
     for youtube_podcast in YouTubePodcast.objects.all().order_by("-id"):
         if show_hidden:

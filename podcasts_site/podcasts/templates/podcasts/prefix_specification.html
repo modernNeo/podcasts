@@ -1,0 +1,18 @@
+<a href="/">Home</a><br>
+<form method="post">
+    {%  csrf_token %}
+    <label>Prefix:</label><input type="text" name="title_prefix" required>
+    <label>Priority</label><input type="number" name="priority" required>
+    <button name="action" value="Create" type="submit">Create</button>
+</form>
+
+{%  for prefix in prefixs %}
+    <form method="post">
+    {% csrf_token %}
+    <input type="number" name="id" value="{{ prefix.id }}" hidden>
+    <label>Prefix:</label><input type="text" name="title_prefix" value="{{ prefix.title_prefix }}">
+    <label>Priority</label><input type="number" name="priority" value="{{ prefix.priority }}">
+    <button name="action" value="Update" type="submit">Update</button>
+    <button name="action" value="Delete" type="submit">Delete</button>
+    </form>
+{%  endfor %}
