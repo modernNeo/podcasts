@@ -18,6 +18,10 @@ class CronSchedule(models.Model):
     def __str__(self):
         return f"scheduler for {self.hour} hour and {self.minute} minutes"
 
+def string_cleaner(str):
+    return (str.replace(':', '').replace(' ', '_').replace(',', '').replace('.', '').replace("/", "_")
+            .replace("%", "").replace(";", "").replace("#", ""))
+
 class YouTubePodcast(models.Model):
     # class Meta:
     #     constraints = [
@@ -44,7 +48,7 @@ class YouTubePodcast(models.Model):
 
     @property
     def friendly_name(self):
-        return self.name.replace(':', '').replace(' ', '_').replace(',', '').replace('.', '').replace("/", "_")
+        return string_cleaner(self.name)
 
     @property
     def video_file_location(self):
