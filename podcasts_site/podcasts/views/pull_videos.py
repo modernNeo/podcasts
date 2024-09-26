@@ -23,7 +23,7 @@ def pull_videos(youtube_podcast):
     Path(youtube_podcast.video_file_location).mkdir(parents=True, exist_ok=True)
     with open(youtube_podcast.archive_file_location, 'w') as f:
         for video in youtube_podcast.youtubepodcastvideo_set.all():
-            f.write(f"youtube {video.video_id}")
+            f.write(f"youtube {video.video_id}\n")
     youtube_dlp_logger = Loggers.get_logger("youtube_dlp")
     try:
         def title_filter(info, *, incomplete):
