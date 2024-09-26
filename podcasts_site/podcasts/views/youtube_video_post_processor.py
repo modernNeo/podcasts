@@ -1,8 +1,10 @@
 import os
 
+import psycopg2
 from yt_dlp import postprocessor
 
-from podcasts.models import YouTubePodcast, YouTubePodcastVideo, YouTubePodcastVideoGrouping, string_cleaner
+from podcasts.models import YouTubePodcast, YouTubePodcastVideo, YouTubePodcastVideoGrouping, string_cleaner, \
+    DuplicateYouTubePodcastVideo
 from podcasts.views.get_thumbnails import get_thumbnails
 from podcasts.views.timestamps.get_timestamp import get_timestamp
 from podcasts.views.setup_logger import Loggers
@@ -25,7 +27,8 @@ class YouTubeVideoPostProcessor(postprocessor.common.PostProcessor):
             current_file_name = full_path[slash_indices[number_of_slashes - 1] + 1:]
             youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] current_file_name={current_file_name}")
             timestamp, cbc_vancouver_news_video = get_timestamp(information, current_file_name, podcast_being_processed)
-            youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] podcast.information_last_updated={podcast_being_processed.information_last_updated}")
+            youtube_dlp_logger.info(
+                f"[youtube_video_post_processor.py run()] podcast.information_last_updated={podcast_being_processed.information_last_updated}")
             youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] timestamp={timestamp}")
             thumbnail = get_thumbnails(information)
             if podcast_being_processed.information_last_updated is None or timestamp > podcast_being_processed.information_last_updated:
@@ -51,21 +54,29 @@ class YouTubeVideoPostProcessor(postprocessor.common.PostProcessor):
             release_stamp = int(timestamp.strftime('%Y-%m-%d-%H-%M').replace("-", ""))
             youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] release_stamp={release_stamp}")
             grouping_release_stamp = int(timestamp.strftime('%Y-%m-%d').replace("-", ""))
-            youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] grouping_release_stamp={grouping_release_stamp}")
+            youtube_dlp_logger.info(
+                f"[youtube_video_post_processor.py run()] grouping_release_stamp={grouping_release_stamp}")
 
-            youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] information[title]={information.get('title', None)}")
-            youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] information[description]={information.get('description', None)}")
+            youtube_dlp_logger.info(
+                f"[youtube_video_post_processor.py run()] information[title]={information.get('title', None)}")
+            youtube_dlp_logger.info(
+                f"[youtube_video_post_processor.py run()] information[description]={information.get('description', None)}")
             youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] podcast={podcast_being_processed}")
-            youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] information[original_url]={information.get('original_url', None)}")
+            youtube_dlp_logger.info(
+                f"[youtube_video_post_processor.py run()] information[original_url]={information.get('original_url', None)}")
             youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] information[thumbnail]={thumbnail}")
-            youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] information[filesize]={information.get('filesize', None)}")
-            youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] information[filesize_approx]={information.get('filesize_approx', None)}")
-            youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] information[duration]={information.get('duration', None)}")
+            youtube_dlp_logger.info(
+                f"[youtube_video_post_processor.py run()] information[filesize]={information.get('filesize', None)}")
+            youtube_dlp_logger.info(
+                f"[youtube_video_post_processor.py run()] information[filesize_approx]={information.get('filesize_approx', None)}")
+            youtube_dlp_logger.info(
+                f"[youtube_video_post_processor.py run()] information[duration]={information.get('duration', None)}")
             file_size = information.get('filesize', None)
             if not file_size:
                 file_size = information.get('filesize_approx', None)
             index_of_last_period = new_file_name.rfind('.')
-            youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] new_file_name.rfind(.)={index_of_last_period}")
+            youtube_dlp_logger.info(
+                f"[youtube_video_post_processor.py run()] new_file_name.rfind(.)={index_of_last_period}")
             if index_of_last_period != -1:
                 youtube_dlp_logger.info(
                     f"[youtube_video_post_processor.py run()] new_file_name[new_file_name.rfind(.):]="
@@ -73,20 +84,31 @@ class YouTubeVideoPostProcessor(postprocessor.common.PostProcessor):
                 )
 
             youtube_podcast_video = YouTubePodcastVideo(
-                video_id=information['id'],filename=new_file_name, original_title=information['title'],
-                description=information["description"], podcast=podcast_being_processed, date=timestamp, identifier_number=release_stamp,
-                grouping_number=grouping_release_stamp,url=information['original_url'], image=thumbnail,
-                size=file_size,extension=new_file_name[index_of_last_period:], duration=information['duration']
+                video_id=information['id'], filename=new_file_name, original_title=information['title'],
+                description=information["description"], podcast=podcast_being_processed, date=timestamp,
+                identifier_number=release_stamp,
+                grouping_number=grouping_release_stamp, url=information['original_url'], image=thumbnail,
+                size=file_size, extension=new_file_name[index_of_last_period:], duration=information['duration']
             )
-            youtube_podcast_video.save()
-            youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] {youtube_podcast_video} saved")
-
-            if cbc_vancouver_news_video:
-                youtube_podcast_video_grouping = YouTubePodcastVideoGrouping(
-                    grouping_number=grouping_release_stamp, podcast=podcast_being_processed, podcast_video=youtube_podcast_video
-                )
-                youtube_podcast_video_grouping.save()
-                youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] {youtube_podcast_video_grouping} saved")
+            try:
+                youtube_podcast_video.save()
+                youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] {youtube_podcast_video} saved")
+                if cbc_vancouver_news_video:
+                    youtube_podcast_video_grouping = YouTubePodcastVideoGrouping(
+                        grouping_number=grouping_release_stamp, podcast=podcast_being_processed,
+                        podcast_video=youtube_podcast_video
+                    )
+                    youtube_podcast_video_grouping.save()
+                    youtube_dlp_logger.info(
+                        f"[youtube_video_post_processor.py run()] {youtube_podcast_video_grouping} saved")
+            except psycopg2.errors.UniqueViolation:
+                DuplicateYouTubePodcastVideo(
+                    video_id=information['id'], filename=new_file_name, original_title=information['title'],
+                    description=information["description"], podcast=podcast_being_processed, date=timestamp,
+                    identifier_number=release_stamp,
+                    grouping_number=grouping_release_stamp, url=information['original_url'], image=thumbnail,
+                    size=file_size, extension=new_file_name[index_of_last_period:], duration=information['duration']
+                ).save()
         youtube_dlp_logger.info("######################################")
         youtube_dlp_logger.info(f"Finished Post-Processing video {full_path}")
         youtube_dlp_logger.info("######################################")

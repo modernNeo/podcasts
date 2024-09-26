@@ -111,7 +111,7 @@ class YouTubePodcastVideo(models.Model):
             UniqueConstraint(fields=['podcast', 'original_title'], name='unique_title'),
             UniqueConstraint(fields=['podcast', 'identifier_number'], name='unique_date_and_time')
         ]
-    video_id = models.CharField(max_length=1000)
+    video_id = models.CharField(max_length=1000, unique=True)
     filename = models.CharField(max_length=1000)
     original_title = models.CharField(max_length=1000)
     description = models.CharField(max_length=5000)
@@ -119,7 +119,7 @@ class YouTubePodcastVideo(models.Model):
     date = pstdatetimefield.PSTDateTimeField()
     identifier_number = models.PositiveBigIntegerField()
     grouping_number = models.IntegerField()
-    url = models.CharField(max_length=10000)
+    url = models.CharField(max_length=10000, unique=True)
     extension = models.CharField(max_length=100)
     image = models.CharField(max_length=10000, null=True)
     size = models.PositiveBigIntegerField()
@@ -151,6 +151,46 @@ class YouTubePodcastVideo(models.Model):
     def __str__(self):
         return f"{self.date.pst} {self.podcast}: {self.filename}"
 
+class DuplicateYouTubePodcastVideo(models.Model):
+    video_id = models.CharField(max_length=1000, unique=True)
+    filename = models.CharField(max_length=1000)
+    original_title = models.CharField(max_length=1000)
+    description = models.CharField(max_length=5000)
+    podcast = models.ForeignKey(YouTubePodcast, on_delete=models.CASCADE)
+    date = pstdatetimefield.PSTDateTimeField()
+    identifier_number = models.PositiveBigIntegerField()
+    grouping_number = models.IntegerField()
+    url = models.CharField(max_length=10000, unique=True)
+    extension = models.CharField(max_length=100)
+    image = models.CharField(max_length=10000, null=True)
+    size = models.PositiveBigIntegerField()
+    hide = models.BooleanField(default=False)
+    manually_hide = models.BooleanField(default=False)
+    duration = models.PositiveBigIntegerField()
+
+    @property
+    def get_location(self):
+        return f"{settings.HTTP_AND_FQDN}{settings.MEDIA_URL}{VIDEOS_FOLDER_NAME}/{self.podcast.friendly_name}/{self.filename}"
+
+    @property
+    def get_file_location(self):
+        return f'{self.podcast.video_file_location}/{self.filename}'
+
+    def delete(self, *args, **kwargs):
+        if self.is_present():
+            fs = FileSystemStorage()
+            fs.delete(self.get_file_location)
+        with open(self.podcast.archive_file_location, 'w') as f:
+            for video in self.podcast.youtubepodcastvideo_set.all():
+                if video.video_id != self.video_id:
+                    f.write(f"youtube {video.video_id}\n")
+        super(DuplicateYouTubePodcastVideo, self).delete(*args, **kwargs)
+
+    def is_present(self):
+        return os.path.exists(self.get_file_location)
+
+    def __str__(self):
+        return f"{self.date.pst} {self.podcast}: {self.filename}"
 
 
 class YouTubePodcastVideoGrouping(models.Model):

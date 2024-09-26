@@ -27,6 +27,11 @@ def pull_videos(youtube_podcast):
                 f.write(f"youtube {video.video_id}\n")
             else:
                 video.delete()
+        for video in youtube_podcast.duplicateyoutubepodcastvideo_set.all():
+            if video.is_present():
+                f.write(f"youtube {video.video_id}\n")
+            else:
+                video.delete()
     youtube_dlp_logger = Loggers.get_logger("youtube_dlp")
     try:
         def title_filter(info, *, incomplete):
