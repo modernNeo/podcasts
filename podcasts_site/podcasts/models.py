@@ -1,3 +1,5 @@
+import os.path
+
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
 from django.db import models
@@ -19,7 +21,7 @@ class CronSchedule(models.Model):
         return f"scheduler for {self.hour} hour and {self.minute} minutes"
 
 def string_cleaner(str):
-    return (str.replace(':', '').replace(' ', '_').replace(',', '').replace('.', '').replace("/", "_")
+    return (str.replace(':', '').replace(' ', '_').replace(',', '').replace("/", "_")
             .replace("%", "").replace(";", "").replace("#", ""))
 
 class YouTubePodcast(models.Model):
@@ -134,13 +136,17 @@ class YouTubePodcastVideo(models.Model):
         return f'{self.podcast.video_file_location}/{self.filename}'
 
     def delete(self, *args, **kwargs):
-        fs = FileSystemStorage()
-        fs.delete(self.get_file_location)
+        if self.is_present():
+            fs = FileSystemStorage()
+            fs.delete(self.get_file_location)
         with open(self.podcast.archive_file_location, 'w') as f:
             for video in self.podcast.youtubepodcastvideo_set.all():
                 if video.video_id != self.video_id:
                     f.write(f"youtube {video.video_id}\n")
         super(YouTubePodcastVideo, self).delete(*args, **kwargs)
+
+    def is_present(self):
+        return os.path.exists(self.get_file_location)
 
     def __str__(self):
         return f"{self.date.pst} {self.podcast}: {self.filename}"
