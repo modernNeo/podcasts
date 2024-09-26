@@ -68,6 +68,7 @@ def showing_videos(request, show_hidden):
         video = YouTubePodcastVideo.objects.all().filter(id=int(video_id)).first()
         if video:
             video.delete()
+            generate_rss_file(video.podcast)
     podcasts = []
     for youtube_podcast in YouTubePodcast.objects.all().order_by("-id"):
         if show_hidden:
