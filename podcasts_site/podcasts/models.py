@@ -139,7 +139,7 @@ class YouTubePodcastVideo(models.Model):
         with open(self.podcast.archive_file_location, 'w') as f:
             for video in self.podcast.youtubepodcastvideo_set.all():
                 if video.video_id != self.video_id:
-                    f.write(f"youtube {video.video_id}")
+                    f.write(f"youtube {video.video_id}\n")
         super(YouTubePodcastVideo, self).delete(*args, **kwargs)
 
     def __str__(self):
