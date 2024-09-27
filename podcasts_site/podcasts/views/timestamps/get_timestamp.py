@@ -14,9 +14,14 @@ def get_timestamp(information, current_file_name, podcast_being_processed):
     if cbc_vancouver_news_video:
         timestamp = get_cbc_vancouver_timestamp(current_file_name).pst
     elif the_national_video or podcast_being_processed.name == 'The National | Full Show':
+        manually_extract = not the_national_video
         if the_national_video:
-            timestamp = get_cbc_the_national_timestamp(information).pst
-        else:
+            try:
+                timestamp = get_cbc_the_national_timestamp(information).pst
+            except AttributeError:
+                manually_extract = True # some videos have the day in a format like "July 2024" in the chapter
+                # so I have to manually extract even though the chapter technically had 'The National' in it
+        if manually_extract:
             video_timestamp = pstdatetime.from_epoch(int(information['timestamp']))
             if video_timestamp.hour < 3: # decided that if a video is uploaded in the first 3 hours of  day, to assume
                 # it was from the previous day
