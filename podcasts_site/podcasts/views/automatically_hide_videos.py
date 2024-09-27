@@ -17,7 +17,7 @@ def automatically_hide_videos(youtube_podcast):
         podcast__name=youtube_podcast.name,
         youtubepodcastvideogrouping__grouping_number__in=date_number_with_multiple_occurrences
     )
-    substrings = youtube_podcast.youtubepodcasttitlesubstring_set.all().order_by('priority')
+    prefixes = youtube_podcast.youtubepodcasttitleprefix_set.all().order_by('priority')
     ids_of_videos_to_hide = []
     for date_number_with_multiple_occurrence in date_number_with_multiple_occurrences:
         videos_on_same_day = {
@@ -25,11 +25,11 @@ def automatically_hide_videos(youtube_podcast):
         }
         video_ids = [video.id for video in list(videos_on_same_day.values())]
         delete_rest_of_videos = False
-        for substring in substrings:
+        for prefix in prefixes:
             if delete_rest_of_videos:
                 break
             for video_title_on_same_day in videos_on_same_day.keys():
-                if not delete_rest_of_videos and substring.title_substring in video_title_on_same_day:
+                if not delete_rest_of_videos and video_title_on_same_day[:len(prefix.title_prefix)] == prefix.title_prefix:
                     video_ids.remove(videos_on_same_day[video_title_on_same_day].id)
                     delete_rest_of_videos = True
         ids_of_videos_to_hide.extend(video_ids)
