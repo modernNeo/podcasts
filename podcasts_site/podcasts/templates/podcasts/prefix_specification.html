@@ -6,7 +6,7 @@
     <button name="action" value="Create" type="submit">Create</button>
 </form>
 
-{%  for prefix in prefixs %}
+{%  for prefix in prefixes %}
     <form method="post">
     {% csrf_token %}
     <input type="number" name="id" value="{{ prefix.id }}" hidden>

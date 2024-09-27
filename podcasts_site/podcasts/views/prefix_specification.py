@@ -29,6 +29,6 @@ def index(request, podcast_id):
     template = loader.get_template("podcasts/prefix_specification.html")
     context = {
         "youtube_podcast" : youtube_podcast,
-        "prefixs" : youtube_podcast.youtubepodcasttitleprefix_set.all().order_by('priority')
+        "prefixes" : youtube_podcast.youtubepodcasttitleprefix_set.all().order_by('priority')
     }
     return HttpResponse(template.render(context, request))
