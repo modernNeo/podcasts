@@ -101,7 +101,8 @@ class YouTubeVideoPostProcessor(postprocessor.common.PostProcessor):
                     youtube_podcast_video_grouping.save()
                     youtube_dlp_logger.info(
                         f"[youtube_video_post_processor.py run()] {youtube_podcast_video_grouping} saved")
-            except IntegrityError:
+            except IntegrityError as e:
+                youtube_dlp_logger.error(f"[youtube_video_post_processor.py run()]  integrity error of {e} with {full_path}")
                 DuplicateYouTubePodcastVideo(
                     video_id=information['id'], filename=new_file_name, original_title=information['title'],
                     description=information["description"], podcast=podcast_being_processed, date=timestamp,
