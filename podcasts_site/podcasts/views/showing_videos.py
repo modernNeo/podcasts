@@ -36,6 +36,8 @@ def showing_videos(request, show_hidden):
             podcast.being_processed = False
             for video in podcast.youtubepodcastvideo_set.all():
                 video.delete()
+            for video in podcast.duplicateyoutubepodcastvideo_set.all():
+                video.delete()
             podcast.save()
             try:
                 shutil.rmtree(podcast.video_file_location)
