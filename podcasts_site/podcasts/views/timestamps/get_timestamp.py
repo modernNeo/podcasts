@@ -11,6 +11,7 @@ def get_timestamp(information, current_file_name, podcast_being_processed):
     youtube_dlp_logger = Loggers.get_logger("youtube_dlp")
     cbc_vancouver_news_video = is_cbc_vancouver_video(current_file_name)
     the_national_video = video_has_national_in_first_chapter(information)
+    news_videos = cbc_vancouver_news_video or the_national_video
     if cbc_vancouver_news_video:
         timestamp = get_cbc_vancouver_timestamp(current_file_name).pst
     elif the_national_video or podcast_being_processed.name == 'The National | Full Show':
@@ -45,4 +46,4 @@ def get_timestamp(information, current_file_name, podcast_being_processed):
         timestamp = pstdatetime.from_epoch(
             information['release_timestamp'] if information['release_timestamp'] else information['timestamp']
         ).pst
-    return timestamp, cbc_vancouver_news_video
+    return timestamp, cbc_vancouver_news_video, news_videos

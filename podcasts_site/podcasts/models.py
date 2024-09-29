@@ -111,11 +111,11 @@ class YouTubePodcastTitlePrefix(models.Model):
 
 
 class YouTubePodcastVideo(models.Model):
-    class Meta:
-        constraints = [
-            UniqueConstraint(fields=['podcast', 'original_title'], name='unique_title'),
-            UniqueConstraint(fields=['podcast', 'identifier_number'], name='unique_date_and_time')
-        ]
+    # class Meta:
+    #     constraints = [
+    #         UniqueConstraint(fields=['podcast', 'original_title'], name='unique_title'),
+            # UniqueConstraint(fields=['podcast', 'identifier_number'], name='unique_date_and_time')
+        # ]
     video_id = models.CharField(max_length=1000, unique=True)
     filename = models.CharField(max_length=1000)
     original_title = models.CharField(max_length=1000)
