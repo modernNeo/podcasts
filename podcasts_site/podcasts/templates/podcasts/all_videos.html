@@ -17,6 +17,9 @@
 {%  for podcast in podcasts %}
     <form method="post">
         {% csrf_token %}
+        {% if podcast.podcast.image %}
+            <img src="{{ podcast.podcast.image }}" width="200">
+        {%  endif %}
         <h1>{{ podcast.podcast }}</h1>
         <input type="number" name="id" value="{{ podcast.podcast.id }}" hidden>
         <label>Name:</label><input type="text" name="name" value="{{ podcast.podcast.frontend_name }}">
