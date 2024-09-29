@@ -148,6 +148,10 @@ class YouTubePodcastVideo(models.Model):
     def is_present(self):
         return os.path.exists(self.get_file_location)
 
+    @property
+    def is_duplicate(self):
+        return False
+
     def __str__(self):
         return f"{self.date.pst} {self.podcast}: {self.original_title}"
 
@@ -167,6 +171,10 @@ class DuplicateYouTubePodcastVideo(models.Model):
     hide = models.BooleanField(default=False)
     manually_hide = models.BooleanField(default=False)
     duration = models.PositiveBigIntegerField()
+
+    @property
+    def is_duplicate(self):
+        return True
 
     @property
     def get_location(self):

@@ -44,7 +44,11 @@
         <form method="post">
         {% csrf_token %}
         <input type="number" name="video_id" value="{{ video.id }}" hidden>
-        <button name="action" value="delete_video" type="submit">Delete Video</button>
+        {%  if video.is_duplicate %}
+            <button name="action" value="delete_duplicate_video" type="submit">Delete Video</button>
+        {%  else %}
+            <button name="action" value="delete_video" type="submit">Delete Video</button>
+        {%  endif %}
         <a href="{{video.get_location}}" target="_blank">{{ video }}</a> - <a href="{{ video.url }}" target="_blank">YouTube Link</a>
         {% if video.hide %}
             <label>Automatically Hidden</label>
