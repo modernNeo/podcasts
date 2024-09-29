@@ -17,7 +17,7 @@
 {%  for podcast in podcasts %}
     <form method="post">
         {% csrf_token %}
-        <img src="{{ podcast.url }}">
+        <img src="{{ podcast.podcast.url }}">
         <h1>{{ podcast.podcast }}</h1>
         {%  if podcast.podcast.being_processed %}
             <b>Being Processed</b>
