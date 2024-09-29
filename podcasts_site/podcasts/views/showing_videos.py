@@ -47,7 +47,7 @@ def showing_videos(request, show_hidden):
         cron_schedule.save()
     podcasts = []
     for youtube_podcast in YouTubePodcast.objects.all().order_by("-id"):
-        videos = youtube_podcast.youtubepodcastvideo_set.all()
+        videos = list(youtube_podcast.youtubepodcastvideo_set.all())
         videos.extend(youtube_podcast.duplicateyoutubepodcastvideo_set.all())
         videos.sort(key=lambda x: x.identifier_number, reverse=True)
         if show_hidden:
