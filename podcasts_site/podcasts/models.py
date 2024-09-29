@@ -190,7 +190,7 @@ class DuplicateYouTubePodcastVideo(models.Model):
         return os.path.exists(self.get_file_location)
 
     def __str__(self):
-        return f"{self.date.pst} {self.podcast}: {self.filename}"
+        return f"[DUPLICATE] {self.date.pst} {self.podcast}: {self.filename}"
 
 
 class YouTubePodcastVideoGrouping(models.Model):
