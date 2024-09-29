@@ -149,7 +149,7 @@ class YouTubePodcastVideo(models.Model):
         return os.path.exists(self.get_file_location)
 
     def __str__(self):
-        return f"{self.date.pst} {self.podcast}: {self.filename}"
+        return f"{self.date.pst} {self.podcast}: {self.original_title}"
 
 class DuplicateYouTubePodcastVideo(models.Model):
     video_id = models.CharField(max_length=1000, unique=True)
@@ -190,7 +190,7 @@ class DuplicateYouTubePodcastVideo(models.Model):
         return os.path.exists(self.get_file_location)
 
     def __str__(self):
-        return f"[DUPLICATE] {self.date.pst} {self.podcast}: {self.filename}"
+        return f"[DUPLICATE] {self.date.pst} {self.podcast}: {self.original_title}"
 
 
 class YouTubePodcastVideoGrouping(models.Model):

@@ -49,7 +49,7 @@
                 {%  csrf_token %}
                 <input type="number" name="video_id" value="{{ video.id }}" hidden>
                 <button name="action" value="delete_video" type="submit">Delete Video</button>
-                <a href="{{video.get_location}}" target="_blank">{{ video.original_title }}</a> - <a href="{{ video.url }}" target="_blank">YouTube Link</a><br>
+                <a href="{{video.get_location}}" target="_blank">{{ video }}</a> - <a href="{{ video.url }}" target="_blank">YouTube Link</a><br>
                 <br>
             </form>
         {% endif %}
