@@ -24,6 +24,8 @@
         <label>When To Pull: </label><input type="time" name="when_to_pull" value="{{ podcast.podcast.front_end_when_to_pull }}" required><br><br>
         <label>Description</label>{{ podcast.podcast.description|safe|linebreaks }}
         <button name="action" value="Update" type="submit">Update</button>
+        <button name="action" value="Reset" type="submit">Reset</button>
+        <button name="action" value="Delete" type="submit">Delete</button>
     </form>
     <a href="/substrings/{{ podcast.podcast.id }}">Specify Substrings</a><br>
     {%  for substring in youtube_podcast.youtubepodcasttitlsubstring_set.all %}
@@ -38,7 +40,7 @@
         <h2>Videos</h2>
     {%  endif %}
     {{ podcast.stats.shown }} / {{ podcast.stats.total }} Videos<br>
-    {%  for video in podcast.podcast.youtubepodcastvideo_set.all|dictsortreversed:"identifier_number" %}
+    {%  for video in videos %}
         <form method="post">
         {% csrf_token %}
         <input type="number" name="video_id" value="{{ video.id }}" hidden>

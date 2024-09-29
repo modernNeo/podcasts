@@ -3,6 +3,7 @@ from pathlib import Path
 from django.conf import settings
 
 from podcasts.models import YouTubePodcast, RSS_FEED_FOLDER_NAME, ARCHIVE_FOLDER_NAME, YouTubeDLPError
+from podcasts.views.email_errors import email_errors
 from podcasts.views.pull_videos import pull_videos
 
 
@@ -15,3 +16,4 @@ def pull_latest_youtube_videos():
     YouTubeDLPError.objects.all().delete()
     for youtube_podcast in youtube_podcasts:
         pull_videos(youtube_podcast)
+    email_errors()

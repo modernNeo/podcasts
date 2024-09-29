@@ -28,6 +28,7 @@
         <label>Description</label>{{ podcast.podcast.description|safe|linebreaks }}
         <button name="action" value="Update" type="submit">Update</button>
         <button name="action" value="Reset" type="submit">Reset</button>
+        <button name="action" value="Delete" type="submit">Delete</button>
     </form>
     <a href="/substrings/{{ podcast.podcast.id }}">Specify Substrings</a><br>
     {%  for substring in podcast.podcast.youtubepodcasttitlesubstring_set.all %}
@@ -42,9 +43,15 @@
         <h2>Videos</h2>
     {%  endif %}
     {{ podcast.stats.shown }} / {{ podcast.stats.total }} Videos<br>
-    {%  for video in podcast.podcast.youtubepodcastvideo_set.all|dictsortreversed:"identifier_number"|slice:":3" %}
+    {%  for video in videos|slice:":3" %}
         {% if not video.hide and not video.manually_hide %}
-            <a href="{{video.get_location}}" target="_blank">{{ video.original_title }}</a> - <a href="{{ video.url }}" target="_blank">YouTube Link</a><br>
+            <form method="post">
+                {%  csrf_token %}
+                <input type="number" name="video_id" value="{{ video.id }}" hidden>
+                <button name="action" value="delete_video" type="submit">Delete Video</button>
+                <a href="{{video.get_location}}" target="_blank">{{ video.original_title }}</a> - <a href="{{ video.url }}" target="_blank">YouTube Link</a><br>
+                <br>
+            </form>
         {% endif %}
     {%  endfor %}
     <br><br>

@@ -1,11 +1,8 @@
-import os
-import shutil
-
-from django.conf import settings
 from django.db.models import Q
 
-from podcasts.models import YouTubePodcast, YouTubePodcastVideo, VIDEOS_FOLDER_NAME, ARCHIVE_FOLDER_NAME, CronSchedule
+from podcasts.models import YouTubePodcast, YouTubePodcastVideo, CronSchedule
 from podcasts.views.generate_rss_file import generate_rss_file
+from podcasts.views.reset_podcast import reset_podcast
 
 
 def showing_videos(request, show_hidden):
@@ -24,6 +21,16 @@ def showing_videos(request, show_hidden):
             podcast.index_range = None if len(index_range) == 0 else index_range
             podcast.when_to_pull = request.POST['when_to_pull']
             podcast.save()
+    elif request.POST.get("action", False) == 'Delete':
+        podcast = YouTubePodcast.objects.all().filter(id=int(request.POST['id'])).first()
+        if podcast:
+            podcast.delete()
+    elif request.POST.get("action", False) == 'delete_video':
+        video = YouTubePodcastVideo.objects.all().filter(id=int(request.POST['video_id'])).first()
+        if video:
+            video.delete()
+            generate_rss_file(video.podcast)
+
     elif request.POST.get("action", False) == "Unhide" or request.POST.get("action", False) == "Hide":
         youtube_video = YouTubePodcastVideo.objects.all().filter(id=int(request.POST['video_id'])).first()
         if youtube_video:
@@ -31,56 +38,31 @@ def showing_videos(request, show_hidden):
             youtube_video.save()
             generate_rss_file(youtube_video.podcast)
     elif request.POST.get("action", False) == "Reset":
-        podcast = YouTubePodcast.objects.all().filter(id=int(request.POST['id'])).first()
-        if podcast:
-            podcast.being_processed = False
-            for video in podcast.youtubepodcastvideo_set.all():
-                video.delete()
-            for video in podcast.duplicateyoutubepodcastvideo_set.all():
-                video.delete()
-            podcast.save()
-            try:
-                shutil.rmtree(podcast.video_file_location)
-            except FileNotFoundError:
-                pass
-            try:
-                shutil.rmtree(f"{settings.MEDIA_ROOT}/{VIDEOS_FOLDER_NAME}/temp")
-            except FileNotFoundError:
-                pass
-            try:
-                os.remove(podcast.archive_file_location)
-            except (FileNotFoundError, IsADirectoryError):
-                pass
-            try:
-                os.remove(f"{settings.MEDIA_ROOT}/{ARCHIVE_FOLDER_NAME}/temp")
-            except FileNotFoundError:
-                pass
-            try:
-                os.remove(podcast.feed_file_location)
-            except FileNotFoundError:
-                pass
+        reset_podcast(request.POST['id'])
     elif request.POST.get("action", False) == "update_cron":
         if cron_schedule is None:
             cron_schedule = CronSchedule()
         cron_schedule.hour = request.POST['hour']
         cron_schedule.minute = request.POST['minute']
         cron_schedule.save()
-    elif request.POST.get("delete", False):
-        video_id = request.POST['delete']
-        video = YouTubePodcastVideo.objects.all().filter(id=int(video_id)).first()
-        if video:
-            video.delete()
-            generate_rss_file(video.podcast)
     podcasts = []
     for youtube_podcast in YouTubePodcast.objects.all().order_by("-id"):
+        videos = youtube_podcast.youtubepodcastvideo_set.all()
+        videos.extend(youtube_podcast.duplicateyoutubepodcastvideo_set.all())
+        videos.sort(key=lambda x: x.identifier_number, reverse=True)
         if show_hidden:
             total_episodes = youtube_podcast.youtubepodcastvideo_set.all().count()
+            total_episodes += youtube_podcast.duplicateyoutubepodcastvideo_set.all().count()
         else:
             total_episodes = youtube_podcast.youtubepodcastvideo_set.all().exclude(
                 Q(hide=True) | Q(manually_hide=True)
             ).count()
+            total_episodes += youtube_podcast.duplicateyoutubepodcastvideo_set.all().exclude(
+                Q(hide=True) | Q(manually_hide=True)
+            ).count()
         podcasts.append({
             "podcast" : youtube_podcast,
+            "videos" : videos,
             "stats" : {
                 "shown" : total_episodes if total_episodes <= 3 else 3,
                 "total" : total_episodes
