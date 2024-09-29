@@ -1,6 +1,7 @@
 from django.db.models import Q
 
 from podcasts.models import YouTubePodcast, YouTubePodcastVideo, CronSchedule, DuplicateYouTubePodcastVideo
+from podcasts.views.delete_podcast import delete_podcast
 from podcasts.views.generate_rss_file import generate_rss_file
 from podcasts.views.reset_podcast import reset_podcast
 
@@ -23,9 +24,9 @@ def showing_videos(request, show_hidden):
             podcast.custom_name = request.POST['name'] if request.POST['name'] != podcast.name else None
             podcast.save()
     elif request.POST.get("action", False) == 'Delete':
-        podcast = YouTubePodcast.objects.all().filter(id=int(request.POST['id'])).first()
-        if podcast:
-            podcast.delete()
+        delete_podcast(request.POST['id'])
+    elif request.POST.get("action", False) == "Reset":
+        reset_podcast(request.POST['id'])
     elif request.POST.get("action", False) == 'delete_video':
         video = YouTubePodcastVideo.objects.all().filter(id=int(request.POST['video_id'])).first()
         if video:
@@ -41,8 +42,6 @@ def showing_videos(request, show_hidden):
             youtube_video.manually_hide = request.POST.get("action", False) == "Hide"
             youtube_video.save()
             generate_rss_file(youtube_video.podcast)
-    elif request.POST.get("action", False) == "Reset":
-        reset_podcast(request.POST['id'])
     elif request.POST.get("action", False) == "update_cron":
         if cron_schedule is None:
             cron_schedule = CronSchedule()
