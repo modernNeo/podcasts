@@ -31,6 +31,7 @@ class YouTubePodcast(models.Model):
     #     ]
 
     name = models.CharField(max_length=1000)
+    custom_name = models.CharField(max_length=1000, null=True)
     description = models.CharField(max_length=5000)
     image = models.CharField(max_length=10000, null=True)
     language = models.CharField(max_length=5)
@@ -49,27 +50,31 @@ class YouTubePodcast(models.Model):
         return self.when_to_pull.strftime("%H:%M:%S")
 
     @property
-    def friendly_name(self):
-        return string_cleaner(self.name)
+    def frontend_name(self):
+        return self.name if self.custom_name is None else self.custom_name
+
+    @property
+    def url_friendly_name(self):
+        return string_cleaner(self.name) if self.custom_name is None else string_cleaner(self.custom_name)
 
     @property
     def video_file_location(self):
-        return f"{settings.MEDIA_ROOT}/{VIDEOS_FOLDER_NAME}/{self.friendly_name}"
+        return f"{settings.MEDIA_ROOT}/{VIDEOS_FOLDER_NAME}/{self.url_friendly_name}"
 
     @property
     def archive_file_location(self):
-        return f"{settings.MEDIA_ROOT}/{ARCHIVE_FOLDER_NAME}/{self.friendly_name}"
+        return f"{settings.MEDIA_ROOT}/{ARCHIVE_FOLDER_NAME}/{self.url_friendly_name}"
 
     @property
     def feed_file_location(self):
-        return f"{settings.MEDIA_ROOT}/{RSS_FEED_FOLDER_NAME}/{self.friendly_name}.xml"
+        return f"{settings.MEDIA_ROOT}/{RSS_FEED_FOLDER_NAME}/{self.url_friendly_name}.xml"
 
     @property
     def http_feed_location(self):
-        return f"{settings.HTTP_AND_FQDN}{settings.MEDIA_URL}{RSS_FEED_FOLDER_NAME}/{self.friendly_name}.xml"
+        return f"{settings.HTTP_AND_FQDN}{settings.MEDIA_URL}{RSS_FEED_FOLDER_NAME}/{self.url_friendly_name}.xml"
 
     def __str__(self):
-        return self.name
+        return self.name if self.custom_name is None else self.custom_name
 
 class YouTubePodcastTitleSubString(models.Model):
     class Meta:
@@ -85,7 +90,7 @@ class YouTubePodcastTitleSubString(models.Model):
     )
 
     def __str__(self):
-        return f"{self.podcast.name} substring {self.title_substring}"
+        return f"{self.podcast.frontend_name} substring {self.title_substring}"
 
 
 class YouTubePodcastTitlePrefix(models.Model):
@@ -102,7 +107,7 @@ class YouTubePodcastTitlePrefix(models.Model):
     )
 
     def __str__(self):
-        return f"{self.podcast.name} prefix {self.title_prefix}"
+        return f"{self.podcast.frontend_name} prefix {self.title_prefix}"
 
 
 class YouTubePodcastVideo(models.Model):
@@ -129,7 +134,7 @@ class YouTubePodcastVideo(models.Model):
 
     @property
     def get_location(self):
-        return f"{settings.HTTP_AND_FQDN}{settings.MEDIA_URL}{VIDEOS_FOLDER_NAME}/{self.podcast.friendly_name}/{self.filename}"
+        return f"{settings.HTTP_AND_FQDN}{settings.MEDIA_URL}{VIDEOS_FOLDER_NAME}/{self.podcast.url_friendly_name}/{self.filename}"
 
     @property
     def get_file_location(self):
@@ -178,7 +183,7 @@ class DuplicateYouTubePodcastVideo(models.Model):
 
     @property
     def get_location(self):
-        return f"{settings.HTTP_AND_FQDN}{settings.MEDIA_URL}{VIDEOS_FOLDER_NAME}/{self.podcast.friendly_name}/{self.filename}"
+        return f"{settings.HTTP_AND_FQDN}{settings.MEDIA_URL}{VIDEOS_FOLDER_NAME}/{self.podcast.url_friendly_name}/{self.filename}"
 
     @property
     def get_file_location(self):
@@ -207,7 +212,7 @@ class YouTubePodcastVideoGrouping(models.Model):
     podcast_video = models.ForeignKey(YouTubePodcastVideo, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"{self.grouping_number} grouping for {self.podcast.name}"
+        return f"{self.grouping_number} grouping for {self.podcast.frontend_name}"
 
 
 class YouTubeDLPError(models.Model):

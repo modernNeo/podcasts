@@ -20,6 +20,7 @@ def showing_videos(request, show_hidden):
             podcast.url = request.POST['url']
             podcast.index_range = None if len(index_range) == 0 else index_range
             podcast.when_to_pull = request.POST['when_to_pull']
+            podcast.custom_name = request.POST['name'] if request.POST['name'] != podcast.name else None
             podcast.save()
     elif request.POST.get("action", False) == 'Delete':
         podcast = YouTubePodcast.objects.all().filter(id=int(request.POST['id'])).first()
