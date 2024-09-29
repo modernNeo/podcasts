@@ -43,7 +43,7 @@
         <h2>Videos</h2>
     {%  endif %}
     {{ podcast.stats.shown }} / {{ podcast.stats.total }} Videos<br>
-    {%  for video in videos|slice:":3" %}
+    {%  for video in podcast.videos|slice:":3" %}
         {% if not video.hide and not video.manually_hide %}
             <form method="post">
                 {%  csrf_token %}

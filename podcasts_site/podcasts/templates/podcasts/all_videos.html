@@ -40,7 +40,7 @@
         <h2>Videos</h2>
     {%  endif %}
     {{ podcast.stats.shown }} / {{ podcast.stats.total }} Videos<br>
-    {%  for video in videos %}
+    {%  for video in podcast.videos %}
         <form method="post">
         {% csrf_token %}
         <input type="number" name="video_id" value="{{ video.id }}" hidden>
