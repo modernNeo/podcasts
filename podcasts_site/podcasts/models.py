@@ -44,6 +44,8 @@ class YouTubePodcast(models.Model):
     information_last_updated = pstdatetimefield.PSTDateTimeField(
         null=True
     )
+    unique_constraint = models.BooleanField(default=False)
+
 
     @property
     def front_end_when_to_pull(self):
@@ -113,9 +115,15 @@ class YouTubePodcastTitlePrefix(models.Model):
 class YouTubePodcastVideo(models.Model):
     # class Meta:
     #     constraints = [
-    #         UniqueConstraint(fields=['podcast', 'original_title'], name='unique_title'),
-            # UniqueConstraint(fields=['podcast', 'identifier_number'], name='unique_date_and_time')
-        # ]
+    #         UniqueConstraint(
+    #             fields=['podcast', 'original_title'], name='unique_title',
+    #             condition=Q(podcast__unique_constraint=True)
+    #         ),
+    #         UniqueConstraint(
+    #             fields=['podcast', 'identifier_number'], name='unique_date_and_time',
+    #             condition=Q(podcast__unique_constraint=True)
+    #         )
+    #     ]
     video_id = models.CharField(max_length=1000, unique=True)
     filename = models.CharField(max_length=1000)
     original_title = models.CharField(max_length=1000)
