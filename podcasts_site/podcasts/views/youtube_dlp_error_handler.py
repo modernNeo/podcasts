@@ -18,10 +18,10 @@ class YoutubeDLPErrorHandler(logging.StreamHandler):
         request = str(record.__dict__)
         try:
             from podcasts.models import YouTubeDLPError
-            if len(YouTubeDLPError.objects.all().filter(message=message).exclude(fixed=True)) == 0:
-                YouTubeDLPError(
-                    error_file_path=self.error_file_name, warn_file_path=self.warn_file_name,
-                    debug_file_path=self.debug_file_name, message=message, request=request).save()
+            # if len(YouTubeDLPError.objects.all().filter(message=message).exclude(fixed=True)) == 0:
+            YouTubeDLPError(
+                error_file_path=self.error_file_name, warn_file_path=self.warn_file_name,
+                debug_file_path=self.debug_file_name, message=message, request=request).save()
         except AppRegistryNotReady:
             pass
         except Exception as e:
