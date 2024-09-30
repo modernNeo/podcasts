@@ -165,6 +165,10 @@ class YouTubePodcastVideo(models.Model):
     def is_duplicate(self):
         return False
 
+    @property
+    def front_end_name(self):
+        return f'{self.date.pst.strftime("%a %Y-%b %d %I:%M %P %Z")} - {self.original_title}'
+
     def __str__(self):
         return f"{self.date.pst} {self.podcast}: {self.original_title}"
 
