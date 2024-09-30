@@ -82,15 +82,34 @@ class YouTubeVideoPostProcessor(postprocessor.common.PostProcessor):
                     f"[youtube_video_post_processor.py run()] new_file_name[new_file_name.rfind(.):]="
                     f"{new_file_name[index_of_last_period:]}"
                 )
-
-            youtube_podcast_video = YouTubePodcastVideo(
-                video_id=information['id'], filename=new_file_name, original_title=information['title'],
-                description=information["description"], podcast=podcast_being_processed, date=timestamp,
-                identifier_number=release_stamp,
-                grouping_number=grouping_release_stamp, url=information['original_url'], image=thumbnail,
-                size=file_size, extension=new_file_name[index_of_last_period:], duration=information['duration'],
-            )
-            try:
+            non_unique_title = YouTubePodcastVideo.objects.all().filter(
+                podcast=podcast_being_processed, original_title=information['title']
+            ).count() > 0
+            non_unique_identifier_number = YouTubePodcastVideo.objects.all().filter(
+                podcast=podcast_being_processed, original_title=information['identifier_number']
+            ).count() > 0
+            if (non_unique_title or non_unique_identifier_number) and podcast_being_processed.unique_constraint:
+                youtube_dlp_logger.error(
+                    f"[youtube_video_post_processor.py run()]  non-unique video with {full_path}")
+                duplicate_youtube_podcast_video = DuplicateYouTubePodcastVideo(
+                    video_id=information['id'], filename=new_file_name, original_title=information['title'],
+                    description=information["description"], podcast=podcast_being_processed, date=timestamp,
+                    identifier_number=release_stamp,
+                    grouping_number=grouping_release_stamp, url=information['original_url'], image=thumbnail,
+                    size=file_size, extension=new_file_name[index_of_last_period:], duration=information['duration']
+                )
+                duplicate_youtube_podcast_video.save()
+                youtube_dlp_logger.info(
+                    f"[youtube_video_post_processor.py run()] {duplicate_youtube_podcast_video} saved"
+                )
+            else:
+                youtube_podcast_video = YouTubePodcastVideo(
+                    video_id=information['id'], filename=new_file_name, original_title=information['title'],
+                    description=information["description"], podcast=podcast_being_processed, date=timestamp,
+                    identifier_number=release_stamp,
+                    grouping_number=grouping_release_stamp, url=information['original_url'], image=thumbnail,
+                    size=file_size, extension=new_file_name[index_of_last_period:], duration=information['duration'],
+                )
                 youtube_podcast_video.save()
                 youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] {youtube_podcast_video} saved")
                 if cbc_vancouver_news_video:
@@ -101,23 +120,6 @@ class YouTubeVideoPostProcessor(postprocessor.common.PostProcessor):
                     youtube_podcast_video_grouping.save()
                     youtube_dlp_logger.info(
                         f"[youtube_video_post_processor.py run()] {youtube_podcast_video_grouping} saved")
-            except IntegrityError as e:
-                if not podcast_being_processed.unique_contraint:
-                    raise e
-                if podcast_being_processed.unique_constraint:
-                    youtube_dlp_logger.error(
-                        f"[youtube_video_post_processor.py run()]  integrity error of {e} with {full_path}")
-                    duplicate_youtube_podcast_video = DuplicateYouTubePodcastVideo(
-                        video_id=information['id'], filename=new_file_name, original_title=information['title'],
-                        description=information["description"], podcast=podcast_being_processed, date=timestamp,
-                        identifier_number=release_stamp,
-                        grouping_number=grouping_release_stamp, url=information['original_url'], image=thumbnail,
-                        size=file_size, extension=new_file_name[index_of_last_period:], duration=information['duration']
-                    )
-                    duplicate_youtube_podcast_video.save()
-                    youtube_dlp_logger.info(
-                        f"[youtube_video_post_processor.py run()] {duplicate_youtube_podcast_video} saved"
-                    )
         youtube_dlp_logger.info("######################################")
         youtube_dlp_logger.info(f"Finished Post-Processing video {full_path}")
         youtube_dlp_logger.info("######################################")
