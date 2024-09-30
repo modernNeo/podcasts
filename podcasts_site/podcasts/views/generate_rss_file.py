@@ -11,7 +11,7 @@ def generate_rss_file(youtube_podcast):
     except ValueError:
         pass
     p = Podcast(
-        name=youtube_podcast.name,
+        name=youtube_podcast.frontend_name,
         description=youtube_podcast.description,
         image=youtube_podcast.image,
         website=youtube_podcast.url,
