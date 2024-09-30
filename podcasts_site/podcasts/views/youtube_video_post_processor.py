@@ -86,7 +86,7 @@ class YouTubeVideoPostProcessor(postprocessor.common.PostProcessor):
                 podcast=podcast_being_processed, original_title=information['title']
             ).count() > 0
             non_unique_identifier_number = YouTubePodcastVideo.objects.all().filter(
-                podcast=podcast_being_processed, original_title=information['identifier_number']
+                podcast=podcast_being_processed, identifier_number=release_stamp
             ).count() > 0
             if (non_unique_title or non_unique_identifier_number) and podcast_being_processed.unique_constraint:
                 youtube_dlp_logger.error(
