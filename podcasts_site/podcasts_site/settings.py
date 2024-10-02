@@ -145,7 +145,8 @@ AUTH_PASSWORD_VALIDATORS = [
 CBC_NEWS_TITLE_DATE_NORMALIZER = {
     "Sept.": "Sep",
     "Aug." : "Aug",
-    "Sep." : "Sep"
+    "Sep." : "Sep",
+    "Oct." : "Oct"
 }
 THE_NATIONAL_DATE_FORMAT = ["%B %d, %Y", "%b %d, %Y"]
 THE_NATIONAL_CHAPTER_PREFIX = 'The National for '
