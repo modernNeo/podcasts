@@ -1,6 +1,6 @@
 from django.db.models import Q
 
-from podcasts.models import YouTubePodcast, YouTubePodcastVideo, CronSchedule, DuplicateYouTubePodcastVideo
+from podcasts.models import YouTubePodcast, CronSchedule, DuplicatePodcastVideo, PodcastVideo
 from podcasts.views.delete_podcast import delete_podcast
 from podcasts.views.generate_rss_file import generate_rss_file
 from podcasts.views.reset_podcast import reset_podcast
@@ -24,23 +24,23 @@ def showing_videos(request, show_hidden):
             podcast.custom_name = request.POST['name'] \
                 if (request.POST['name'] != podcast.name and request.POST['name'].strip() != '' ) \
                 else None
-            podcast.unique_constraint = request.POST.get('unique_constraint', False) == 'on'
+            podcast.cbc_news = request.POST.get('cbc_news', False) == 'on'
             podcast.save()
     elif request.POST.get("action", False) == 'Delete':
         delete_podcast(request.POST['id'])
     elif request.POST.get("action", False) == "Reset":
         reset_podcast(request.POST['id'])
     elif request.POST.get("action", False) == 'delete_video':
-        video = YouTubePodcastVideo.objects.all().filter(id=int(request.POST['video_id'])).first()
+        video = PodcastVideo.objects.all().filter(id=int(request.POST['video_id'])).first()
         if video:
             video.delete()
             generate_rss_file(video.podcast)
     elif request.POST.get("action", False) == 'delete_duplicate_video':
-        video = DuplicateYouTubePodcastVideo.objects.all().filter(id=int(request.POST['video_id'])).first()
+        video = DuplicatePodcastVideo.objects.all().filter(id=int(request.POST['video_id'])).first()
         if video:
             video.delete()
     elif request.POST.get("action", False) == "Unhide" or request.POST.get("action", False) == "Hide":
-        youtube_video = YouTubePodcastVideo.objects.all().filter(id=int(request.POST['video_id'])).first()
+        youtube_video = PodcastVideo.objects.all().filter(id=int(request.POST['video_id'])).first()
         if youtube_video:
             youtube_video.manually_hide = request.POST.get("action", False) == "Hide"
             youtube_video.save()
@@ -53,19 +53,30 @@ def showing_videos(request, show_hidden):
         cron_schedule.save()
     podcasts = []
     for youtube_podcast in YouTubePodcast.objects.all().order_by("-id"):
-        videos = list(youtube_podcast.youtubepodcastvideo_set.all())
-        videos.extend(youtube_podcast.duplicateyoutubepodcastvideo_set.all())
+        if youtube_podcast.cbc_news:
+            videos = list(youtube_podcast.cbcnewspodcastvideo_set.all())
+            videos.extend(youtube_podcast.duplicatepodcastvideo_set.all())
+        else:
+            videos = list(youtube_podcast.podcastvideo_set.all())
         videos.sort(key=lambda x: x.identifier_number, reverse=True)
         if show_hidden:
-            total_episodes = youtube_podcast.youtubepodcastvideo_set.all().count()
-            total_episodes += youtube_podcast.duplicateyoutubepodcastvideo_set.all().count()
+            if youtube_podcast.cbc_news:
+                total_episodes = youtube_podcast.cbcnewspodcastvideo_set.all().count()
+                total_episodes += youtube_podcast.duplicatepodcastvideo_set.all().count()
+            else:
+                total_episodes = youtube_podcast.podcastvideo_set.all().count()
         else:
-            total_episodes = youtube_podcast.youtubepodcastvideo_set.all().exclude(
-                Q(hide=True) | Q(manually_hide=True)
-            ).count()
-            total_episodes += youtube_podcast.duplicateyoutubepodcastvideo_set.all().exclude(
-                Q(hide=True) | Q(manually_hide=True)
-            ).count()
+            if youtube_podcast.cbc_news:
+                total_episodes = youtube_podcast.cbcnewspodcastvideo_set.all().exclude(
+                    Q(hide=True) | Q(manually_hide=True)
+                ).count()
+                total_episodes += youtube_podcast.duplicatepodcastvideo_set.all().exclude(
+                    Q(hide=True) | Q(manually_hide=True)
+                ).count()
+            else:
+                total_episodes = youtube_podcast.podcastvideo_set.all().exclude(
+                    Q(hide=True) | Q(manually_hide=True)
+                ).count()
         podcasts.append({
             "podcast" : youtube_podcast,
             "videos" : videos,

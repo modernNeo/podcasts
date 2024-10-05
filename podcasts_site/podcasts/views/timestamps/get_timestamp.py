@@ -1,10 +1,10 @@
 from datetime import timedelta
 
+from podcasts.views.pstdatetimefield import pstdatetime
+from podcasts.views.setup_logger import Loggers
 from podcasts.views.timestamps.cbc_the_national_timestamp import video_has_national_in_first_chapter, \
     get_cbc_the_national_timestamp
 from podcasts.views.timestamps.cbc_vancouver_timestamp import is_cbc_vancouver_video, get_cbc_vancouver_timestamp
-from podcasts.views.pstdatetimefield import pstdatetime
-from podcasts.views.setup_logger import Loggers
 
 
 def get_timestamp(information, current_file_name, podcast_being_processed):

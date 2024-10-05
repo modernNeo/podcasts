@@ -44,7 +44,7 @@ class YouTubePodcast(models.Model):
     information_last_updated = pstdatetimefield.PSTDateTimeField(
         null=True
     )
-    unique_constraint = models.BooleanField(default=False)
+    cbc_news = models.BooleanField(default=False)
 
 
     @property
@@ -75,6 +75,18 @@ class YouTubePodcast(models.Model):
     def http_feed_location(self):
         return f"{settings.HTTP_AND_FQDN}{settings.MEDIA_URL}{RSS_FEED_FOLDER_NAME}/{self.url_friendly_name}.xml"
 
+    def get_videos(self):
+        videos = list(self.duplicatepodcastvideo_set.all())
+        videos.extend(list(self.cbcnewspodcastvideo_set.all()))
+        videos.extend(list(self.podcastvideo_set.all()))
+        return videos
+
+    def get_video_filenames(self):
+        video_filenames = list(self.duplicatepodcastvideo_set.all().values_list('filename', flat=True))
+        video_filenames.extend(list(self.cbcnewspodcastvideo_set.all().values_list('filename', flat=True)))
+        video_filenames.extend(list(self.podcastvideo_set.all().values_list('filename', flat=True)))
+        return video_filenames
+
     def __str__(self):
         return self.name if self.custom_name is None else self.custom_name
 
@@ -94,7 +106,6 @@ class YouTubePodcastTitleSubString(models.Model):
     def __str__(self):
         return f"{self.podcast.frontend_name} substring {self.title_substring}"
 
-
 class YouTubePodcastTitlePrefix(models.Model):
     class Meta:
         constraints = [
@@ -111,19 +122,10 @@ class YouTubePodcastTitlePrefix(models.Model):
     def __str__(self):
         return f"{self.podcast.frontend_name} prefix {self.title_prefix}"
 
+class YouTubeVideo(models.Model):
+    class Meta:
+        abstract = True
 
-class YouTubePodcastVideo(models.Model):
-    # class Meta:
-    #     constraints = [
-    #         UniqueConstraint(
-    #             fields=['podcast', 'original_title'], name='unique_title',
-    #             condition=Q(podcast__unique_constraint=True)
-    #         ),
-    #         UniqueConstraint(
-    #             fields=['podcast', 'identifier_number'], name='unique_date_and_time',
-    #             condition=Q(podcast__unique_constraint=True)
-    #         )
-    #     ]
     video_id = models.CharField(max_length=1000, unique=True)
     filename = models.CharField(max_length=1000)
     original_title = models.CharField(max_length=1000)
@@ -139,6 +141,17 @@ class YouTubePodcastVideo(models.Model):
     hide = models.BooleanField(default=False)
     manually_hide = models.BooleanField(default=False)
     duration = models.PositiveBigIntegerField()
+    file_not_found = models.BooleanField(default=False)
+
+    def delete(self, *args, **kwargs):
+        if self.is_present():
+            fs = FileSystemStorage()
+            fs.delete(self.get_file_location)
+        with open(self.podcast.archive_file_location, 'w') as f:
+            for video in self.podcast.get_videos():
+                if video.video_id != self.video_id:
+                    f.write(f"youtube {video.video_id}\n")
+        super(YouTubeVideo, self).delete(*args, **kwargs)
 
     @property
     def get_location(self):
@@ -147,81 +160,54 @@ class YouTubePodcastVideo(models.Model):
     @property
     def get_file_location(self):
         return f'{self.podcast.video_file_location}/{self.filename}'
-
-    def delete(self, *args, **kwargs):
-        if self.is_present():
-            fs = FileSystemStorage()
-            fs.delete(self.get_file_location)
-        with open(self.podcast.archive_file_location, 'w') as f:
-            for video in self.podcast.youtubepodcastvideo_set.all():
-                if video.video_id != self.video_id:
-                    f.write(f"youtube {video.video_id}\n")
-        super(YouTubePodcastVideo, self).delete(*args, **kwargs)
-
-    def is_present(self):
-        return os.path.exists(self.get_file_location)
-
-    @property
-    def is_duplicate(self):
-        return False
 
     @property
     def front_end_name(self):
         return f'{self.date.pst.strftime("%a %Y-%b %d %I:%M %p %Z")} - {self.original_title}'
 
-    def __str__(self):
+    def is_present(self):
+        return os.path.exists(self.get_file_location)
+
+    def base_str(self):
         return f"{self.date.pst} {self.podcast}: {self.original_title}"
 
-class DuplicateYouTubePodcastVideo(models.Model):
-    video_id = models.CharField(max_length=1000, unique=True)
-    filename = models.CharField(max_length=1000)
-    original_title = models.CharField(max_length=1000)
-    description = models.CharField(max_length=5000)
-    podcast = models.ForeignKey(YouTubePodcast, on_delete=models.CASCADE)
-    date = pstdatetimefield.PSTDateTimeField()
-    identifier_number = models.PositiveBigIntegerField()
-    grouping_number = models.IntegerField()
-    url = models.CharField(max_length=10000, unique=True)
-    extension = models.CharField(max_length=100)
-    image = models.CharField(max_length=10000, null=True)
-    size = models.PositiveBigIntegerField()
-    hide = models.BooleanField(default=False)
-    manually_hide = models.BooleanField(default=False)
-    duration = models.PositiveBigIntegerField()
+class PodcastVideo(YouTubeVideo):
+
+    def __str__(self):
+        return f"[PodcastVideo] {self.base_str()}"
+
+class CBCNewsPodcastVideo(YouTubeVideo):
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                fields=['podcast', 'original_title'], name='unique_title'
+            ),
+            UniqueConstraint(
+                fields=['podcast', 'identifier_number'], name='unique_date_and_time'
+            )
+        ]
+
+    def __str__(self):
+        return f"[CBCNewsPodcastVideo] {self.base_str()}"
+
+    @property
+    def is_duplicate(self):
+        return False
+
+class DuplicatePodcastVideo(YouTubeVideo):
 
     @property
     def is_duplicate(self):
         return True
 
-    @property
-    def get_location(self):
-        return f"{settings.HTTP_AND_FQDN}{settings.MEDIA_URL}{VIDEOS_FOLDER_NAME}/{self.podcast.url_friendly_name}/{self.filename}"
-
-    @property
-    def get_file_location(self):
-        return f'{self.podcast.video_file_location}/{self.filename}'
-
-    def delete(self, *args, **kwargs):
-        if self.is_present():
-            fs = FileSystemStorage()
-            fs.delete(self.get_file_location)
-        with open(self.podcast.archive_file_location, 'w') as f:
-            for video in self.podcast.youtubepodcastvideo_set.all():
-                if video.video_id != self.video_id:
-                    f.write(f"youtube {video.video_id}\n")
-        super(DuplicateYouTubePodcastVideo, self).delete(*args, **kwargs)
-
-    def is_present(self):
-        return os.path.exists(self.get_file_location)
-
     def __str__(self):
         return f"[DUPLICATE] {self.date.pst} {self.podcast}: {self.original_title}"
 
 
-class YouTubePodcastVideoGrouping(models.Model):
+class PodcastVideoGrouping(models.Model):
     grouping_number = models.IntegerField()
     podcast = models.ForeignKey(YouTubePodcast, on_delete=models.CASCADE)
-    podcast_video = models.ForeignKey(YouTubePodcastVideo, on_delete=models.CASCADE)
+    podcast_video = models.ForeignKey(CBCNewsPodcastVideo, on_delete=models.CASCADE)
 
     def __str__(self):
         return f"{self.grouping_number} grouping for {self.podcast.frontend_name}"
