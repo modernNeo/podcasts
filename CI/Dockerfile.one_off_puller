@@ -1,12 +1,12 @@
-FROM python:3.12.5-alpine
-RUN apk update && apk add alpine-conf
-RUN setup-timezone -z Canada/Pacific
+FROM python:3.12.5
+RUN apt-get update
+# RUN timedatectl set-timezone Canada/Pacific
 
 EXPOSE 8000
 
 EXPOSE 5432
 
-RUN apk add postgresql
+RUN apt-get install -y postgresql-client
 
 WORKDIR /src/app
 COPY requirements.txt requirements.txt
