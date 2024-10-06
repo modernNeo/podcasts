@@ -15,7 +15,7 @@ def generate_rss_file(youtube_podcast: YouTubePodcast):
     except TypeError:
         return
     videos = youtube_podcast.cbcnewspodcastvideo_set.all() \
-        if youtube_podcast.cbc_news else youtube_podcast.podcastvideo_set()
+        if youtube_podcast.cbc_news else youtube_podcast.podcastvideo_set.all()
     p = Podcast(
         name=youtube_podcast.frontend_name,
         description=youtube_podcast.description,
