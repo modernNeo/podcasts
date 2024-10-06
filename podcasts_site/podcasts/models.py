@@ -161,10 +161,6 @@ class YouTubeVideo(models.Model):
     def get_file_location(self):
         return f'{self.podcast.video_file_location}/{self.filename}'
 
-    @property
-    def front_end_name(self):
-        return f'{self.date.pst.strftime("%a %Y-%b %d %I:%M %p %Z")} - {self.original_title}'
-
     def is_present(self):
         return os.path.exists(self.get_file_location)
 
@@ -172,6 +168,10 @@ class YouTubeVideo(models.Model):
         return f"{self.date.pst} {self.podcast}: {self.original_title}"
 
 class PodcastVideo(YouTubeVideo):
+
+    @property
+    def front_end_name(self):
+        return f'{self.date.pst.strftime("%a %Y-%b %d %I:%M %p %Z")} - {self.original_title}'
 
     def __str__(self):
         return f"[PodcastVideo] {self.base_str()}"
@@ -187,6 +187,10 @@ class CBCNewsPodcastVideo(YouTubeVideo):
             )
         ]
 
+    @property
+    def front_end_name(self):
+        return f'{self.date.pst.strftime("%a %Y-%b %d %I:%M %p %Z")} - {self.original_title}'
+
     def __str__(self):
         return f"[CBCNewsPodcastVideo] {self.base_str()}"
 
@@ -195,6 +199,10 @@ class CBCNewsPodcastVideo(YouTubeVideo):
         return False
 
 class DuplicatePodcastVideo(YouTubeVideo):
+
+    @property
+    def front_end_name(self):
+        return f'[DUPLICATE] {self.date.pst.strftime("%a %Y-%b %d %I:%M %p %Z")} - {self.original_title}'
 
     @property
     def is_duplicate(self):
