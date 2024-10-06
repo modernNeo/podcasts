@@ -53,30 +53,26 @@ def showing_videos(request, show_hidden):
         cron_schedule.save()
     podcasts = []
     for youtube_podcast in YouTubePodcast.objects.all().order_by("-id"):
-        if youtube_podcast.cbc_news:
-            videos = list(youtube_podcast.cbcnewspodcastvideo_set.all())
-            videos.extend(youtube_podcast.duplicatepodcastvideo_set.all())
-        else:
-            videos = list(youtube_podcast.podcastvideo_set.all())
-        videos.sort(key=lambda x: x.identifier_number, reverse=True)
         if show_hidden:
             if youtube_podcast.cbc_news:
-                total_episodes = youtube_podcast.cbcnewspodcastvideo_set.all().count()
-                total_episodes += youtube_podcast.duplicatepodcastvideo_set.all().count()
+                videos = list(youtube_podcast.cbcnewspodcastvideo_set.all())
+                videos.extend(youtube_podcast.duplicatepodcastvideo_set.all())
             else:
-                total_episodes = youtube_podcast.podcastvideo_set.all().count()
+                videos = list(youtube_podcast.podcastvideo_set.all())
         else:
             if youtube_podcast.cbc_news:
-                total_episodes = youtube_podcast.cbcnewspodcastvideo_set.all().exclude(
+                videos = list(youtube_podcast.cbcnewspodcastvideo_set.all().exclude(
                     Q(hide=True) | Q(manually_hide=True)
-                ).count()
-                total_episodes += youtube_podcast.duplicatepodcastvideo_set.all().exclude(
+                ))
+                videos.extend(youtube_podcast.duplicatepodcastvideo_set.all().exclude(
                     Q(hide=True) | Q(manually_hide=True)
-                ).count()
+                ))
             else:
-                total_episodes = youtube_podcast.podcastvideo_set.all().exclude(
+                videos = list(youtube_podcast.podcastvideo_set.all().exclude(
                     Q(hide=True) | Q(manually_hide=True)
-                ).count()
+                ))
+        total_episodes = len(videos)
+        videos.sort(key=lambda x: x.identifier_number, reverse=True)
         podcasts.append({
             "podcast" : youtube_podcast,
             "videos" : videos,
