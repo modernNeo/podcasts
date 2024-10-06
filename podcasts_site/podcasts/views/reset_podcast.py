@@ -10,9 +10,11 @@ def reset_podcast(podcast_id):
     podcast = YouTubePodcast.objects.all().filter(id=int(podcast_id)).first()
     if podcast:
         podcast.being_processed = False
-        for video in podcast.youtubepodcastvideo_set.all():
+        for video in podcast.cbcnewspodcastvideo_set.all():
             video.delete()
-        for video in podcast.duplicateyoutubepodcastvideo_set.all():
+        for video in podcast.duplicatepodcastvideo_set.all():
+            video.delete()
+        for video in podcast.podcastvideo_set.all():
             video.delete()
         podcast.save()
         try:
