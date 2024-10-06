@@ -40,10 +40,7 @@ def pull_videos(youtube_podcast):
             "playlistend": youtube_podcast.index_range,
             "logger" : Loggers.get_logger("youtube_dlp"),
             "ffmpeg_location" : "ffmpeg-N-117339-gf25c9cc213-linux64-gpl/bin/ffmpeg",
-            # "format":  "bv*[ext=mp4]+ba[ext=m4a]",
             "format_sort": ['vcodec:avc', 'res', 'acodec:aac'],
-            'extractor_args': {'youtube': {'player_client': ['ios']}}
-            # "merge_output_format" : "mp4",
 
             # useful for debugging
             # "listformats" : True
