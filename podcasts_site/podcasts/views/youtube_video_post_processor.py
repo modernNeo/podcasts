@@ -1,3 +1,4 @@
+import datetime
 import os
 
 from django.db import IntegrityError
@@ -26,8 +27,10 @@ class YouTubeVideoPostProcessor(postprocessor.common.PostProcessor):
             podcast_being_processed = YouTubePodcast.objects.all().filter(being_processed=True).first()
             if podcast_being_processed:
                 current_file_name = full_path[slash_indices[number_of_slashes - 1] + 1:]
-                youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] current_file_name={current_file_name}")
-                timestamp, cbc_vancouver_news_video = get_timestamp(information, current_file_name, podcast_being_processed)
+                youtube_dlp_logger.info(
+                    f"[youtube_video_post_processor.py run()] current_file_name={current_file_name}")
+                timestamp, cbc_vancouver_news_video = get_timestamp(information, current_file_name,
+                                                                    podcast_being_processed)
                 youtube_dlp_logger.info(
                     f"[youtube_video_post_processor.py run()] podcast.information_last_updated={podcast_being_processed.information_last_updated}")
                 youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] timestamp={timestamp}")
@@ -45,10 +48,35 @@ class YouTubeVideoPostProcessor(postprocessor.common.PostProcessor):
                 new_file_name = string_cleaner(
                     f"{timestamp.strftime('%Y-%m-%d-%H-%M')}-{current_file_name}"
                 )
+
+                index_of_last_period = new_file_name.rfind('.')
+                youtube_dlp_logger.info(
+                    f"[youtube_video_post_processor.py run()] new_file_name.rfind(.)={index_of_last_period}")
+
+                duplicate_cbc_news_video = False
+                if index_of_last_period != -1:
+                    youtube_dlp_logger.info(
+                        f"[youtube_video_post_processor.py run()] new_file_name[new_file_name.rfind(.):]="
+                        f"{new_file_name[index_of_last_period:]}"
+                    )
+                    seconds_in_an_hour = 60 * 60
+                    if int(information['duration']) >= seconds_in_an_hour and podcast_being_processed.cbc_news:
+                        duplicate_cbc_news_video = True
+                        # the uploader of the CBC news videos sometimes erroneously uploads a duplicate longer than an hour
+                        # but because it is seconds in the playlist, it actually ends up overwriting the original with my script
+                        # so I have to add "_long" to it to ensure it doesn't overwrite anything
+                        new_file_name = f"{new_file_name[:index_of_last_period]}_long{new_file_name[index_of_last_period:]}"
+                        youtube_dlp_logger.info(
+                            f"[youtube_video_post_processor.py run()] new_file_name for long ones =[{new_file_name}]"
+                        )
+
                 youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] new_file_name={new_file_name}")
                 old_file_path = f"{full_path[:slash_indices[number_of_slashes - 1] + 1]}{current_file_name}"
                 youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] old_file_path={old_file_path}")
                 new_file_path = f"{full_path[:slash_indices[number_of_slashes - 1] + 1]}{new_file_name}"
+
+                new_file_path = new_file_path.replace("/temp_video_path", "")
+
                 youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] new_file_path={new_file_path}")
 
                 os.rename(old_file_path, new_file_path)
@@ -75,15 +103,12 @@ class YouTubeVideoPostProcessor(postprocessor.common.PostProcessor):
                 file_size = information.get('filesize', None)
                 if not file_size:
                     file_size = information.get('filesize_approx', None)
-                index_of_last_period = new_file_name.rfind('.')
-                youtube_dlp_logger.info(
-                    f"[youtube_video_post_processor.py run()] new_file_name.rfind(.)={index_of_last_period}")
-                if index_of_last_period != -1:
-                    youtube_dlp_logger.info(
-                        f"[youtube_video_post_processor.py run()] new_file_name[new_file_name.rfind(.):]="
-                        f"{new_file_name[index_of_last_period:]}"
-                    )
                 try:
+                    if duplicate_cbc_news_video:
+                        raise IntegrityError(
+                            f"throwing integrity error as {information['title']} with a duration of"
+                            f" {datetime.timedelta(seconds=information['duration'])} is probably duplicate"
+                        )
                     if podcast_being_processed.cbc_news:
                         youtube_podcast_video = CBCNewsPodcastVideo.objects.all().filter(
                             video_id=information['id']
