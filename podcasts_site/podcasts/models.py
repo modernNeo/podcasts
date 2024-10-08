@@ -1,3 +1,4 @@
+import datetime
 import os.path
 
 from django.conf import settings
@@ -161,6 +162,10 @@ class YouTubeVideo(models.Model):
     def get_file_location(self):
         return f'{self.podcast.video_file_location}/{self.filename}'
 
+    @property
+    def get_front_end_duration(self):
+        return f"{datetime.timedelta(seconds=self.duration)}"
+
     def is_present(self):
         return os.path.exists(self.get_file_location)
 
@@ -171,7 +176,7 @@ class PodcastVideo(YouTubeVideo):
 
     @property
     def front_end_name(self):
-        return f'{self.date.pst.strftime("%a %Y-%b %d %I:%M %p %Z")} - {self.original_title}'
+        return f'{self.date.pst.strftime("%a %Y-%b %d %I:%M %p %Z")} {self.get_front_end_duration} - {self.original_title}'
 
     def __str__(self):
         return f"[PodcastVideo] {self.base_str()}"
@@ -189,7 +194,7 @@ class CBCNewsPodcastVideo(YouTubeVideo):
 
     @property
     def front_end_name(self):
-        return f'{self.date.pst.strftime("%a %Y-%b %d %I:%M %p %Z")} - {self.original_title}'
+        return f'{self.date.pst.strftime("%a %Y-%b %d %I:%M %p %Z")} {self.get_front_end_duration} - {self.original_title}'
 
     def __str__(self):
         return f"[CBCNewsPodcastVideo] {self.base_str()}"
@@ -202,7 +207,7 @@ class DuplicatePodcastVideo(YouTubeVideo):
 
     @property
     def front_end_name(self):
-        return f'[DUPLICATE] {self.date.pst.strftime("%a %Y-%b %d %I:%M %p %Z")} - {self.original_title}'
+        return f'[DUPLICATE] {self.date.pst.strftime("%a %Y-%b %d %I:%M %p %Z")} {self.get_front_end_duration} - {self.original_title}'
 
     @property
     def is_duplicate(self):
