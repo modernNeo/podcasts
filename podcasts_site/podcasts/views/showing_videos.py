@@ -35,6 +35,11 @@ def showing_videos(request, show_hidden):
         if video:
             video.delete()
             generate_rss_file(video.podcast)
+    elif request.POST.get("action", False) == 'delete_cbc_video':
+        video = CBCNewsPodcastVideo.objects.all().filter(id=int(request.POST['video_id'])).first()
+        if video:
+            video.delete()
+            generate_rss_file(video.podcast)
     elif request.POST.get("action", False) == 'delete_duplicate_video':
         video = DuplicatePodcastVideo.objects.all().filter(id=int(request.POST['video_id'])).first()
         if video:
