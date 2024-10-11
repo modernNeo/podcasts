@@ -156,7 +156,8 @@ CBC_VANCOUVER_NEWS_DATE_FORMAT = [
     "%I,%B %d", # needed cause of a typo with 2024 July 14's title
     "%I_%M %p, %B %d", #needed cause of a wierd format with the videos around 2024 July 3rd
     "%I%M %p, %B %d", #needed cause of wierd format with the videos around 2024 June 22nd
-    "%I_%M, %B %d" # needed cause of a wierd format on July 20th
+    "%I_%M, %B %d", # needed cause of a wierd format on July 20th
+    "%I %b %d" # used on Oct 9th 2025 at the earliest
 ]
 CBC_VANCOUVER_NEWS_PREFIX = 'CBC Vancouver News at '
 # Internationalization

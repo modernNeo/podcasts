@@ -30,8 +30,7 @@ def pull_videos(youtube_podcast):
             'verbose': True,
             "match_filter": match_filter,
             "outtmpl": '%(title)s.%(ext)s',  # done because if not specified, ytdlp adds the video ID to the filename
-            "paths": {"home": f"{youtube_podcast.video_file_location}/temp_video_path"}, # adding temp_video_path just
-            # to be able to not have the duplicate videos overwrite the original if they both have the same name
+            "paths": {"home": f"{youtube_podcast.video_file_location}"},
             "download_archive": youtube_podcast.archive_file_location,  # done so that past downloaded videos
             # are not re-downloaded
             "ignoreerrors": True,  # helpful so that if one video has an issue, the rest will still be

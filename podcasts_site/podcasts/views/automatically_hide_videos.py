@@ -1,4 +1,4 @@
-from podcasts.models import CBCNewsPodcastVideo, YouTubePodcast
+from podcasts.models import YouTubePodcast, YouTubeVideo
 
 
 def automatically_hide_videos(youtube_podcast: YouTubePodcast):
@@ -13,9 +13,9 @@ def automatically_hide_videos(youtube_podcast: YouTubePodcast):
         else:
             date_number_with_multiple_occurrences.append(group.grouping_number)
 
-    videos = CBCNewsPodcastVideo.objects.all().filter(
+    videos = YouTubeVideo.objects.all().filter(
         podcast__name=youtube_podcast.name,
-        podcast__cbcnewspodcastvideo__grouping_number__in=date_number_with_multiple_occurrences
+        podcastvideogrouping__grouping_number__in=date_number_with_multiple_occurrences
     )
     prefixes = youtube_podcast.youtubepodcasttitleprefix_set.all().order_by('priority')
     ids_of_videos_to_hide = []
@@ -33,4 +33,4 @@ def automatically_hide_videos(youtube_podcast: YouTubePodcast):
                     video_ids.remove(videos_on_same_day[video_title_on_same_day].id)
                     delete_rest_of_videos = True
         ids_of_videos_to_hide.extend(video_ids)
-    CBCNewsPodcastVideo.objects.filter(id__in=ids_of_videos_to_hide).update(hide=True)
+    YouTubeVideo.objects.filter(id__in=ids_of_videos_to_hide).update(hide=True)

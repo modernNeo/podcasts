@@ -6,7 +6,6 @@ from logging.handlers import RotatingFileHandler
 
 import pytz
 
-from podcasts.views.pstdatetimefield import pstdatetime
 from podcasts.views.youtube_dlp_error_handler import YoutubeDLPErrorHandler
 
 SYS_LOG_HANDLER_NAME = "sys"

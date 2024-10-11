@@ -17,59 +17,52 @@
 {%  for podcast in podcasts %}
     <form method="post">
         {% csrf_token %}
-        {% if podcast.podcast.image %}
-            <img src="{{ podcast.podcast.image }}" width="200">
+        {% if podcast.image %}
+            <img src="{{ podcast.image }}" width="200">
         {%  endif %}
-        <h1>{{ podcast.podcast }}</h1>
-        <input type="number" name="id" value="{{ podcast.podcast.id }}" hidden>
-        <label>Name:</label><input type="text" name="name" value="{{ podcast.podcast.frontend_name }}">
-        <label>URL:</label><input type="text" name="url" value="{{ podcast.podcast.url }}"> <br>
-        <label>Number of Past Items to Process: </label><input type="number" name="index_range" value="{{ podcast.podcast.index_range }}"> |
-        <label>When To Pull: </label><input type="time" name="when_to_pull" value="{{ podcast.podcast.front_end_when_to_pull }}" required><br><br>
-        <label>CBC News: </label><input type="checkbox" name="cbc_news" {% if podcast.podcast.cbc_news %} checked {%  endif %}><br>
-        <label>Description</label>{{ podcast.podcast.description|safe|linebreaks }}
+        <h1>{{ podcast }}</h1>
+        <input type="number" name="id" value="{{ podcast.id }}" hidden>
+        <label>Name:</label><input type="text" name="name" value="{{ podcast.frontend_name }}">
+        <label>URL:</label><input type="text" name="url" value="{{ podcast.url }}"> <br>
+        <label>Number of Past Items to Process: </label><input type="number" name="index_range" value="{{ podcast.index_range }}"> |
+        <label>When To Pull: </label><input type="time" name="when_to_pull" value="{{ podcast.front_end_when_to_pull }}" required><br><br>
+        <label>CBC News: </label><input type="checkbox" name="cbc_news" {% if podcast.cbc_news %} checked {%  endif %}><br>
+        <label>Description</label>{{ podcast.description|safe|linebreaks }}
         <button name="action" value="Update" type="submit">Update</button>
         <button name="action" value="Reset" type="submit">Reset</button>
         <button name="action" value="Delete" type="submit">Delete</button>
     </form>
-    <a href="/substrings/{{ podcast.podcast.id }}">Specify Substrings</a><br>
+    <a href="/substrings/{{ podcast.id }}">Specify Substrings</a><br>
     {%  for substring in youtube_podcast.youtubepodcasttitlsubstring_set.all %}
         <p>{{ substring.title_substring }}</p>
     {%  endfor %}
-    <a href="/prefixes/{{ podcast.podcast.id }}">Specify Prefixes</a><br>
+    <a href="/prefixes/{{ podcast.id }}">Specify Prefixes</a><br>
     {%  for prefix in youtube_podcast.youtubepodcasttitleprefix_set.all %}
         <p>{{ prefix.title_prefix }}</p>
     {%  endfor %}
-    <a href="{{ podcast.podcast.http_feed_location }}" target="_blank">RSS Feed</a><br>
-    {%  if podcast.stats.total > 0 %}
+    <a href="{{ podcast.http_feed_location }}" target="_blank">RSS Feed</a><br>
+    {%  if podcast.all_videos_count > 0 %}
         <h2>Videos</h2>
+        {{ podcast.all_videos_count }} Videos<br>
+        {%  for video in podcast.front_end_get_all_videos_list %}
+            <form method="post">
+                {% csrf_token %}
+                <input type="number" name="video_id" value="{{ video.id }}" hidden><button name="action" value="delete_video" type="submit">Delete Video</button>
+                <a href="{{video.get_location}}" target="_blank">{{ video.front_end_name }}</a> - <a href="{{ video.url }}" target="_blank">YouTube Link</a>
+                {% if video.hide %}
+                    <label>Automatically Hidden</label>
+                {%  else %}
+                    <label>Automatically Visible</label>
+                {%  endif %}
+                {% if video.manually_hide %}
+                    <button name="action" value="Unhide" type="submit">Unhide</button>
+                {%  else %}
+                    <button name="action" value="Hide" type="submit">Hide</button>
+                {%  endif %}
+                <br>
+            </form>
+        {%  endfor %}
     {%  endif %}
-    {{ podcast.stats.shown }} / {{ podcast.stats.total }} Videos<br>
-    {%  for video in podcast.videos %}
-        <form method="post">
-        {% csrf_token %}
-        <input type="number" name="video_id" value="{{ video.id }}" hidden>
-        {%  if video.is_duplicate %}
-            <button name="action" value="delete_duplicate_video" type="submit">Delete Video</button>
-        {%  elif podcast.podcast.cbc_news %}
-            <button name="action" value="delete_cbc_video" type="submit">Delete Video</button>
-        {%  else %}
-            <button name="action" value="delete_video" type="submit">Delete Video</button>
-        {%  endif %}
-        <a href="{{video.get_location}}" target="_blank">{{ video.front_end_name }}</a> - <a href="{{ video.url }}" target="_blank">YouTube Link</a>
-        {% if video.hide %}
-            <label>Automatically Hidden</label>
-        {%  else %}
-            <label>Automatically Visible</label>
-        {%  endif %}
-        {% if video.manually_hide %}
-            <button name="action" value="Unhide" type="submit">Unhide</button>
-        {%  else %}
-            <button name="action" value="Hide" type="submit">Hide</button>
-        {%  endif %}
-        <br>
-        </form>
-    {%  endfor %}
     <br><br>
 
 {%  endfor %}

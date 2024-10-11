@@ -21,8 +21,8 @@ class CronSchedule(models.Model):
     def __str__(self):
         return f"scheduler for {self.hour} hour and {self.minute} minutes"
 
-def string_cleaner(str):
-    return (str.replace(':', '').replace(' ', '_').replace(',', '').replace("/", "_")
+def string_cleaner(name):
+    return (name.replace(':', '').replace(' ', '_').replace(',', '').replace("/", "_")
             .replace("%", "").replace(";", "").replace("#", ""))
 
 class YouTubePodcast(models.Model):
@@ -77,16 +77,32 @@ class YouTubePodcast(models.Model):
         return f"{settings.HTTP_AND_FQDN}{settings.MEDIA_URL}{RSS_FEED_FOLDER_NAME}/{self.url_friendly_name}.xml"
 
     def get_videos(self):
-        videos = list(self.duplicatepodcastvideo_set.all())
-        videos.extend(list(self.cbcnewspodcastvideo_set.all()))
-        videos.extend(list(self.podcastvideo_set.all()))
-        return videos
+        return list(self.youtubevideo_set.all())
+
+    @property
+    def shown_visible_videos_count(self):
+        total = self.youtubevideo_set.all().exclude(
+                Q(hide=True) | Q(manually_hide=True)
+            ).count()
+        return 3 if total >= 3 else total
+
+    @property
+    def all_videos_count(self):
+        return self.youtubevideo_set.all().count()
+
+    @property
+    def front_end_get_visible_videos_list(self):
+        return self.youtubevideo_set.all().exclude(
+                Q(hide=True) | Q(manually_hide=True)
+            ).order_by('identifier_number')
+
+    @property
+    def front_end_get_all_videos_list(self):
+        return self.youtubevideo_set.all().order_by('identifier_number')
+
 
     def get_video_filenames(self):
-        video_filenames = list(self.duplicatepodcastvideo_set.all().values_list('filename', flat=True))
-        video_filenames.extend(list(self.cbcnewspodcastvideo_set.all().values_list('filename', flat=True)))
-        video_filenames.extend(list(self.podcastvideo_set.all().values_list('filename', flat=True)))
-        return video_filenames
+        return list(self.youtubevideo_set.all().values_list('filename', flat=True))
 
     def __str__(self):
         return self.name if self.custom_name is None else self.custom_name
@@ -99,10 +115,7 @@ class YouTubePodcastTitleSubString(models.Model):
 
     title_substring = models.CharField(max_length=1000, default=None, null=True)
     podcast = models.ForeignKey(YouTubePodcast, on_delete=models.CASCADE)
-
-    priority = models.IntegerField(
-        default=None
-    )
+    priority = models.IntegerField(default=None)
 
     def __str__(self):
         return f"{self.podcast.frontend_name} substring {self.title_substring}"
@@ -115,17 +128,12 @@ class YouTubePodcastTitlePrefix(models.Model):
 
     title_prefix = models.CharField(max_length=1000, default=None, null=True)
     podcast = models.ForeignKey(YouTubePodcast, on_delete=models.CASCADE)
-
-    priority = models.IntegerField(
-        default=None
-    )
+    priority = models.IntegerField(default=None)
 
     def __str__(self):
         return f"{self.podcast.frontend_name} prefix {self.title_prefix}"
 
 class YouTubeVideo(models.Model):
-    class Meta:
-        abstract = True
 
     video_id = models.CharField(max_length=1000, unique=True)
     filename = models.CharField(max_length=1000)
@@ -169,58 +177,17 @@ class YouTubeVideo(models.Model):
     def is_present(self):
         return os.path.exists(self.get_file_location)
 
-    def base_str(self):
+    @property
+    def front_end_name(self):
+        return f'{self.date.pst.strftime("%a %Y-%b %d %I:%M %p %Z")} {self.get_front_end_duration} - {self.original_title}'
+
+    def __str__(self):
         return f"{self.date.pst} {self.podcast}: {self.original_title}"
-
-class PodcastVideo(YouTubeVideo):
-
-    @property
-    def front_end_name(self):
-        return f'{self.date.pst.strftime("%a %Y-%b %d %I:%M %p %Z")} {self.get_front_end_duration} - {self.original_title}'
-
-    def __str__(self):
-        return f"[PodcastVideo] {self.base_str()}"
-
-class CBCNewsPodcastVideo(YouTubeVideo):
-    class Meta:
-        constraints = [
-            UniqueConstraint(
-                fields=['podcast', 'original_title'], name='unique_title'
-            ),
-            UniqueConstraint(
-                fields=['podcast', 'identifier_number'], name='unique_date_and_time'
-            )
-        ]
-
-    @property
-    def front_end_name(self):
-        return f'{self.date.pst.strftime("%a %Y-%b %d %I:%M %p %Z")} {self.get_front_end_duration} - {self.original_title}'
-
-    def __str__(self):
-        return f"[CBCNewsPodcastVideo] {self.base_str()}"
-
-    @property
-    def is_duplicate(self):
-        return False
-
-class DuplicatePodcastVideo(YouTubeVideo):
-
-    @property
-    def front_end_name(self):
-        return f'[DUPLICATE] {self.date.pst.strftime("%a %Y-%b %d %I:%M %p %Z")} {self.get_front_end_duration} - {self.original_title}'
-
-    @property
-    def is_duplicate(self):
-        return True
-
-    def __str__(self):
-        return f"[DUPLICATE] {self.date.pst} {self.podcast}: {self.original_title}"
-
 
 class PodcastVideoGrouping(models.Model):
     grouping_number = models.IntegerField()
     podcast = models.ForeignKey(YouTubePodcast, on_delete=models.CASCADE)
-    podcast_video = models.ForeignKey(CBCNewsPodcastVideo, on_delete=models.CASCADE)
+    podcast_video = models.ForeignKey(YouTubeVideo, on_delete=models.CASCADE)
 
     def __str__(self):
         return f"{self.grouping_number} grouping for {self.podcast.frontend_name}"

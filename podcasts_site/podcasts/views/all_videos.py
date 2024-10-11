@@ -9,6 +9,6 @@ def index(request):
     return HttpResponse(
         loader.get_template("podcasts/all_videos.html")
         .render(
-            showing_videos(request, True), request
+            showing_videos(request), request
         )
     )
