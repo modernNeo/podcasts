@@ -12,7 +12,7 @@ from podcasts.views import pstdatetimefield
 
 VIDEOS_FOLDER_NAME = "videos"
 ARCHIVE_FOLDER_NAME = "archives"
-RSS_FEED_FOLDER_NAME = 'rss_feed'
+RSS_FEED_FOLDER_NAME = 'rss_feeds'
 
 class CronSchedule(models.Model):
     hour = models.IntegerField()
