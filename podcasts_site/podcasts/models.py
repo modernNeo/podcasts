@@ -94,11 +94,11 @@ class YouTubePodcast(models.Model):
     def front_end_get_visible_videos_list(self):
         return self.youtubevideo_set.all().exclude(
                 Q(hide=True) | Q(manually_hide=True)
-            ).order_by('identifier_number')
+            ).order_by('-identifier_number')
 
     @property
     def front_end_get_all_videos_list(self):
-        return self.youtubevideo_set.all().order_by('identifier_number')
+        return self.youtubevideo_set.all().order_by('-identifier_number')
 
 
     def get_video_filenames(self):
