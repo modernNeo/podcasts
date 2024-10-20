@@ -17,6 +17,8 @@ def automatically_hide_videos(youtube_podcast: YouTubePodcast):
         podcast__name=youtube_podcast.name,
         podcastvideogrouping__grouping_number__in=date_number_with_multiple_occurrences
     )
+    ids = list(videos.values_list('id', flat=True))
+    YouTubeVideo.objects.filter(id__in=ids).update(hide=False)
     prefixes = youtube_podcast.youtubepodcasttitleprefix_set.all().order_by('priority')
     ids_of_videos_to_hide = []
     for date_number_with_multiple_occurrence in date_number_with_multiple_occurrences:
