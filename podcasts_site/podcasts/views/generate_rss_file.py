@@ -8,8 +8,14 @@ from podcasts.models import YouTubePodcast
 
 def generate_rss_file(youtube_podcast: YouTubePodcast):
     category = None
+    subcategory = None
     try:
-        category = Category(youtube_podcast.category)
+        if youtube_podcast.category == 'News & Politics':
+            category = 'News'
+            subcategory = 'Politics'
+        else:
+            category = youtube_podcast.category
+        category = Category(category=category, subcategory=subcategory)
     except ValueError:
         pass
     except TypeError:
