@@ -15,7 +15,7 @@ done
 
 rm ffmpeg-N-117339-gf25c9cc213-linux64-gpl.tar.xz || true
 rm ffmpeg-N-117339-gf25c9cc213-linux64-gpl || true
-wget https://github.com/yt-dlp/FFmpeg-Builds/releases/download/autobuild-2024-10-04-14-17/ffmpeg-N-117339-gf25c9cc213-linux64-gpl.tar.xz
+wget https://github.com/yt-dlp/FFmpeg-Builds/releases/download/autobuild-2024-10-10-16-04/ffmpeg-N-117451-g0f5592cfc7-linux64-gpl.tar.xz
 tar -xf ffmpeg-N-117339-gf25c9cc213-linux64-gpl.tar.xz
 
 exec $cmd
