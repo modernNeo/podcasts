@@ -13,10 +13,10 @@ done
 
 >&2 echo "Postgres is up - executing command"
 
-rm ffmpeg-N-117481-g02306cbfee-linux64-gpl.tar.xz || true
-rm ffmpeg-N-117481-g02306cbfee-linux64-gpl || true
-wget https://github.com/yt-dlp/FFmpeg-Builds/releases/download/autobuild-2024-10-12-18-07/ffmpeg-N-117481-g02306cbfee-linux64-gpl.tar.xz
-tar -xf ffmpeg-N-117481-g02306cbfee-linux64-gpl.tar.xz
+rm ffmpeg.tar.xz || true
+rm ffmpeg || true
+wget https://github.com/yt-dlp/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-gpl.tar.xz -O ffmpeg.tar.xz
+tar -xf ffmpeg.tar.xz
 
 exec $cmd
 

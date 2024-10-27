@@ -39,7 +39,7 @@ def pull_videos(youtube_podcast):
             # from a bot
             "playlistend": youtube_podcast.index_range,
             "logger" : Loggers.get_logger("youtube_dlp"),
-            "ffmpeg_location" : "ffmpeg-N-117481-g02306cbfee-linux64-gpl/bin/ffmpeg",
+            "ffmpeg_location" : "ffmpeg-master-latest-linux64-gpl/bin/ffmpeg",
             "format_sort": ['vcodec:avc', 'res', 'acodec:aac'],
 
             # useful for debugging
