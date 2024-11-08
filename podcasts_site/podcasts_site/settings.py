@@ -146,7 +146,8 @@ CBC_NEWS_TITLE_DATE_NORMALIZER = {
     "Sept.": "Sep",
     "Aug." : "Aug",
     "Sep." : "Sep",
-    "Oct." : "Oct"
+    "Oct." : "Oct",
+    "Nov." : "Nov"
 }
 THE_NATIONAL_DATE_FORMAT = ["%B %d, %Y", "%b %d, %Y"]
 THE_NATIONAL_CHAPTER_PREFIX = 'The National for '
