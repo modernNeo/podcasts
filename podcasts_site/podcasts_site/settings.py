@@ -164,6 +164,7 @@ CBC_VANCOUVER_NEWS_DATE_FORMAT = [
     "%I_%M, %b %d", # used for 2024 Oct 26th
     "%I,%b %d", # used for 2024 Nov 3rd
     "%I%M %b %d", # used on 2024 Nov 9th
+    "%I_%M %b %d", #used on 2024 Nov 16
 ]
 CBC_VANCOUVER_NEWS_PREFIX = 'CBC Vancouver News at '
 # Internationalization
