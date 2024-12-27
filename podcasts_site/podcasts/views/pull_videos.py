@@ -1,8 +1,10 @@
 import os
 import shutil
+import sys
 from pathlib import Path
 
 import yt_dlp
+from yt_dlp.utils import ExtractorError
 
 from podcasts.views.automatically_hide_videos import automatically_hide_videos
 from podcasts.views.delete_videos_that_are_not_properly_tracked import delete_videos_that_are_not_properly_tracked
@@ -11,6 +13,22 @@ from podcasts.views.match_filter import match_filter
 from podcasts.views.setup_logger import Loggers
 from podcasts.views.update_archive_file import update_archive_file
 from podcasts.views.youtube_video_post_processor import YouTubeVideoPostProcessor
+
+
+class CustomDL(yt_dlp.YoutubeDL):
+
+    def trouble(self, message=None, tb=None, is_error=True):
+        if sys.exc_info()[0]:
+            exception = sys.exc_info()[1]
+            if type(exception) is ExtractorError:
+                private_video = (
+                        "Private video. Sign in if you've been granted access to this video"
+                        in exception.msg
+                )
+                if private_video:
+                    self.params['logger'].warn(message)
+                    return
+        super().trouble(message=message, tb=tb, is_error=is_error)
 
 
 def pull_videos(youtube_podcast):
@@ -46,7 +64,8 @@ def pull_videos(youtube_podcast):
             # "listformats" : True
             # "skip_download" : True
         }
-        with yt_dlp.YoutubeDL(yt_opts) as ydl:
+
+        with CustomDL(yt_opts) as ydl:
             ydl.add_post_processor(YouTubeVideoPostProcessor())
             ydl.download(youtube_podcast.url)
     except (yt_dlp.utils.ExistingVideoReached, yt_dlp.utils.DownloadError):

@@ -17,9 +17,13 @@ error_logging_level = logging.ERROR
 warn_logging_level = logging.WARNING
 
 class YoutubeDLPDebugStreamHandler(logging.StreamHandler):
+
+    def __init__(self, stream=None):
+        logging.StreamHandler.__init__(self, stream=stream)
+
     def emit(self, record):
         if record.levelno < error_logging_level:
-            super().emit(record)
+            logging.StreamHandler.emit(self, record)
 
 class PSTFormatter(logging.Formatter):
     def __init__(self, fmt=None, datefmt=None, tz=None):

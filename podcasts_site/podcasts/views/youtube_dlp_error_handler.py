@@ -14,7 +14,7 @@ class YoutubeDLPErrorHandler(logging.StreamHandler):
         super().__init__(stream)
 
     def emit(self, record):
-        message = record.exc_text if record.exc_text is not None else record.message
+        message = record.exc_text if record.exc_text is not None else record.msg
         request = str(record.__dict__)
         try:
             from podcasts.models import YouTubeDLPError
