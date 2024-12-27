@@ -60,6 +60,7 @@ def pull_videos(youtube_podcast):
             "logger" : Loggers.get_logger("youtube_dlp"),
             "ffmpeg_location" : "ffmpeg-master-latest-linux64-gpl/bin/ffmpeg",
             "format_sort": ['vcodec:avc', 'res', 'acodec:aac'],
+            "cookiefile" : os.environ.get('COOKIE_LOCATION', None)
 
             # useful for debugging
             # "listformats" : True

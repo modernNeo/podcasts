@@ -46,9 +46,11 @@ services:  #Services that are needed for the podcasts_site app
             - GMAIL_USERNAME
             - GMAIL_PASSWORD
             - SECRET_KEY
+            - COOKIE_LOCATION
         volumes: #volume are for hot reload
             - logs:/src/app/logs
             - assets:/src/app/assets
+            - /home/jace/nas_mount/podcasts_assets:/src/app/cookies_folder
         networks:
             - podcasts_site_network
 #        stdin_open: true # docker run -i
