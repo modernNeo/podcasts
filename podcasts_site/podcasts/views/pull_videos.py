@@ -23,9 +23,13 @@ class CustomDL(yt_dlp.YoutubeDL):
             if type(exception) is ExtractorError:
                 private_video = (
                         "Private video. Sign in if you've been granted access to this video"
-                        in exception.msg
+                        in exception.msg or
+                        "Video unavailable. This video is private" in exception.msg
                 )
-                removed_video = "Video unavailable. This video has been removed by the uploader" in exception.msg
+                removed_video = (
+                        "Video unavailable. This video has been removed by the uploader" in exception.msg or
+                        "Video unavailable" in exception.msg
+                )
                 if private_video or removed_video:
                     self.params['logger'].warn(message)
                     return
