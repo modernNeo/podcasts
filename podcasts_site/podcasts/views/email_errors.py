@@ -9,10 +9,7 @@ def email_errors():
     errors = YouTubeDLPWarnError.objects.all().filter(processed=False)
     video_unavailable_errors = errors.filter(video_unavailable=True)
     if len(video_unavailable_errors) > 0:
-        video_unavailables = f"""
-        Unavailable Videos:
-        
-        """
+        video_unavailables = "Unavailable Videos:\n\n"
         podcast_displayed = []
         for video_unavailable_error in video_unavailable_errors:
             if video_unavailable_error.podcast.id not in podcast_displayed:
@@ -26,14 +23,14 @@ def email_errors():
     number_of_errors = errors.filter(levelno=error_logging_level).count()
     number_of_warnings = errors.filter(levelno=warn_logging_level).count()
     if number_of_errors > 0:
-        subject = f"{number_of_errors} podcast error[s]"
+        subject = f"{number_of_errors} podcast error{'' if number_of_errors == 0 else 's'}"
     if number_of_warnings > 0:
         if number_of_errors > 0:
             subject += " and"
         subject += f" {number_of_warnings} "
         if number_of_errors == 0:
             subject += "podcast "
-        subject += f"warnings[s]"
+        subject += f"warnings{'' if number_of_warnings == 0 else 's'}"
 
 
     body = f"{video_unavailables}" if video_unavailables else video_unavailables
