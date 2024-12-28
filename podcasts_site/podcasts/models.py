@@ -223,21 +223,6 @@ class LoggingFilePath(models.Model):
     )
 
 class YouTubeDLPWarnError(models.Model):
-    error_file_path = models.CharField(
-        max_length=500,
-        default=None,
-        null=True
-    )
-    warn_file_path = models.CharField(
-        max_length=500,
-        default=None,
-        null=True
-    )
-    debug_file_path = models.CharField(
-        max_length=500,
-        default=None,
-        null=True
-    )
     message = models.CharField(
         max_length=10000
     )
@@ -249,7 +234,6 @@ class YouTubeDLPWarnError(models.Model):
     fixed = models.BooleanField(
         default=False
     )
-
     processed = models.BooleanField(
         default=False
     )
@@ -263,4 +247,4 @@ class YouTubeDLPWarnError(models.Model):
 
 
     def __str__(self):
-        return f"Error in file {self.error_file_path}"
+        return f"Error [{self.message}] in podcast {self.podcast}"

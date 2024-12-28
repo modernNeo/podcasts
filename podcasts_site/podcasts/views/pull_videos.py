@@ -39,12 +39,9 @@ class CustomDL(yt_dlp.YoutubeDL):
                     self.params['logger'].warn(message)
                     video_unavailable = True
 
-        file_paths = LoggingFilePath.objects.all()[0]
         podcast_being_processed = YouTubePodcast.objects.all().filter(being_processed=True).first()
         YouTubeDLPWarnError(
-            error_file_path=file_paths.error_file_path, warn_file_path=file_paths.warn_file_path,
-            debug_file_path=file_paths.debug_file_path, message=message, levelno=levelno,
-            video_unavailable=video_unavailable, podcast=podcast_being_processed
+            message=message, levelno=levelno, video_unavailable=video_unavailable, podcast=podcast_being_processed
         ).save()
         if video_unavailable:
             return
