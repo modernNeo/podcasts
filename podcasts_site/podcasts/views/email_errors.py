@@ -23,14 +23,14 @@ def email_errors():
     number_of_errors = errors.filter(levelno=error_logging_level).count()
     number_of_warnings = errors.filter(levelno=warn_logging_level).count()
     if number_of_errors > 0:
-        subject = f"{number_of_errors} podcast error{'' if number_of_errors == 0 else 's'}"
+        subject = f"{number_of_errors} podcast error{'' if number_of_errors == 1 else 's'}"
     if number_of_warnings > 0:
         if number_of_errors > 0:
             subject += " and"
         subject += f" {number_of_warnings} "
         if number_of_errors == 0:
             subject += "podcast "
-        subject += f"warnings{'' if number_of_warnings == 0 else 's'}"
+        subject += f"warning{'' if number_of_warnings == 1 else 's'}"
 
 
     body = f"{video_unavailables}" if video_unavailables else video_unavailables
