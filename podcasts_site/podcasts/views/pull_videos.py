@@ -41,7 +41,7 @@ class CustomDL(yt_dlp.YoutubeDL):
                         "Video unavailable. This video has been removed by the uploader" in exception.msg
                 )
                 if private_video or removed_video:
-                    self.params['logger'].warn(message)
+                    self.params['logger'].debug(message)
                     return
                 elif "Video unavailable" in exception.msg:
                     self.params['logger'].warn(message)
