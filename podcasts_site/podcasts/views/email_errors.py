@@ -22,11 +22,24 @@ def email_errors():
             video_unavailables += f"\nhttps://www.youtube.com/watch?v={video_unavailable_error.video_id}"
     else:
         video_unavailables = None
+    subject = ""
+    number_of_errors = errors.filter(levelno=error_logging_level).count()
+    number_of_warnings = errors.filter(levelno=warn_logging_level).count()
+    if number_of_errors > 0:
+        subject = f"{number_of_errors} podcast error[s]"
+    if number_of_warnings > 0:
+        if number_of_errors > 0:
+            subject += " and"
+        subject += f" {number_of_warnings} "
+        if number_of_errors == 0:
+            subject += "podcast "
+        subject += f"warnings[s]"
+
+
     body = f"{video_unavailables}" if video_unavailables else video_unavailables
     file_paths = LoggingFilePath.objects.all()[0]
 
     if len(errors.filter(levelno=error_logging_level)) > 0:
-        number_of_errors = errors.filter(levelno=error_logging_level).count()
         gmail = Gmail()
         log_sent = []
         for error in errors:
@@ -36,7 +49,7 @@ def email_errors():
                 continue
             log_sent.append(file_paths.error_file_path)
             gmail.send_email(
-                subject=f"{number_of_errors} podcast WARNINGS", body=body, to_email=os.environ['TO_EMAIL'], to_name='modernNeo',
+                subject=subject, body=body, to_email=os.environ['TO_EMAIL'], to_name='modernNeo',
                 attachments=[file_paths.debug_file_path, file_paths.warn_file_path, file_paths.error_file_path]
             )
             error.processed = True
@@ -45,7 +58,6 @@ def email_errors():
     elif len(errors.filter(levelno=warn_logging_level)) > 0:
         gmail = Gmail()
         log_sent = []
-        number_of_warnings = errors.filter(levelno=warn_logging_level).count()
         for error in errors:
             if file_paths.error_file_path in log_sent:
                 error.processed = True
@@ -53,8 +65,7 @@ def email_errors():
                 continue
             log_sent.append(file_paths.error_file_path)
             gmail.send_email(
-                subject=f"{number_of_warnings} podcast WARNINGS", body=body,
-                to_email=os.environ['TO_EMAIL'], to_name='modernNeo',
+                subject=subject, body=body, to_email=os.environ['TO_EMAIL'], to_name='modernNeo',
                 attachments=[file_paths.debug_file_path, file_paths.warn_file_path, file_paths.error_file_path]
             )
             error.processed = True

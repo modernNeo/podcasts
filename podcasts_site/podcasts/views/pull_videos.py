@@ -6,14 +6,15 @@ from pathlib import Path
 import yt_dlp
 from yt_dlp.utils import ExtractorError
 
-from podcasts.models import YouTubeDLPWarnError, LoggingFilePath, YouTubePodcast
+from podcasts.models import YouTubeDLPWarnError, YouTubePodcast
 from podcasts.views.automatically_hide_videos import automatically_hide_videos
 from podcasts.views.delete_videos_that_are_not_properly_tracked import delete_videos_that_are_not_properly_tracked
 from podcasts.views.generate_rss_file import generate_rss_file
 from podcasts.views.match_filter import match_filter
-from podcasts.views.setup_logger import Loggers, error_logging_level
+from podcasts.views.setup_logger import Loggers, error_logging_level, warn_logging_level
 from podcasts.views.update_archive_file import update_archive_file
 from podcasts.views.youtube_video_post_processor import YouTubeVideoPostProcessor
+
 
 def get_youtube_id(message):
     youtube_tag = " [youtube]"
@@ -26,6 +27,7 @@ class CustomDL(yt_dlp.YoutubeDL):
 
     def trouble(self, message=None, tb=None, is_error=True):
         video_unavailable = False
+        log_level = error_logging_level
 
         if sys.exc_info()[0]:
             exception = sys.exc_info()[1]
@@ -43,11 +45,12 @@ class CustomDL(yt_dlp.YoutubeDL):
                     return
                 elif "Video unavailable" in exception.msg:
                     self.params['logger'].warn(message)
+                    log_level = warn_logging_level
                     video_unavailable = True
 
         podcast_being_processed = YouTubePodcast.objects.all().filter(being_processed=True).first()
         YouTubeDLPWarnError(
-            message=message, levelno=error_logging_level, video_unavailable=video_unavailable,
+            message=message, levelno=log_level, video_unavailable=video_unavailable,
             podcast=podcast_being_processed, video_id=get_youtube_id(message)
         ).save()
         if video_unavailable:
