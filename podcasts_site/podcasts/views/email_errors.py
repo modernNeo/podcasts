@@ -19,7 +19,7 @@ def email_errors():
                 name = video_unavailable_error.podcast.custom_name \
                     if video_unavailable_error.podcast.custom_name else video_unavailable_error.podcast.name
                 video_unavailables += f"{name}\n"
-            video_unavailables += f"\nhttps://www.youtube.com/watch?v={video_unavailable_error.message}"
+            video_unavailables += f"\nhttps://www.youtube.com/watch?v={video_unavailable_error.video_id}"
     else:
         video_unavailables = None
     body = f"{video_unavailables}" if video_unavailables else video_unavailables
