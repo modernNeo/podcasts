@@ -39,7 +39,7 @@ def email_errors():
     body = f"{video_unavailables}" if video_unavailables else video_unavailables
     file_paths = LoggingFilePath.objects.all()[0]
 
-    if len(errors.filter(levelno=error_logging_level)) > 0:
+    if number_of_errors > 0:
         gmail = Gmail()
         log_sent = []
         for error in errors:
@@ -55,7 +55,7 @@ def email_errors():
             error.processed = True
             error.save()
         gmail.close_connection()
-    elif len(errors.filter(levelno=warn_logging_level)) > 0:
+    elif number_of_warnings > 0:
         gmail = Gmail()
         log_sent = []
         for error in errors:
