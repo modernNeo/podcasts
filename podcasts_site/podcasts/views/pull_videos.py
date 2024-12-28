@@ -6,11 +6,12 @@ from pathlib import Path
 import yt_dlp
 from yt_dlp.utils import ExtractorError
 
+from podcasts.models import YouTubeDLPWarnError, LoggingFilePath, YouTubePodcast
 from podcasts.views.automatically_hide_videos import automatically_hide_videos
 from podcasts.views.delete_videos_that_are_not_properly_tracked import delete_videos_that_are_not_properly_tracked
 from podcasts.views.generate_rss_file import generate_rss_file
 from podcasts.views.match_filter import match_filter
-from podcasts.views.setup_logger import Loggers
+from podcasts.views.setup_logger import Loggers, error_logging_level
 from podcasts.views.update_archive_file import update_archive_file
 from podcasts.views.youtube_video_post_processor import YouTubeVideoPostProcessor
 
@@ -18,6 +19,8 @@ from podcasts.views.youtube_video_post_processor import YouTubeVideoPostProcesso
 class CustomDL(yt_dlp.YoutubeDL):
 
     def trouble(self, message=None, tb=None, is_error=True):
+        levelno = error_logging_level
+        video_unavailable = False
         if sys.exc_info()[0]:
             exception = sys.exc_info()[1]
             if type(exception) is ExtractorError:
@@ -27,12 +30,24 @@ class CustomDL(yt_dlp.YoutubeDL):
                         "Video unavailable. This video is private" in exception.msg
                 )
                 removed_video = (
-                        "Video unavailable. This video has been removed by the uploader" in exception.msg or
-                        "Video unavailable" in exception.msg
+                        "Video unavailable. This video has been removed by the uploader" in exception.msg
                 )
                 if private_video or removed_video:
                     self.params['logger'].warn(message)
                     return
+                elif "Video unavailable" in exception.msg:
+                    self.params['logger'].warn(message)
+                    video_unavailable = True
+
+        file_paths = LoggingFilePath.objects.all()[0]
+        podcast_being_processed = YouTubePodcast.objects.all().filter(being_processed=True).first()
+        YouTubeDLPWarnError(
+            error_file_path=file_paths.error_file_path, warn_file_path=file_paths.warn_file_path,
+            debug_file_path=file_paths.debug_file_path, message=message, levelno=levelno,
+            video_unavailable=video_unavailable, podcast=podcast_being_processed
+        ).save()
+        if video_unavailable:
+            return
         super().trouble(message=message, tb=tb, is_error=is_error)
 
 

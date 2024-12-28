@@ -6,7 +6,7 @@ from logging.handlers import RotatingFileHandler
 
 import pytz
 
-from podcasts.views.youtube_dlp_error_handler import YoutubeDLPErrorHandler
+from podcasts.models import LoggingFilePath
 
 SYS_LOG_HANDLER_NAME = "sys"
 
@@ -166,19 +166,25 @@ class Loggers:
         logger.addHandler(sys_stdout_stream_handler)
         sys.stdout = LoggerWriter(logger.info)
 
+        LoggingFilePath(
+            error_file_path=error_log_file_absolute_path,
+            warn_file_path=warn_log_file_absolute_path,
+            debug_file_path=debug_log_file_absolute_path
+        ).save()
 
-        sys.stderr = sys.__stderr__
-        sys_stderr_stream_handler = YoutubeDLPErrorHandler(
-            sys.stderr,
-            debug_file_name=debug_log_file_absolute_path,
-            info_file_name=info_log_file_absolute_path,
-            warn_file_name=warn_log_file_absolute_path,
-            error_file_name=error_log_file_absolute_path
-        )
-        sys_stderr_stream_handler.setFormatter(sys_stream_formatting)
-        sys_stderr_stream_handler.setLevel(error_logging_level)
-        logger.addHandler(sys_stderr_stream_handler)
-        sys.stderr = LoggerWriter(logger.error)
+
+        # sys.stderr = sys.__stderr__
+        # sys_stderr_stream_handler = YoutubeDLPWarnErrorHandler(
+        #     sys.stderr,
+        #     debug_file_name=debug_log_file_absolute_path,
+        #     info_file_name=info_log_file_absolute_path,
+        #     warn_file_name=warn_log_file_absolute_path,
+        #     error_file_name=error_log_file_absolute_path
+        # )
+        # sys_stderr_stream_handler.setFormatter(sys_stream_formatting)
+        # sys_stderr_stream_handler.setLevel(warn_logging_level)
+        # logger.addHandler(sys_stderr_stream_handler)
+        # sys.stderr = LoggerWriter(logger.error)
 
         return logger
 

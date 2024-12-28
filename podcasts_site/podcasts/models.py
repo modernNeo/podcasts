@@ -1,4 +1,5 @@
 import datetime
+import logging
 import os.path
 
 from django.conf import settings
@@ -120,6 +121,18 @@ class YouTubePodcastTitleSubString(models.Model):
     def __str__(self):
         return f"{self.podcast.frontend_name} substring {self.title_substring}"
 
+# class YouTubePodcastTimestampPriority(models.Model):
+#     class Meta:
+#         constraints = [
+#             UniqueConstraint(fields=['podcast', 'priority'], name='unique_podcast_timestamp_priority')
+#         ]
+#     timestamp = PSTDateTimeField()
+#     podcast = models.ForeignKey(YouTubePodcast, on_delete=models.CASCADE)
+#     priority = models.IntegerField(default=None)
+#
+#     def __str__(self):
+#         return f"{self.podcast.frontend_name} timestamp {self.timestamp}"
+
 class YouTubePodcastTitlePrefix(models.Model):
     class Meta:
         constraints = [
@@ -192,8 +205,24 @@ class PodcastVideoGrouping(models.Model):
     def __str__(self):
         return f"{self.grouping_number} grouping for {self.podcast.frontend_name}"
 
+class LoggingFilePath(models.Model):
+    error_file_path = models.CharField(
+        max_length=500,
+        default=None,
+        null=True
+    )
+    warn_file_path = models.CharField(
+        max_length=500,
+        default=None,
+        null=True
+    )
+    debug_file_path = models.CharField(
+        max_length=500,
+        default=None,
+        null=True
+    )
 
-class YouTubeDLPError(models.Model):
+class YouTubeDLPWarnError(models.Model):
     error_file_path = models.CharField(
         max_length=500,
         default=None,
@@ -224,6 +253,14 @@ class YouTubeDLPError(models.Model):
     processed = models.BooleanField(
         default=False
     )
+    levelno = models.IntegerField(
+        default=logging.WARNING
+    )
+    video_unavailable = models.BooleanField(
+        null=True
+    )
+    podcast = models.ForeignKey(YouTubePodcast, on_delete=models.CASCADE)
+
 
     def __str__(self):
         return f"Error in file {self.error_file_path}"
