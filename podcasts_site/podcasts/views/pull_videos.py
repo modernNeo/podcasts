@@ -15,12 +15,18 @@ from podcasts.views.setup_logger import Loggers, error_logging_level
 from podcasts.views.update_archive_file import update_archive_file
 from podcasts.views.youtube_video_post_processor import YouTubeVideoPostProcessor
 
+def get_youtube_id(message):
+    youtube_tag = " [youtube]"
+    youtube_tag_index = message.index(youtube_tag)
+    tag_part_of_message = message[youtube_tag_index + len(youtube_tag):]
+    end_index_of_tag = tag_part_of_message.index(":")
+    return tag_part_of_message[:end_index_of_tag]
 
 class CustomDL(yt_dlp.YoutubeDL):
 
     def trouble(self, message=None, tb=None, is_error=True):
-        levelno = error_logging_level
         video_unavailable = False
+
         if sys.exc_info()[0]:
             exception = sys.exc_info()[1]
             if type(exception) is ExtractorError:
@@ -41,7 +47,8 @@ class CustomDL(yt_dlp.YoutubeDL):
 
         podcast_being_processed = YouTubePodcast.objects.all().filter(being_processed=True).first()
         YouTubeDLPWarnError(
-            message=message, levelno=levelno, video_unavailable=video_unavailable, podcast=podcast_being_processed
+            message=message, levelno=error_logging_level, video_unavailable=video_unavailable,
+            podcast=podcast_being_processed, video_id=get_youtube_id(message)
         ).save()
         if video_unavailable:
             return

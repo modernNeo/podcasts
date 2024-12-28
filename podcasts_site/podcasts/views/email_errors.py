@@ -16,7 +16,9 @@ def email_errors():
         podcast_displayed = []
         for video_unavailable_error in video_unavailable_errors:
             if video_unavailable_error.podcast.id not in podcast_displayed:
-                video_unavailables += f"{video_unavailable_error.podcast.description}\n"
+                name = video_unavailable_error.podcast.custom_name \
+                    if video_unavailable_error.podcast.custom_name else video_unavailable_error.podcast.name
+                video_unavailables += f"{name}\n"
             video_unavailables += f"\nhttps://www.youtube.com/watch?v={video_unavailable_error.message}"
     else:
         video_unavailables = None
@@ -24,7 +26,7 @@ def email_errors():
     file_paths = LoggingFilePath.objects.all()[0]
 
     if len(errors.filter(levelno=error_logging_level)) > 0:
-        number_of_errors = errors.filter(levelno=error_logging_level)
+        number_of_errors = errors.filter(levelno=error_logging_level).count()
         gmail = Gmail()
         log_sent = []
         for error in errors:
@@ -43,7 +45,7 @@ def email_errors():
     elif len(errors.filter(levelno=warn_logging_level)) > 0:
         gmail = Gmail()
         log_sent = []
-        number_of_warnings = errors.filter(levelno=warn_logging_level)
+        number_of_warnings = errors.filter(levelno=warn_logging_level).count()
         for error in errors:
             if file_paths.error_file_path in log_sent:
                 error.processed = True

@@ -243,6 +243,10 @@ class YouTubeDLPWarnError(models.Model):
     video_unavailable = models.BooleanField(
         null=True
     )
+    video_id = models.CharField(
+        max_length=100,
+        default=None
+    )
     podcast = models.ForeignKey(YouTubePodcast, on_delete=models.CASCADE)
 
 
