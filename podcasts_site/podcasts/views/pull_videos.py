@@ -19,7 +19,7 @@ from podcasts.views.youtube_video_post_processor import YouTubeVideoPostProcesso
 def get_youtube_id(message):
     youtube_tag = " [youtube]"
     youtube_tag_index = message.index(youtube_tag)
-    tag_part_of_message = message[youtube_tag_index + len(youtube_tag):]
+    tag_part_of_message = message[youtube_tag_index + len(youtube_tag)+1:]
     end_index_of_tag = tag_part_of_message.index(":")
     return tag_part_of_message[:end_index_of_tag]
 
