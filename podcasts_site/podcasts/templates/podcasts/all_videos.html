@@ -33,11 +33,11 @@
         <button name="action" value="Delete" type="submit">Delete</button>
     </form>
     <a href="/substrings/{{ podcast.id }}">Specify Substrings</a><br>
-    {%  for substring in youtube_podcast.youtubepodcasttitlsubstring_set.all %}
+    {%  for substring in podcast.youtubepodcasttitlesubstring_set.all %}
         <p>{{ substring.title_substring }}</p>
     {%  endfor %}
     <a href="/prefixes/{{ podcast.id }}">Specify Prefixes</a><br>
-    {%  for prefix in youtube_podcast.youtubepodcasttitleprefix_set.all %}
+    {%  for prefix in podcast.youtubepodcasttitleprefix_set.all %}
         <p>{{ prefix.title_prefix }}</p>
     {%  endfor %}
     <a href="{{ podcast.http_feed_location }}" target="_blank">RSS Feed</a><br>
