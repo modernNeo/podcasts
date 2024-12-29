@@ -36,8 +36,8 @@ def email_errors():
     body = f"{video_unavailables}" if video_unavailables else video_unavailables
     file_paths = LoggingFilePath.objects.all()[0]
 
-    if number_of_errors > 0:
-        gmail = Gmail()
+    gmail = Gmail()
+    if number_of_errors > 0 or number_of_warnings > 0:
         log_sent = []
         for error in errors:
             if file_paths.error_file_path in log_sent:
@@ -51,20 +51,9 @@ def email_errors():
             )
             error.processed = True
             error.save()
-        gmail.close_connection()
-    elif number_of_warnings > 0:
-        gmail = Gmail()
-        log_sent = []
-        for error in errors:
-            if file_paths.error_file_path in log_sent:
-                error.processed = True
-                error.save()
-                continue
-            log_sent.append(file_paths.error_file_path)
-            gmail.send_email(
-                subject=subject, body=body, to_email=os.environ['TO_EMAIL'], to_name='modernNeo',
-                attachments=[file_paths.debug_file_path, file_paths.warn_file_path, file_paths.error_file_path]
-            )
-            error.processed = True
-            error.save()
-        gmail.close_connection()
+    else:
+        gmail.send_email(
+            subject="podcasts successfully polled", body="", to_email=os.environ['TO_EMAIL'], to_name='modernNeo',
+            attachments=[file_paths.debug_file_path, file_paths.warn_file_path, file_paths.error_file_path]
+        )
+    gmail.close_connection()
