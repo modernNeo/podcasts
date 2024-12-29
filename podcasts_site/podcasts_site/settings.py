@@ -79,7 +79,7 @@ PROD_ENV = os.environ['ENV'] == "PROD"
 if PROD_ENV:
     MEDIA_ROOT = os.path.join(BASE_DIR, ASSETS_FOLDER_NAME)
 else:
-    MEDIA_ROOT = os.path.join(BASE_DIR.parent, ASSETS_FOLDER_NAME)
+    MEDIA_ROOT = os.path.join('/home/jace/1_Home/podcasts_website', ASSETS_FOLDER_NAME)
 
 Path(MEDIA_ROOT).mkdir(parents=True, exist_ok=True)
 
