@@ -4,7 +4,7 @@ pipeline {
         disableConcurrentBuilds()
         buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))
     }
-    triggers { cron (BRANCH_NAME == "master" ? "TZ=America/Vancouver\n0 1 * * *" : "" ) }
+    triggers { cron (BRANCH_NAME == "master" ? "TZ=America/Vancouver\n45 1 * * *" : "" ) }
     stages {
         stage('Deploy') {
             when {
