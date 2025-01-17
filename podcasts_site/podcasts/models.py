@@ -245,7 +245,8 @@ class YouTubeDLPWarnError(models.Model):
     )
     video_id = models.CharField(
         max_length=100,
-        default=None
+        default=None,
+        null=True
     )
     podcast = models.ForeignKey(YouTubePodcast, on_delete=models.CASCADE)
 
