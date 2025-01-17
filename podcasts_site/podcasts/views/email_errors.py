@@ -7,7 +7,7 @@ from podcasts.views.setup_logger import error_logging_level, warn_logging_level
 
 def email_errors():
     errors = YouTubeDLPWarnError.objects.all().filter(processed=False)
-    video_unavailable_errors = errors.filter(video_unavailable=True)
+    video_unavailable_errors = errors.filter(video_unavailable=True).exclude(video_id__isnull=True)
     if len(video_unavailable_errors) > 0:
         video_unavailables = "Unavailable Videos:\n\n"
         podcast_displayed = []

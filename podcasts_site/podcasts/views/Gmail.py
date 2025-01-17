@@ -77,12 +77,14 @@ class Gmail:
                     msg['From'] = from_name + " <" + self.from_email + ">"
                     msg['To'] = to_name + " <" + to_email + ">"
                     msg['Subject'] = subject
-                    msg.attach(MIMEText(body))
+                    if body:
+                        msg.attach(MIMEText(body))
 
                     if attachments is not None:
                         for attachment in attachments:
                             if os.path.exists(attachment):
                                 try:
+                                    self.logger.info("trying to attach {}".format(attachment))
                                     package = open(attachment, 'rb')
                                     payload = MIMEBase('application', 'octet-stream')
                                     payload.set_payload(package.read())
