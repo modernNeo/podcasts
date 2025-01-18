@@ -33,7 +33,11 @@ class CustomDL(yt_dlp.YoutubeDL):
         If stderr is a tty file the 'WARNING:' will be colored
         """
         if self.params.get('logger') is not None:
-            if '[youtube:tab] Incomplete data received. Retrying' in message:
+            podcasts_with_data_retrieval_issues = (
+                    '[youtube:tab] Incomplete data received. Retrying' in message or
+                    '[youtube:tab] Incomplete data received. Giving up after 3 retries' in message
+            )
+            if podcasts_with_data_retrieval_issues:
                 podcast_being_processed = YouTubePodcast.objects.all().filter(being_processed=True).first()
                 if podcast_being_processed is not None:
                     if podcast_being_processed.name == 'The Weekly Show with Jon Stewart | FULL Episodes':
