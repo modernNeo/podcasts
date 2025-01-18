@@ -27,6 +27,18 @@ def get_youtube_id(message):
 
 class CustomDL(yt_dlp.YoutubeDL):
 
+    def report_warning(self, message, only_once=False):
+        """
+        Print the message to stderr, it will be prefixed with 'WARNING:'
+        If stderr is a tty file the 'WARNING:' will be colored
+        """
+        if self.params.get('logger') is not None:
+            if '[youtube:tab] Incomplete data received. Retrying' in message:
+                podcast_being_processed = YouTubePodcast.objects.all().filter(being_processed=True).first()
+                if podcast_being_processed is not None:
+                    self.params['logger'].warning(f"[{podcast_being_processed.name}]")
+        super().report_warning(message, only_once=only_once)
+
     def trouble(self, message=None, tb=None, is_error=True):
         video_unavailable = False
         log_level = error_logging_level
