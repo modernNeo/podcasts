@@ -36,6 +36,9 @@ class CustomDL(yt_dlp.YoutubeDL):
             if '[youtube:tab] Incomplete data received. Retrying' in message:
                 podcast_being_processed = YouTubePodcast.objects.all().filter(being_processed=True).first()
                 if podcast_being_processed is not None:
+                    if podcast_being_processed.name == 'The Weekly Show with Jon Stewart | FULL Episodes':
+                        self.params['logger'].info(message)
+                        return
                     self.params['logger'].warning(f"[{podcast_being_processed.name}]")
         super().report_warning(message, only_once=only_once)
 
