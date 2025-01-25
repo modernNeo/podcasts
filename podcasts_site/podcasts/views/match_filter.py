@@ -6,7 +6,7 @@ def match_filter(info, *, incomplete):
     if title is None:
         # it's processing the podcast info
         return
-    if info['live_status'] == 'is_upcoming':
+    if info.get('live_status', None) == 'is_upcoming':
         # processing a video that is not yet uploaded
         return f"{title} is not yet uploaded"
     youtube_podcast = YouTubePodcast.objects.all().filter(being_processed=True).first()
