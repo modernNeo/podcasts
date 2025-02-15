@@ -39,10 +39,13 @@ def showing_videos(request):
         video_id = request.POST['video_id']
         youtube_dlp_logger.info(f"processing video with ID of [{video_id}]")
         youtube_video = YouTubeVideo.objects.all().filter(id=int(video_id)).first()
+        youtube_podcast = youtube_video.podcast
         if youtube_video:
             youtube_video.manually_hide = request.POST.get("action", False) == "Hide"
+            youtube_dlp_logger.info(f"video [{youtube_video}] with id {video_id} is set as {'' if youtube_video.manually_hide else 'not '}hidden")
             youtube_video.save()
-            generate_rss_file(youtube_video.podcast)
+            youtube_podcast.refresh_from_db()
+            generate_rss_file(youtube_podcast)
         else:
             youtube_dlp_logger.error(f"could not find a video with ID [{video_id}]")
     elif request.POST.get("action", False) == "update_cron":
