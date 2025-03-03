@@ -10,7 +10,7 @@ def match_filter(info, *, incomplete):
         return
     youtube_dlp_logger = Loggers.get_logger("youtube_dlp")
     youtube_dlp_logger.info(f"{title}'s info is {info}")
-    if info.get('live_status', None) == 'is_upcoming':
+    if info.get('live_status', None) == 'is_upcoming' or info.get('live_status', None) == 'is_live':
         # processing a video that is not yet uploaded
         return f"{title} is not yet uploaded"
     youtube_podcast = YouTubePodcast.objects.all().filter(being_processed=True).first()
