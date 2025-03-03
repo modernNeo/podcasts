@@ -8,6 +8,8 @@ def match_filter(info, *, incomplete):
     if title is None:
         # it's processing the podcast info
         return
+    youtube_dlp_logger = Loggers.get_logger("youtube_dlp")
+    youtube_dlp_logger.info(f"{title}'s info is {info}")
     if info.get('live_status', None) == 'is_upcoming':
         # processing a video that is not yet uploaded
         return f"{title} is not yet uploaded"
