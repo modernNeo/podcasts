@@ -1,3 +1,5 @@
+import json
+
 from podcasts.models import YouTubePodcast
 from podcasts.views.setup_logger import Loggers
 
@@ -9,7 +11,7 @@ def match_filter(info, *, incomplete):
         # it's processing the podcast info
         return
     youtube_dlp_logger = Loggers.get_logger("youtube_dlp")
-    youtube_dlp_logger.info(f"{title}'s info is {info}")
+    youtube_dlp_logger.info(f"{title}'s info is {json.dumps(info, indent=4)}")
     if info.get('live_status', None) == 'is_upcoming' or info.get('live_status', None) == 'is_live':
         # processing a video that is not yet uploaded
         return f"{title} is not yet uploaded"
