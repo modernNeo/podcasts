@@ -4,7 +4,7 @@ from podcasts.models import YouTubePodcast
 from podcasts.views.setup_logger import Loggers
 
 
-def match_filter(info, *, incomplete):
+def match_filter(info, incomplete):
     # youtube_dlp_logger = Loggers.get_logger("youtube_dlp")
     title = info.get("title")
     if title is None:
