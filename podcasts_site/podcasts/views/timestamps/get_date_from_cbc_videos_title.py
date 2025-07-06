@@ -49,4 +49,6 @@ def get_date_from_cbc_videos_title(video_title_after_substring, date_formats):
     youtube_dlp_logger.info(
         f"[youtube_video_post_processor.py get_date_from_cbc_videos_title()] returning timestamp [{timestamp}]"
     )
+    if timestamp is None:
+        raise Exception(f"Unable to pull date/time from CBC Video with title {video_title_after_substring}")
     return timestamp
