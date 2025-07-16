@@ -26,7 +26,11 @@ def get_cbc_vancouver_timestamp(current_file_name):
     )
     timestamp = get_date_from_cbc_videos_title(title_substring_with_date, settings.CBC_VANCOUVER_NEWS_DATE_FORMAT)
     youtube_dlp_logger.info(f"[cbc_vancouver_timestamp.py get_cbc_vancouver_timestamp()] timestamp=[{timestamp}]")
+
+    # necessary because just using the hour that is extracted from the title of the video makes it seem like a video that
+    # was uploaded at 6 PM was instead uploaded at 6 AM
     hour = timestamp.hour + 12 if timestamp.hour + 12 <= 23 else timestamp.hour
+
     timestamp = pstdatetime(year=pstdatetime.now().year, month=timestamp.month, day=timestamp.day,
                             hour=hour, minute=timestamp.minute, second=0,
                             tzinfo=pstdatetime.PACIFIC_TZ)
