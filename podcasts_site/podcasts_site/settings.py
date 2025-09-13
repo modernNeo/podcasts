@@ -173,6 +173,7 @@ CBC_VANCOUVER_NEWS_DATE_FORMAT = [
     "%I_%M%p, %B %d", # used on 2025 July 5th
     "%I%p, %B %d", #used on 2025 July 3rd and 4th
     "%I %B %d", #used on 2025, July 7th
+    "%I %b%d", #used on 2025, Sept 1
 ]
 CBC_VANCOUVER_NEWS_PREFIX = 'CBC Vancouver News at '
 # Internationalization
