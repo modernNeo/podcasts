@@ -142,40 +142,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-CBC_NEWS_TITLE_DATE_NORMALIZER = {
-    "Sept.": "Sep",
-    "Aug." : "Aug",
-    "Sep." : "Sep",
-    "Oct." : "Oct",
-    "Nov." : "Nov"
-}
-THE_NATIONAL_DATE_FORMAT = ["%B %d, %Y", "%b %d, %Y"]
-THE_NATIONAL_CHAPTER_PREFIX = 'The National for '
 
-CBC_VANCOUVER_NEWS_DATE_FORMAT = [
-    "%I, %b %d", "%I%M, %b %d", "%I, %B %d",
-    "%I,%B %d", # needed cause of a typo with 2024 July 14's title
-    "%I_%M %p, %B %d", #needed cause of a wierd format with the videos around 2024 July 3rd
-    "%I%M %p, %B %d", #needed cause of wierd format with the videos around 2024 June 22nd
-    "%I_%M, %B %d", # needed cause of a wierd format on July 20th
-    "%I %b %d", # used on 2024 Oct 9th at the earliest
-    "%I, %b%d", # used on 2024 Oct 11th at the earliest
-    "%I_%M,%b%d", # used on 2024 Oct 19th at the earliest
-    "%I_%M, %b %d", # used for 2024 Oct 26th
-    "%I,%b %d", # used for 2024 Nov 3rd
-    "%I%M %b %d", # used on 2024 Nov 9th
-    "%I_%M %b %d", #used on 2024 Nov 16
-    "%I%M, %B %d", # used for 2025 March 29th
-    "%I_%M,%B %d", # used on 2025 April 26
-    "%I.%B %d", # used on 2025 May 2nd
-    "%I - %b %d", # used on 2025 May 5th
-    "%I%M%p %b %d", # used on 2025 May 10th
-    "%I_%M%p, %B %d", # used on 2025 July 5th
-    "%I%p, %B %d", #used on 2025 July 3rd and 4th
-    "%I %B %d", #used on 2025, July 7th
-    "%I %b%d", #used on 2025, Sept 1
-]
-CBC_VANCOUVER_NEWS_PREFIX = 'CBC Vancouver News at '
+
+
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 

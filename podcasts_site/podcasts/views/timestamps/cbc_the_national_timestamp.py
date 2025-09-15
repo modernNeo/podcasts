@@ -1,8 +1,9 @@
-from django.conf import settings
-
 from podcasts.views.timestamps.cbc_vancouver_timestamp import get_date_from_cbc_videos_title
 from podcasts.views.pstdatetimefield import pstdatetime
 from podcasts.views.setup_logger import Loggers
+
+THE_NATIONAL_DATE_FORMAT = ["%B %d, %Y", "%b %d, %Y"]
+THE_NATIONAL_CHAPTER_PREFIX = 'The National for '
 
 
 def video_has_national_in_first_chapter(information):
@@ -40,8 +41,8 @@ def video_has_national_in_first_chapter(information):
 
 def get_cbc_the_national_timestamp(information):
     youtube_dlp_logger = Loggers.get_logger("youtube_dlp")
-    date_string = information['chapters'][0]['title'][len(settings.THE_NATIONAL_CHAPTER_PREFIX):]
-    timestamp = get_date_from_cbc_videos_title(date_string, settings.THE_NATIONAL_DATE_FORMAT)
+    date_string = information['chapters'][0]['title'][len(THE_NATIONAL_CHAPTER_PREFIX):]
+    timestamp = get_date_from_cbc_videos_title(date_string, THE_NATIONAL_DATE_FORMAT)
     if timestamp is None:
         raise AttributeError()
     youtube_dlp_logger.info(f"[cbc_the_national_timestamp.py get_cbc_the_national_timestamp()] timestamp=[{timestamp}]")

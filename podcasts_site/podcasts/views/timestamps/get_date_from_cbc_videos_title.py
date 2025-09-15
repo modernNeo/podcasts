@@ -1,20 +1,25 @@
-from django.conf import settings
-
 from podcasts.models import VideoWithNewDateFormat, YouTubePodcast
 from podcasts.views.pstdatetimefield import pstdatetime
 from podcasts.views.setup_logger import Loggers
 
+CBC_NEWS_TITLE_DATE_NORMALIZER = {
+    "Sept.": "Sep",
+    "Aug." : "Aug",
+    "Sep." : "Sep",
+    "Oct." : "Oct",
+    "Nov." : "Nov"
+}
 
 def normalize_date_string(video_title_after_substring):
     youtube_dlp_logger = Loggers.get_logger("youtube_dlp")
-    for date in settings.CBC_NEWS_TITLE_DATE_NORMALIZER.keys():
+    for date in CBC_NEWS_TITLE_DATE_NORMALIZER.keys():
         if date in video_title_after_substring:
             youtube_dlp_logger.info(
                 f"[youtube_video_post_processor.py normalize_date_string()] found string [{date}] in "
                 f"video_title_after_substring [{video_title_after_substring}]"
             )
             video_title_after_substring = video_title_after_substring.replace(
-                date, settings.CBC_NEWS_TITLE_DATE_NORMALIZER[date]
+                date, CBC_NEWS_TITLE_DATE_NORMALIZER[date]
             )
             youtube_dlp_logger.info(
                 f"[youtube_video_post_processor.py normalize_date_string()] video_title_after_substring =  "
