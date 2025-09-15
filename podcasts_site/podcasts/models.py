@@ -222,6 +222,15 @@ class LoggingFilePath(models.Model):
         null=True
     )
 
+class VideoWithNewDateFormat(models.Model):
+    video_title = models.CharField(
+        max_length=10000
+    )
+    podcast = models.ForeignKey(YouTubePodcast, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"Error [{self.video_title}] in podcast {self.podcast}"
+
 class YouTubeDLPWarnError(models.Model):
     message = models.CharField(
         max_length=10000

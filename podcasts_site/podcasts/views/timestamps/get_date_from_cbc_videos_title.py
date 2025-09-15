@@ -1,5 +1,6 @@
 from django.conf import settings
 
+from podcasts.models import VideoWithNewDateFormat, YouTubePodcast
 from podcasts.views.pstdatetimefield import pstdatetime
 from podcasts.views.setup_logger import Loggers
 
@@ -50,5 +51,8 @@ def get_date_from_cbc_videos_title(video_title_after_substring, date_formats):
         f"[youtube_video_post_processor.py get_date_from_cbc_videos_title()] returning timestamp [{timestamp}]"
     )
     if timestamp is None:
-        raise Exception(f"Unable to pull date/time from CBC Video with title {video_title_after_substring}")
+        podcast_being_processed = YouTubePodcast.objects.all().filter(being_processed=True).first()
+        VideoWithNewDateFormat(
+            video_title = video_title_after_substring, podcast=podcast_being_processed
+        ).save()
     return timestamp

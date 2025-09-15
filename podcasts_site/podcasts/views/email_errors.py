@@ -1,6 +1,6 @@
 import os
 
-from podcasts.models import YouTubeDLPWarnError, LoggingFilePath
+from podcasts.models import YouTubeDLPWarnError, LoggingFilePath, VideoWithNewDateFormat
 from podcasts.views.Gmail import Gmail
 from podcasts.views.setup_logger import error_logging_level, warn_logging_level
 
@@ -22,8 +22,14 @@ def email_errors():
     subject = ""
     number_of_errors = errors.filter(levelno=error_logging_level).count()
     number_of_warnings = errors.filter(levelno=warn_logging_level).count()
+    invalid_dates = VideoWithNewDateFormat.objects.all()
+    number_of_invalid_dates = invalid_dates.count()
+    if number_of_invalid_dates > 0:
+        subject = f"{number_of_invalid_dates} CBC videos with invalid date formats"
     if number_of_errors > 0:
-        subject = f"{number_of_errors} podcast error{'' if number_of_errors == 1 else 's'}"
+        if number_of_invalid_dates > 0:
+            subject += " and"
+        subject += f"{number_of_errors} podcast error{'' if number_of_errors == 1 else 's'}"
     if number_of_warnings > 0:
         if number_of_errors > 0:
             subject += " and"

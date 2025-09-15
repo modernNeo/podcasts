@@ -42,6 +42,8 @@ def get_cbc_the_national_timestamp(information):
     youtube_dlp_logger = Loggers.get_logger("youtube_dlp")
     date_string = information['chapters'][0]['title'][len(settings.THE_NATIONAL_CHAPTER_PREFIX):]
     timestamp = get_date_from_cbc_videos_title(date_string, settings.THE_NATIONAL_DATE_FORMAT)
+    if timestamp is None:
+        raise AttributeError()
     youtube_dlp_logger.info(f"[cbc_the_national_timestamp.py get_cbc_the_national_timestamp()] timestamp=[{timestamp}]")
     timestamp = pstdatetime(
         year=pstdatetime.now().year, month=timestamp.month, day=timestamp.day, hour=6 + 12,

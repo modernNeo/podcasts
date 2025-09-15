@@ -3,7 +3,7 @@ from pathlib import Path
 from django.conf import settings
 
 from podcasts.models import YouTubePodcast, RSS_FEED_FOLDER_NAME, ARCHIVE_FOLDER_NAME, LoggingFilePath, \
-    YouTubeDLPWarnError
+    YouTubeDLPWarnError, VideoWithNewDateFormat
 from podcasts.views.email_errors import email_errors
 from podcasts.views.pull_videos import pull_videos
 
@@ -16,6 +16,7 @@ def pull_latest_youtube_videos():
     Path(f"{settings.MEDIA_ROOT}/{ARCHIVE_FOLDER_NAME}").mkdir(parents=True, exist_ok=True)
     LoggingFilePath.objects.all().delete()
     YouTubeDLPWarnError.objects.all().delete()
+    VideoWithNewDateFormat.objects.all().delete()
     for youtube_podcast in youtube_podcasts:
         pull_videos(youtube_podcast)
     email_errors()

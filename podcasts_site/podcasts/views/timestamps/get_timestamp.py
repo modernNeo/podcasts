@@ -12,19 +12,21 @@ def get_timestamp(information, current_file_name, podcast_being_processed):
     cbc_vancouver_news_video = is_cbc_vancouver_video(current_file_name)
     the_national_video = video_has_national_in_first_chapter(information)
     if cbc_vancouver_news_video:
-        file_name_timestamp = get_cbc_vancouver_timestamp(current_file_name).pst
-        video_timestamp = pstdatetime.from_epoch(int(information['timestamp'])).pst
-        if video_timestamp.hour < 3:
-            video_timestamp = video_timestamp - timedelta(hours=6)
+        timestamp = get_cbc_vancouver_timestamp(current_file_name)
+        if timestamp:
+            file_name_timestamp = timestamp.pst
+            video_timestamp = pstdatetime.from_epoch(int(information['timestamp'])).pst
+            if video_timestamp.hour < 3:
+                video_timestamp = video_timestamp - timedelta(hours=6)
 
-        # the below originally used the video_timestamp for the month and day but I can't remember if there was a
-        # good reason for that, and it can cause issues if CBC has an issue and doesn't upload a day's programming
-        # until the next day
-        timestamp = pstdatetime(
-            year=video_timestamp.year, month=file_name_timestamp.month, day=file_name_timestamp.day,
-            hour=file_name_timestamp.hour, minute=file_name_timestamp.minute,
-            second=0, tzinfo=pstdatetime.PACIFIC_TZ
-        )
+            # the below originally used the video_timestamp for the month and day but I can't remember if there was a
+            # good reason for that, and it can cause issues if CBC has an issue and doesn't upload a day's programming
+            # until the next day
+            timestamp = pstdatetime(
+                year=video_timestamp.year, month=file_name_timestamp.month, day=file_name_timestamp.day,
+                hour=file_name_timestamp.hour, minute=file_name_timestamp.minute,
+                second=0, tzinfo=pstdatetime.PACIFIC_TZ
+            )
     elif the_national_video or podcast_being_processed.name == 'The National | Full Show':
         manually_extract = not the_national_video
         if the_national_video:
