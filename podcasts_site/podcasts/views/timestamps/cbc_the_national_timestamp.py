@@ -28,7 +28,7 @@ def video_has_national_in_first_chapter(information):
         )
         return False
     is_national = (
-            settings.THE_NATIONAL_CHAPTER_PREFIX == first_chapter['title'][:len(settings.THE_NATIONAL_CHAPTER_PREFIX)]
+            THE_NATIONAL_CHAPTER_PREFIX == first_chapter['title'][:len(THE_NATIONAL_CHAPTER_PREFIX)]
     )
     youtube_dlp_logger.info(
         f"[cbc_the_national_timestamp.py video_has_national_in_first_chapter()] first_chapter[title]="
