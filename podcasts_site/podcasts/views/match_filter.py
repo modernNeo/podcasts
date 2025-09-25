@@ -12,7 +12,7 @@ def match_filter(info, incomplete):
     youtube_dlp_logger = Loggers.get_logger("youtube_dlp")
     # info['automatic_captions'] = None
     # info['formats'] = None
-    # youtube_dlp_logger.info(f"{title}'s info is {json.dumps(info, indent=4)}")
+    youtube_dlp_logger.info(f"{title}'s info is {json.dumps(info, indent=4)}")
     youtube_dlp_logger.info(f"matching [{title}]")
     if info.get('live_status', None) == 'is_upcoming' or info.get('live_status', None) == 'is_live':
         # processing a video that is not yet uploaded
