@@ -94,34 +94,37 @@ class YouTubeVideoPostProcessor(postprocessor.common.PostProcessor):
                     file_size = information.get('filesize', None)
                     if not file_size:
                         file_size = information.get('filesize_approx', None)
-                    youtube_podcast_video = YouTubeVideo.objects.all().filter(
-                        video_id=youtube_id).first()
-                    if not youtube_podcast_video:
-                        youtube_podcast_video = YouTubeVideo()
-                    youtube_podcast_video.file_not_found = False
-                    youtube_podcast_video.video_id = youtube_id
-                    youtube_podcast_video.filename = new_file_name
-                    youtube_podcast_video.original_title = information['title']
-                    youtube_podcast_video.description = information["description"]
-                    youtube_podcast_video.podcast = podcast_being_processed
-                    youtube_podcast_video.date = timestamp
-                    youtube_podcast_video.identifier_number = release_stamp
-                    youtube_podcast_video.grouping_number = grouping_release_stamp
-                    youtube_podcast_video.url = information['original_url']
-                    youtube_podcast_video.image = thumbnail
-                    youtube_podcast_video.size = file_size
-                    youtube_podcast_video.extension = new_file_name[index_of_last_period:]
-                    youtube_podcast_video.duration = information['duration']
-                    youtube_podcast_video.save()
-                    youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] {youtube_podcast_video} saved")
-                    if cbc_vancouver_news_video:
-                        youtube_podcast_video_grouping = PodcastVideoGrouping(
-                            grouping_number=grouping_release_stamp, podcast=podcast_being_processed,
-                            podcast_video=youtube_podcast_video
-                        )
-                        youtube_podcast_video_grouping.save()
-                        youtube_dlp_logger.info(
-                            f"[youtube_video_post_processor.py run()] {youtube_podcast_video_grouping} saved")
+                    if file_size is None:
+                        youtube_dlp_logger.error(f"could not find the file size for {information['title']}")
+                    else:
+                        youtube_podcast_video = YouTubeVideo.objects.all().filter(
+                            video_id=youtube_id).first()
+                        if not youtube_podcast_video:
+                            youtube_podcast_video = YouTubeVideo()
+                        youtube_podcast_video.file_not_found = False
+                        youtube_podcast_video.video_id = youtube_id
+                        youtube_podcast_video.filename = new_file_name
+                        youtube_podcast_video.original_title = information['title']
+                        youtube_podcast_video.description = information["description"]
+                        youtube_podcast_video.podcast = podcast_being_processed
+                        youtube_podcast_video.date = timestamp
+                        youtube_podcast_video.identifier_number = release_stamp
+                        youtube_podcast_video.grouping_number = grouping_release_stamp
+                        youtube_podcast_video.url = information['original_url']
+                        youtube_podcast_video.image = thumbnail
+                        youtube_podcast_video.size = file_size
+                        youtube_podcast_video.extension = new_file_name[index_of_last_period:]
+                        youtube_podcast_video.duration = information['duration']
+                        youtube_podcast_video.save()
+                        youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] {youtube_podcast_video} saved")
+                        if cbc_vancouver_news_video:
+                            youtube_podcast_video_grouping = PodcastVideoGrouping(
+                                grouping_number=grouping_release_stamp, podcast=podcast_being_processed,
+                                podcast_video=youtube_podcast_video
+                            )
+                            youtube_podcast_video_grouping.save()
+                            youtube_dlp_logger.info(
+                                f"[youtube_video_post_processor.py run()] {youtube_podcast_video_grouping} saved")
             youtube_dlp_logger.info("###############################################")
             youtube_dlp_logger.info(f"# Finished Post-Processing video {full_path} #")
             youtube_dlp_logger.info("###############################################")
