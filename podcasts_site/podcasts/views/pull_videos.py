@@ -4,6 +4,7 @@ import sys
 from pathlib import Path
 
 import yt_dlp
+from yt_dlp.networking.exceptions import HTTPError
 from yt_dlp.utils import ExtractorError
 
 from podcasts.models import YouTubeDLPWarnError, YouTubePodcast
@@ -55,6 +56,7 @@ class CustomDL(yt_dlp.YoutubeDL):
 
     def trouble(self, message=None, tb=None, is_error=True):
         video_unavailable = False
+        podcast_being_processed = None
         log_level = error_logging_level
 
         if sys.exc_info()[0]:
@@ -75,8 +77,13 @@ class CustomDL(yt_dlp.YoutubeDL):
                     self.params['logger'].warn(message)
                     log_level = warn_logging_level
                     video_unavailable = True
+            if type(exception) is HTTPError:
+                podcast_being_processed = YouTubePodcast.objects.all().filter(being_processed=True).first()
+                self.params['logger'].error(f'{message} for {podcast_being_processed}')
+                video_unavailable = True
 
-        podcast_being_processed = YouTubePodcast.objects.all().filter(being_processed=True).first()
+        if podcast_being_processed is None:
+            podcast_being_processed = YouTubePodcast.objects.all().filter(being_processed=True).first()
         YouTubeDLPWarnError(
             message=message, levelno=log_level, video_unavailable=video_unavailable,
             podcast=podcast_being_processed, video_id=get_youtube_id(message)
@@ -106,7 +113,7 @@ def pull_videos(youtube_podcast):
             "paths": {"home": f"{youtube_podcast.video_file_location}"},
             "download_archive": youtube_podcast.archive_file_location,  # done so that past downloaded videos
             # are not re-downloaded
-            "ignoreerrors": True,  # helpful so that if one video has an issue, the rest will still be
+            # "ignoreerrors": True,  # helpful so that if one video has an issue, the rest will still be
             # attempted to be downloaded
             "sleep_interval_requests": 20,  # to avoid youtube trying to verify the requests are not coming
             # from a bot
@@ -114,6 +121,7 @@ def pull_videos(youtube_podcast):
             "logger" : Loggers.get_logger("youtube_dlp"),
             "ffmpeg_location" : "ffmpeg-master-latest-linux64-gpl/bin/ffmpeg",
             "format_sort": ['vcodec:avc', 'res', 'acodec:aac'],
+            "extractor_args": {"youtube": {"player_client": ["default", "-tv_simply"]}},
             "cookiefile" : os.environ.get('COOKIE_LOCATION', None)
 
             # useful for debugging
