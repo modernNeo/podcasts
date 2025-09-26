@@ -77,7 +77,7 @@ class CustomDL(yt_dlp.YoutubeDL):
                     self.params['logger'].warn(message)
                     log_level = warn_logging_level
                     video_unavailable = True
-            if type(exception) is HTTPError:
+            else:
                 podcast_being_processed = YouTubePodcast.objects.all().filter(being_processed=True).first()
                 self.params['logger'].error(f'{message} for {podcast_being_processed}')
                 video_unavailable = True
@@ -121,7 +121,7 @@ def pull_videos(youtube_podcast):
             "logger" : Loggers.get_logger("youtube_dlp"),
             "ffmpeg_location" : "ffmpeg-master-latest-linux64-gpl/bin/ffmpeg",
             "format_sort": ['vcodec:avc', 'res', 'acodec:aac'],
-            "extractor_args": {"youtube": {"player_client": ["default", "-tv_simply"]}},
+            "extractor_args": {"youtube": {"player_client": ["default", "-tv_simply"]}}, # fixing latest yt-dlp bug with arg from https://github.com/yt-dlp/yt-dlp/issues/14456#issuecomment-3339654496
             "cookiefile" : os.environ.get('COOKIE_LOCATION', None)
 
             # useful for debugging
