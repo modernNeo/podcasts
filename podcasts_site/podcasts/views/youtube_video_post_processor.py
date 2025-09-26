@@ -95,7 +95,7 @@ class YouTubeVideoPostProcessor(postprocessor.common.PostProcessor):
                     if not file_size:
                         file_size = information.get('filesize_approx', None)
                     if file_size is None:
-                        youtube_dlp_logger.error(f"could not find the file size for {information['title']}")
+                        youtube_dlp_logger.error(f"could not find the file size for {information['title']} with a url of {information['original_url']}")
                     else:
                         youtube_podcast_video = YouTubeVideo.objects.all().filter(
                             video_id=youtube_id).first()
