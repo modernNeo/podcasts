@@ -12,5 +12,5 @@ def delete_videos_that_are_not_properly_tracked(youtube_podcast: YouTubePodcast)
     for video in os.listdir(youtube_podcast.video_file_location):
         if video not in tracked_videos:
             video_full_path = f"{youtube_podcast.video_file_location}/{video}"
-            youtube_dlp_logger.error(f"[{video_full_path}] not in {youtube_podcast.video_file_location}")
+            youtube_dlp_logger.warn(f"[{video_full_path}] not in {youtube_podcast.video_file_location}")
             # os.remove(video_full_path)
