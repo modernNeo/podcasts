@@ -25,6 +25,15 @@ class YoutubeDLPDebugStreamHandler(logging.StreamHandler):
         if record.levelno < error_logging_level:
             logging.StreamHandler.emit(self, record)
 
+class ErrorHandler(logging.StreamHandler):
+
+    def __init__(self, stream=None):
+        logging.StreamHandler.__init__(self, stream=stream)
+
+    def emit(self, record):
+        if record.levelno > warn_logging_level:
+            logging.StreamHandler.emit(self, record)
+
 class PSTFormatter(logging.Formatter):
     def __init__(self, fmt=None, datefmt=None, tz=None):
         super(PSTFormatter, self).__init__(fmt, datefmt)
@@ -173,7 +182,12 @@ class Loggers:
         ).save()
 
 
-        # sys.stderr = sys.__stderr__
+        sys.stderr = sys.__stderr__
+        sys_stderr_stream_handler = ErrorHandler(sys.stderr)
+        sys_stderr_stream_handler.setFormatter(sys_stream_formatting)
+        sys_stderr_stream_handler.setLevel(warn_logging_level)
+        logger.addHandler(sys_stderr_stream_handler)
+        sys.stderr = LoggerWriter(logger.error)
         # sys_stderr_stream_handler = YoutubeDLPWarnErrorHandler(
         #     sys.stderr,
         #     debug_file_name=debug_log_file_absolute_path,
