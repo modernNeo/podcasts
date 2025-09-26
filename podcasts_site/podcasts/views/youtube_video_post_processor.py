@@ -94,6 +94,8 @@ class YouTubeVideoPostProcessor(postprocessor.common.PostProcessor):
                     file_size = information.get('filesize', None)
                     if not file_size:
                         file_size = information.get('filesize_approx', None)
+                    if not file_size:
+                        file_size = os.path.getsize(new_file_path) #temporary until bug gets fixed
                     if file_size is None:
                         youtube_dlp_logger.error(f"could not find the file size for {information['title']} with a url of {information['original_url']}")
                     else:
