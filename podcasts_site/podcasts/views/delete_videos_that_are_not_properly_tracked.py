@@ -18,7 +18,7 @@ def delete_videos_that_are_not_properly_tracked(youtube_podcast: YouTubePodcast)
             )
             YouTubeDLPWarnError(
                 message=message, levelno=logging.WARN, video_unavailable=False,
-                podcast=youtube_podcast, video_id=video.video_id
+                podcast=youtube_podcast, video_id=None
             ).save()
             youtube_dlp_logger.warn(message)
             # os.remove(video_full_path)
