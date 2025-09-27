@@ -11,6 +11,6 @@ def update_archive_file(youtube_podcast: YouTubePodcast):
                 f.write(f"youtube {video.video_id}\n")
             else:
                 video.file_not_found = True
-                youtube_dlp_logger.warn(f"[{video}] not in {youtube_podcast.video_file_location}")
+                youtube_dlp_logger.warn(f"[update_archive_file] [{video}] not in {youtube_podcast.video_file_location}")
                 # video.delete()
             video.save()
