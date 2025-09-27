@@ -80,7 +80,6 @@ class CustomDL(yt_dlp.YoutubeDL):
             else:
                 podcast_being_processed = YouTubePodcast.objects.all().filter(being_processed=True).first()
                 self.params['logger'].error(f'{message} for {podcast_being_processed}')
-                video_unavailable = True
 
         if podcast_being_processed is None:
             podcast_being_processed = YouTubePodcast.objects.all().filter(being_processed=True).first()
@@ -88,8 +87,7 @@ class CustomDL(yt_dlp.YoutubeDL):
             message=message, levelno=log_level, video_unavailable=video_unavailable,
             podcast=podcast_being_processed, video_id=get_youtube_id(message)
         ).save()
-        if video_unavailable:
-            return
+        return # I decided I'd rather never call the super and instead look for more videos
         super().trouble(message=message, tb=tb, is_error=is_error)
 
 
