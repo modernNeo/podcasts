@@ -113,16 +113,16 @@ def pull_videos(youtube_podcast):
             "paths": {"home": f"{youtube_podcast.video_file_location}"},
             "download_archive": youtube_podcast.archive_file_location,  # done so that past downloaded videos
             # are not re-downloaded
-            # "ignoreerrors": True,  # helpful so that if one video has an issue, the rest will still be
-            # attempted to be downloaded
-            "sleep_interval_requests": 20,  # to avoid youtube trying to verify the requests are not coming
-            # from a bot
+            "sleep_interval_requests": 20,  # to avoid youtube trying to verify the requests are not coming from a bot
             "playlistend": youtube_podcast.index_range,
             "logger" : Loggers.get_logger("youtube_dlp"),
             "ffmpeg_location" : "ffmpeg-master-latest-linux64-gpl/bin/ffmpeg",
-            "format_sort": ['vcodec:avc', 'res', 'acodec:aac'],
-            "extractor_args": {"youtube": {"player_client": ["default", "-tv_simply"]}}, # fixing latest yt-dlp bug with arg from https://github.com/yt-dlp/yt-dlp/issues/14456#issuecomment-3339654496
-            "cookiefile" : os.environ.get('COOKIE_LOCATION', None)
+            "format_sort": ['vcodec:avc', 'res', 'acodec:aac'], # needed cause of
+            # https://github.com/yt-dlp/yt-dlp/issues/11177#issuecomment-2395588715
+            "extractor_args": {"youtube": {"player_client": ["default", "-tv_simply"]}}, # fixing latest yt-dlp bug
+            # with arg from https://github.com/yt-dlp/yt-dlp/issues/14456#issuecomment-3339654496
+            "cookiefile" : os.environ.get('COOKIE_LOCATION', None),
+            'format': 'bv+ba/b' # needed cause of https://github.com/yt-dlp/yt-dlp/issues/14462#issuecomment-3340774234
 
             # useful for debugging
             # "listformats" : True
