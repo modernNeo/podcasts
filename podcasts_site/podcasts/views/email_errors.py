@@ -9,20 +9,20 @@ def email_errors():
     errors = YouTubeDLPWarnError.objects.all().filter(processed=False)
     video_unavailable_errors = errors.filter(video_unavailable=True)
     all_other_errors = errors.filter(video_unavailable=False)
-    video_unavailables = None
+    email_body = None
     if len(video_unavailable_errors) > 0:
-        video_unavailables = "Unavailable Videos:\n\n"
+        email_body = "Unavailable Videos:\n\n"
         podcast_displayed = []
         for video_unavailable_error in video_unavailable_errors:
             if video_unavailable_error.podcast.id not in podcast_displayed:
                 name = video_unavailable_error.podcast.custom_name \
                     if video_unavailable_error.podcast.custom_name else video_unavailable_error.podcast.name
-                video_unavailables += f"{name}\n"
-            video_unavailables += f"\nhttps://www.youtube.com/watch?v={video_unavailable_error.video_id}"
+                email_body += f"{name}\n"
+            email_body += f"\nhttps://www.youtube.com/watch?v={video_unavailable_error.video_id}"
     if len(all_other_errors) > 0:
-        video_unavailables = "Other Errors:\n\n"
+        email_body = "Other Errors:\n\n"
         for all_other_error in all_other_errors:
-            video_unavailables += f"{all_other_error}\n"
+            email_body += f"{all_other_error}\n"
     subject = ""
     number_of_errors = errors.filter(levelno=error_logging_level).count()
     number_of_warnings = errors.filter(levelno=warn_logging_level).count()
@@ -43,7 +43,6 @@ def email_errors():
         subject += f"warning{'' if number_of_warnings == 1 else 's'}"
 
 
-    body = f"{video_unavailables}" if video_unavailables else video_unavailables
     file_paths = LoggingFilePath.objects.all()[0]
 
     gmail = Gmail()
@@ -56,7 +55,7 @@ def email_errors():
                 continue
             log_sent.append(file_paths.error_file_path)
             gmail.send_email(
-                subject=subject, body=body, to_email=os.environ['TO_EMAIL'], to_name='modernNeo',
+                subject=subject, body=email_body, to_email=os.environ['TO_EMAIL'], to_name='modernNeo',
                 attachments=[file_paths.debug_file_path, file_paths.warn_file_path, file_paths.error_file_path]
             )
             error.processed = True

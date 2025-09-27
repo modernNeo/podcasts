@@ -21,4 +21,4 @@ def delete_videos_that_are_not_properly_tracked(youtube_podcast: YouTubePodcast)
                 podcast=youtube_podcast, video_id=None
             ).save()
             youtube_dlp_logger.warn(message)
-            # os.remove(video_full_path)
+            os.remove(video_full_path)
