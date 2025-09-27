@@ -1,6 +1,7 @@
+import logging
 import os
 
-from podcasts.models import YouTubePodcast
+from podcasts.models import YouTubePodcast, YouTubeDLPWarnError
 from podcasts.views.setup_logger import Loggers
 
 
@@ -11,8 +12,13 @@ def delete_videos_that_are_not_properly_tracked(youtube_podcast: YouTubePodcast)
     for video in os.listdir(youtube_podcast.video_file_location):
         if video not in tracked_videos:
             video_full_path = f"{youtube_podcast.video_file_location}/{video}"
-            youtube_dlp_logger.warn(
+            message = (
                 f"[delete_videos_that_are_not_properly_tracked]\n\t[{video_full_path}] not in\n\t\t"
                 f"{youtube_podcast.video_file_location}"
             )
+            YouTubeDLPWarnError(
+                message=message, levelno=logging.WARN, video_unavailable=False,
+                podcast=youtube_podcast, video_id=video.video_id
+            ).save()
+            youtube_dlp_logger.warn(message)
             # os.remove(video_full_path)

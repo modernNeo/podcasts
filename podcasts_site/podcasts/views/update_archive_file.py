@@ -1,4 +1,6 @@
-from podcasts.models import YouTubePodcast
+import logging
+
+from podcasts.models import YouTubePodcast, YouTubeDLPWarnError
 from podcasts.views.setup_logger import Loggers
 
 
@@ -10,9 +12,12 @@ def update_archive_file(youtube_podcast: YouTubePodcast):
                 video.file_not_found = False
                 f.write(f"youtube {video.video_id}\n")
             else:
+                message = f"[update_archive_file]\n\t[{video}] not in \n\t\t{youtube_podcast.video_file_location}"
                 video.file_not_found = True
-                youtube_dlp_logger.warn(
-                    f"[update_archive_file]\n\t[{video}] not in \n\t\t{youtube_podcast.video_file_location}"
-                )
+                YouTubeDLPWarnError(
+                    message=message, levelno=logging.WARN, video_unavailable=False,
+                    podcast=youtube_podcast, video_id=video.video_id
+                ).save()
+                youtube_dlp_logger.warn(message)
                 # video.delete()
             video.save()

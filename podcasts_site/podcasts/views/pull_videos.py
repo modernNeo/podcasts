@@ -4,7 +4,6 @@ import sys
 from pathlib import Path
 
 import yt_dlp
-from yt_dlp.networking.exceptions import HTTPError
 from yt_dlp.utils import ExtractorError
 
 from podcasts.models import YouTubeDLPWarnError, YouTubePodcast
