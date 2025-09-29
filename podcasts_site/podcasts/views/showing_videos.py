@@ -1,3 +1,5 @@
+import os
+
 from podcasts.models import YouTubePodcast, CronSchedule, YouTubeVideo
 from podcasts.views.delete_podcast import delete_podcast
 from podcasts.views.generate_rss_file import generate_rss_file
@@ -21,9 +23,28 @@ def showing_videos(request):
             podcast.url = request.POST['url']
             podcast.index_range = None if len(index_range) == 0 else index_range
             podcast.when_to_pull = request.POST['when_to_pull']
-            podcast.custom_name = request.POST['name'] \
-                if (request.POST['name'] != podcast.name and request.POST['name'].strip() != '' ) \
-                else None
+            current_name = podcast.name
+            new_name = request.POST['name']
+            name_changed = current_name != new_name and new_name.strip() != ''
+            if name_changed:
+                current_video_file_location = podcast.video_file_location
+                current_archive_location = podcast.archive_file_location
+                current_rss_feed_file_location = podcast.feed_file_location
+                podcast.custom_name = new_name
+                new_name_usable = (
+                        os.path.exists(current_video_file_location) and
+                        not os.path.exists(podcast.video_file_location) and
+                        os.path.exists(current_archive_location) and
+                        not os.path.exists(podcast.archive_file_location) and
+                        os.path.exists(current_rss_feed_file_location) and
+                        not os.path.exists(podcast.feed_file_location)
+                )
+                if new_name_usable:
+                    os.rename(current_video_file_location, podcast.video_file_location)
+                    os.rename(current_archive_location, podcast.archive_file_location)
+                    os.rename(current_rss_feed_file_location, podcast.feed_file_location)
+                else:
+                    podcast.custom_name = None
             podcast.cbc_news = request.POST.get('cbc_news', False) == 'on'
             podcast.save()
     elif request.POST.get("action", False) == 'Delete':
