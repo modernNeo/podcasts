@@ -24,7 +24,7 @@ class CronSchedule(models.Model):
 
 def string_cleaner(name):
     return (name.replace(':', '').replace(' ', '_').replace(',', '').replace("/", "_")
-            .replace("%", "").replace(";", "").replace("#", ""))
+            .replace("%", "").replace(";", "").replace("#", "").replace("?", ""))
 
 class YouTubePodcast(models.Model):
     # class Meta:
