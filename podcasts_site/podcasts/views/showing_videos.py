@@ -26,10 +26,16 @@ def showing_videos(request):
             current_name = podcast.name
             new_name = request.POST['name']
             name_changed = current_name != new_name and new_name.strip() != ''
+            youtube_dlp_logger.info(f"{current_name=}")
+            youtube_dlp_logger.info(f"{new_name=}")
+            youtube_dlp_logger.info(f"{name_changed=}")
             if name_changed:
                 current_video_file_location = podcast.video_file_location
                 current_archive_location = podcast.archive_file_location
                 current_rss_feed_file_location = podcast.feed_file_location
+                youtube_dlp_logger.info(f"{current_video_file_location=}")
+                youtube_dlp_logger.info(f"{current_archive_location=}")
+                youtube_dlp_logger.info(f"{current_rss_feed_file_location=}")
                 podcast.custom_name = new_name
                 new_name_usable = (
                         os.path.exists(current_video_file_location) and
@@ -39,6 +45,7 @@ def showing_videos(request):
                         os.path.exists(current_rss_feed_file_location) and
                         not os.path.exists(podcast.feed_file_location)
                 )
+                youtube_dlp_logger.info(f"{new_name_usable=}")
                 if new_name_usable:
                     os.rename(current_video_file_location, podcast.video_file_location)
                     os.rename(current_archive_location, podcast.archive_file_location)
