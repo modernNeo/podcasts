@@ -6,26 +6,34 @@ from podcasts.views.setup_logger import error_logging_level, warn_logging_level
 
 
 def email_errors():
-    errors = YouTubeDLPWarnError.objects.all().filter(processed=False)
-    video_unavailable_errors = errors.filter(video_unavailable=True)
-    all_other_errors = errors.filter(video_unavailable=False)
+    errors_and_warnings = YouTubeDLPWarnError.objects.all().filter(processed=False)
+
+    video_unavailable_errors_and_warnings = errors_and_warnings.filter(video_unavailable=True)
     email_body = None
-    if len(video_unavailable_errors) > 0:
+    if len(video_unavailable_errors_and_warnings) > 0:
         email_body = "Unavailable Videos:\n\n"
         podcast_displayed = []
-        for video_unavailable_error in video_unavailable_errors:
+        for video_unavailable_error in video_unavailable_errors_and_warnings:
             if video_unavailable_error.podcast.id not in podcast_displayed:
                 name = video_unavailable_error.podcast.custom_name \
                     if video_unavailable_error.podcast.custom_name else video_unavailable_error.podcast.name
                 email_body += f"{name}\n"
             email_body += f"\nhttps://www.youtube.com/watch?v={video_unavailable_error.video_id}"
+
+    all_other_errors_and_warnings = errors_and_warnings.filter(video_unavailable=False)
+    all_other_errors = all_other_errors_and_warnings.filter(levelno=error_logging_level)
+    all_other_warnings = all_other_errors_and_warnings.filter(levelno=warn_logging_level)
+    number_of_errors = all_other_errors.count()
+    number_of_warnings = all_other_warnings.count()
     if len(all_other_errors) > 0:
         email_body = "Other Errors:\n\n"
         for all_other_error in all_other_errors:
-            email_body += f"{all_other_error}\n"
+            email_body += f"{all_other_error.message} for podcast {all_other_error.podcast}\n"
+    if len(all_other_warnings) > 0:
+        email_body = "Other Warnings:\n\n"
+        for all_other_warning in all_other_warnings:
+            email_body += f"{all_other_warning.message} for podcast {all_other_warning.podcast}\n"
     subject = ""
-    number_of_errors = errors.filter(levelno=error_logging_level).count()
-    number_of_warnings = errors.filter(levelno=warn_logging_level).count()
     invalid_dates = VideoWithNewDateFormat.objects.all()
     number_of_invalid_dates = invalid_dates.count()
     if number_of_invalid_dates > 0:
@@ -48,7 +56,7 @@ def email_errors():
     gmail = Gmail()
     if number_of_errors > 0 or number_of_warnings > 0:
         log_sent = []
-        for error in errors:
+        for error in errors_and_warnings:
             if file_paths.error_file_path in log_sent:
                 error.processed = True
                 error.save()
