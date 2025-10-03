@@ -37,13 +37,19 @@ def showing_videos(request):
                 youtube_dlp_logger.info(f"{current_archive_location=}")
                 youtube_dlp_logger.info(f"{current_rss_feed_file_location=}")
                 podcast.custom_name = new_name
+                new_video_file_location = podcast.video_file_location
+                new_archive_location = podcast.archive_file_location
+                new_rss_feed_file_location = podcast.feed_file_location
+                youtube_dlp_logger.info(f"{new_video_file_location=}")
+                youtube_dlp_logger.info(f"{new_archive_location=}")
+                youtube_dlp_logger.info(f"{new_rss_feed_file_location=}")
                 new_name_usable = (
                         os.path.exists(current_video_file_location) and
-                        not os.path.exists(podcast.video_file_location) and
+                        not os.path.exists(new_video_file_location) and
                         os.path.exists(current_archive_location) and
-                        not os.path.exists(podcast.archive_file_location) and
+                        not os.path.exists(new_archive_location) and
                         os.path.exists(current_rss_feed_file_location) and
-                        not os.path.exists(podcast.feed_file_location)
+                        not os.path.exists(new_rss_feed_file_location)
                 )
                 youtube_dlp_logger.info(f"{new_name_usable=}")
                 if new_name_usable:
