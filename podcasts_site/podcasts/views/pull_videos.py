@@ -33,24 +33,29 @@ class CustomDL(yt_dlp.YoutubeDL):
         If stderr is a tty file the 'WARNING:' will be colored
         """
         if self.params.get('logger') is not None:
-            common_data_retrieval_log_messages = (
-                    '[youtube:tab] Incomplete data received. Retrying' in message or
-                    '[youtube:tab] Incomplete data received. Giving up after 3 retries' in message
-            )
             podcast_being_processed = YouTubePodcast.objects.all().filter(being_processed=True).first()
-            podcasts_with_known_retrieval_issues = (
-                'The Weekly Show with Jon Stewart | FULL Episodes'
-            )
-            podcasts_known_to_be_problematic = (
-                    podcast_being_processed is not None and
-                    podcast_being_processed.name in podcasts_with_known_retrieval_issues
-            )
-            if common_data_retrieval_log_messages and podcasts_known_to_be_problematic:
-                # https://github.com/yt-dlp/yt-dlp/issues/11930#issuecomment-2564490472
-                self.params['logger'].info(message)
-                return
-            elif not podcasts_known_to_be_problematic:
-                self.params['logger'].warning(f"[{podcast_being_processed.name}]")
+            if podcast_being_processed is not None:
+                jon_stewart_common_data_retrieval_log_messages = (
+                        '[youtube:tab] Incomplete data received. Retrying' in message or
+                        '[youtube:tab] Incomplete data received. Giving up after 3 retries' in message
+                )
+                jon_stewart_being_processed = podcast_being_processed.name == 'The Weekly Show with Jon Stewart | FULL Episodes'
+                jon_stewart_issue = jon_stewart_common_data_retrieval_log_messages and jon_stewart_being_processed
+
+                trevor_noah_hidden_log_messages = (
+                    '[youtube:tab] YouTube said: INFO - 2 unavailable videos are hidden'
+                )
+                trevor_noah_being_processed = podcast_being_processed.name == 'What Now With Trevor Noah - (Full Podcast Episodes)'
+                trevor_noah_issue = trevor_noah_hidden_log_messages and trevor_noah_being_processed
+                if jon_stewart_issue:
+                    # https://github.com/yt-dlp/yt-dlp/issues/11930#issuecomment-2564490472
+                    self.params['logger'].info(message)
+                    return
+                elif trevor_noah_issue:
+                    self.params['logger'].info(message)
+                    return
+                else:
+                    self.params['logger'].warning(f"warning below is for podcast [{podcast_being_processed.name}]")
         super().report_warning(message, only_once=only_once)
 
     def trouble(self, message=None, tb=None, is_error=True):
