@@ -38,6 +38,9 @@ class YouTubeVideoPostProcessor(postprocessor.common.PostProcessor):
                         f"[youtube_video_post_processor.py run()] {timestamp=}"
                     )
                     thumbnail = get_thumbnails(information)
+
+                    youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] {information['uploader']=}")
+
                     update_podcast_being_processed(podcast_being_processed, timestamp, information, thumbnail)
 
                     new_file_name = f"{timestamp.strftime('%Y-%m-%d-%H-%M')}-{current_file_name}"

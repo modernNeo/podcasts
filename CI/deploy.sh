@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# PURPOSE: used be jenkins to launch Wall_e to the CSSS PROD Discord Guild
+# PURPOSE: used be jenkins to launch the podcast app
 
 set -e -o xtrace
 # https://stackoverflow.com/a/5750463/7734535
