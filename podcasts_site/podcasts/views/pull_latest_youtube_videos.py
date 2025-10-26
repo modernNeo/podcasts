@@ -13,7 +13,6 @@ def pull_latest_youtube_videos():
     youtube_podcasts = YouTubePodcast.objects.all().filter(url__isnull=False).order_by("id")
     Path(f"{settings.MEDIA_ROOT}/{RSS_FEED_FOLDER_NAME}").mkdir(parents=True, exist_ok=True)
     Path(f"{settings.MEDIA_ROOT}/{ARCHIVE_FOLDER_NAME}").mkdir(parents=True, exist_ok=True)
-    LoggingFilePath.objects.all().delete()
     YouTubeDLPWarnError.objects.all().delete()
     VideoWithNewDateFormat.objects.all().delete()
     for youtube_podcast in youtube_podcasts:
