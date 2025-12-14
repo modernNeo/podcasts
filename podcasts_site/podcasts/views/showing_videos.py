@@ -60,6 +60,7 @@ def showing_videos(request):
                     podcast.custom_name = None
             podcast.cbc_news = request.POST.get('cbc_news', False) == 'on'
             podcast.save()
+            generate_rss_file(podcast)
     elif request.POST.get("action", False) == 'Delete':
         delete_podcast(request.POST['id'])
     elif request.POST.get("action", False) == "Reset":
