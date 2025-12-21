@@ -6,7 +6,7 @@ from pathlib import Path
 import yt_dlp
 from yt_dlp.utils import ExtractorError
 
-from podcasts.models import YouTubeDLPWarnError, YouTubePodcast
+from podcasts.models import YouTubeDLPWarnError, YouTubePodcast, ARCHIVE_FOLDER_PATH
 from podcasts.views.automatically_hide_videos import automatically_hide_videos
 from podcasts.views.delete_videos_that_are_not_properly_tracked import delete_videos_that_are_not_properly_tracked
 from podcasts.views.generate_rss_file import generate_rss_file
@@ -142,8 +142,11 @@ def pull_videos(youtube_podcast):
     if first_run:
         if os.path.exists(youtube_podcast.video_file_location):
             shutil.rmtree(youtube_podcast.video_file_location)
-        os.rename(previous_video_file_location, youtube_podcast.video_file_location)
-        os.rename(previous_archive_file_location, youtube_podcast.archive_file_location)
+        os.makedirs(ARCHIVE_FOLDER_PATH, exist_ok=True)
+        if os.path.exists(previous_video_file_location):
+            os.rename(previous_video_file_location, youtube_podcast.video_file_location)
+        if os.path.exists(previous_archive_file_location):
+            os.rename(previous_archive_file_location, youtube_podcast.archive_file_location)
 
     delete_videos_that_are_not_properly_tracked(youtube_podcast)
     automatically_hide_videos(youtube_podcast)

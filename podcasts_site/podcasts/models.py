@@ -14,6 +14,7 @@ from podcasts.views import pstdatetimefield
 VIDEOS_FOLDER_NAME = "videos"
 ARCHIVE_FOLDER_NAME = "archives"
 RSS_FEED_FOLDER_NAME = 'rss_feeds'
+ARCHIVE_FOLDER_PATH = f"{settings.MEDIA_ROOT}/{ARCHIVE_FOLDER_NAME}"
 
 class CronSchedule(models.Model):
     hour = models.IntegerField()

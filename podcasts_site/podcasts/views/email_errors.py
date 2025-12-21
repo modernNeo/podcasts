@@ -32,7 +32,7 @@ def email_errors():
     if len(all_other_warnings) > 0:
         email_body = "Other Warnings:\n\n"
         for all_other_warning in all_other_warnings:
-            email_body += f"{all_other_warning.message} for podcast {all_other_warning.podcast}\n"
+            email_body += f"{all_other_warning.message} for podcast {all_other_warning.podcast}\n\n"
     subject = ""
     invalid_dates = VideoWithNewDateFormat.objects.all()
     number_of_invalid_dates = invalid_dates.count()
@@ -42,6 +42,10 @@ def email_errors():
         if number_of_invalid_dates > 0:
             subject += " and"
         subject += f"{number_of_errors} podcast error{'' if number_of_errors == 1 else 's'}"
+    if number_of_invalid_dates > 0:
+        email_body += "Invalid Dates on CBC Vancouver News Videos\n\n"
+    for invalid_date in invalid_dates:
+        email_body += f"{invalid_date.video_title}"
     if number_of_warnings > 0:
         if number_of_errors > 0:
             subject += " and"

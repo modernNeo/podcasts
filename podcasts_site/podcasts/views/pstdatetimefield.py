@@ -1,3 +1,5 @@
+import os.path
+
 from dateutil.tz import tz, tzfile
 import pytz
 import re
@@ -134,7 +136,9 @@ class PSTDateTimeField(models.DateTimeField):
                 month = int(date[5:7])
                 day = int(date[8:10])
                 setattr(model_instance, self.attname, pstdatetime.create_utc_time(year, month, day))
-            elif date.tzinfo == tzfile('/usr/share/zoneinfo/Canada/Pacific'):
+            elif os.path.exists("/usr/share/zoneinfo/Canada/Pacific") and date.tzinfo == tzfile('/usr/share/zoneinfo/Canada/Pacific'):
+                setattr(model_instance, self.attname, date.utc)
+            elif os.path.exists("/usr/share/zoneinfo/America/Vancouver") and date.tzinfo == tzfile('/usr/share/zoneinfo/America/Vancouver'):
                 setattr(model_instance, self.attname, date.utc)
             elif date.tzinfo is None:
                 raise Exception("no timezone detected")
