@@ -76,7 +76,7 @@ class YouTubePodcast(models.Model):
 
     @property
     def http_feed_location(self):
-        return f"{settings.HTTP_AND_FQDN}{settings.MEDIA_URL}{RSS_FEED_FOLDER_NAME}/{self.url_friendly_name}.xml"
+        return f"{settings.XML_AND_VIDEO_FQDN}{settings.MEDIA_URL}{RSS_FEED_FOLDER_NAME}/{self.url_friendly_name}.xml"
 
     def get_videos(self):
         return list(self.youtubevideo_set.all())
@@ -178,7 +178,7 @@ class YouTubeVideo(models.Model):
 
     @property
     def get_location(self):
-        return f"{settings.HTTP_AND_FQDN}{settings.MEDIA_URL}{VIDEOS_FOLDER_NAME}/{self.podcast.url_friendly_name}/{self.filename}"
+        return f"{settings.XML_AND_VIDEO_FQDN}{settings.MEDIA_URL}{VIDEOS_FOLDER_NAME}/{self.podcast.url_friendly_name}/{self.filename}"
 
     @property
     def get_file_location(self):
