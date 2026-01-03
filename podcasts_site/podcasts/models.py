@@ -177,6 +177,14 @@ class YouTubeVideo(models.Model):
         super(YouTubeVideo, self).delete(*args, **kwargs)
 
     @property
+    def get_title(self):
+        if self.original_title[:len(self.podcast.frontend_name)] == self.podcast.frontend_name:
+            # needed cause if the episode title's prefix is the same as the podcast name, Apple Podcasts takes it upon
+            # itself to cut down the episode name on the app
+            return f".{self.original_title}"
+        return self.original_title
+
+    @property
     def get_location(self):
         return f"{settings.XML_AND_VIDEO_FQDN}{settings.MEDIA_URL}{VIDEOS_FOLDER_NAME}/{self.podcast.url_friendly_name}/{self.filename}"
 

@@ -32,7 +32,7 @@ def generate_rss_file(youtube_podcast: YouTubePodcast):
         explicit=False,
         episodes=[
             Episode(
-                title=video.original_title,
+                title=video.get_title,
                 summary=video.description,
                 authors=[Person(youtube_podcast.author)],
                 image=video.image,
