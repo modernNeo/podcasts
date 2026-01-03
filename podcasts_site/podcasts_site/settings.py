@@ -97,6 +97,7 @@ print(f'[settings.py] STATIC_URL set to {STATIC_URL}')
 print(f'[settings.py] MEDIA_URL set to {MEDIA_URL}')
 
 PROD_HOST = None
+LAN_HOST = None
 if PROD_ENV:
     PROD_HOST = os.environ['PROD_HOST']
     LAN_HOST = os.environ['LAN_HOST']
@@ -120,7 +121,7 @@ else:
 
 HOST = PROD_HOST if PROD_ENV else "localhost"
 ALLOWED_HOSTS = [HOST, LAN_HOST]
-HTTP_AND_FQDN = f"https://{HOST}" if PROD_ENV else f"http://{HOST}"
+HTTP_AND_FQDN = f"http://{LAN_HOST}" if PROD_ENV else f"http://{HOST}"
 CSRF_TRUSTED_ORIGINS = [HTTP_AND_FQDN]
 if not PROD_ENV:
     HTTP_AND_FQDN += ":8000"
