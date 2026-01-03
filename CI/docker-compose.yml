@@ -11,6 +11,7 @@ services:  #Services that are needed for the podcasts_site app
             - COMPOSE_PROJECT_NAME
             - ENV
             - PROD_HOST
+            - LAN_HOST
             - TO_EMAIL
             - GMAIL_USERNAME
             - GMAIL_PASSWORD
@@ -42,6 +43,7 @@ services:  #Services that are needed for the podcasts_site app
             - COMPOSE_PROJECT_NAME
             - ENV
             - PROD_HOST
+            - LAN_HOST
             - TO_EMAIL
             - GMAIL_USERNAME
             - GMAIL_PASSWORD

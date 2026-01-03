@@ -16,6 +16,7 @@ pipeline {
                 string(credentialsId: 'PODCASTS_SITE_POSTGRES_USER', variable: 'PODCASTS_SITE_POSTGRES_USER'),
                 string(credentialsId: 'PODCASTS_SITE_POSTGRES_DB', variable: 'PODCASTS_SITE_POSTGRES_DB'),
                 string(credentialsId: 'PODCASTS_SITE_PROD_HOST', variable: 'PODCASTS_SITE_PROD_HOST'),
+                string(credentialsId: 'LAN_HOST', variable: 'LAN_HOST'),
                 string(credentialsId: 'TO_EMAIL', variable: 'TO_EMAIL'),
                 string(credentialsId: 'COOKIE_LOCATION', variable: 'COOKIE_LOCATION'),
                 string(credentialsId: 'GMAIL_USERNAME', variable: 'GMAIL_USERNAME'),
@@ -27,6 +28,7 @@ pipeline {
                         export POSTGRES_USER="'"${PODCASTS_SITE_POSTGRES_USER}"'";
                         export POSTGRES_PASSWORD="'"${PODCASTS_SITE_POSTGRES_PASSWORD}"'";
                         export PROD_HOST="'"${PODCASTS_SITE_PROD_HOST}"'";
+                        export LAN_HOST="'"${LAN_HOST}"'";
                         export TO_EMAIL="'"${TO_EMAIL}"'";
                         export COOKIE_LOCATION="'"${COOKIE_LOCATION}"'";
                         export GMAIL_USERNAME="'"${GMAIL_USERNAME}"'";
