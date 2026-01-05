@@ -13,24 +13,18 @@ def delete_podcast(podcast_id):
         for video in podcast.youtubevideo_set.all():
             video.delete()
         podcast.save()
-        try:
-            shutil.rmtree(podcast.video_file_location)
-        except FileNotFoundError:
-            pass
-        try:
-            shutil.rmtree(f"{settings.MEDIA_ROOT}/{VIDEOS_FOLDER_NAME}/temp")
-        except FileNotFoundError:
-            pass
-        try:
-            os.remove(podcast.archive_file_location)
-        except (FileNotFoundError, IsADirectoryError):
-            pass
-        try:
-            os.remove(f"{settings.MEDIA_ROOT}/{ARCHIVE_FOLDER_NAME}/temp")
-        except FileNotFoundError:
-            pass
-        try:
-            os.remove(podcast.feed_file_location)
-        except FileNotFoundError:
-            pass
+
+        if podcast.files_to_delete_available:
+            try:
+                shutil.rmtree(podcast.video_file_location)
+            except FileNotFoundError:
+                pass
+            try:
+                os.remove(podcast.archive_file_location)
+            except (FileNotFoundError, IsADirectoryError):
+                pass
+            try:
+                os.remove(podcast.feed_file_location)
+            except FileNotFoundError:
+                pass
         podcast.delete()

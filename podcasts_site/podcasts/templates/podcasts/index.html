@@ -43,7 +43,9 @@
     {%  for prefix in podcast.youtubepodcasttitleprefix_set.all %}
         <p>{{ prefix.title_prefix }}</p>
     {%  endfor %}
-    <a href="{{ podcast.http_feed_location }}" target="_blank">RSS Feed</a><br>
+    {%  if self.rss_feed_available %}
+        <a href="{{ podcast.http_feed_location }}" target="_blank">RSS Feed</a><br>
+    {%  endif %}
     {%  if podcast.shown_visible_videos_count > 0 %}
         <h2>Videos</h2>
         {{ podcast.shown_visible_videos_count }} / {{ podcast.all_videos_count }} Videos<br>

@@ -47,7 +47,7 @@ def get_cbc_the_national_timestamp(information):
         raise AttributeError()
     youtube_dlp_logger.info(f"[cbc_the_national_timestamp.py get_cbc_the_national_timestamp()] timestamp=[{timestamp}]")
     timestamp = pstdatetime(
-        year=pstdatetime.now().year, month=timestamp.month, day=timestamp.day, hour=6 + 12,
+        year=timestamp.year, month=timestamp.month, day=timestamp.day, hour=6 + 12,
         minute=1, # adding a minute just so that it's easier to make sure the national shows up after the vancouver
         # news in my queue.
         second=0, tzinfo=pstdatetime.PACIFIC_TZ

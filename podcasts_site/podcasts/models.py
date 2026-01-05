@@ -60,6 +60,8 @@ class YouTubePodcast(models.Model):
 
     @property
     def url_friendly_name(self):
+        if len(self.name.strip()) == 0:
+            raise Exception("no name detected")
         return string_cleaner(self.name) if self.custom_name is None else string_cleaner(self.custom_name)
 
     @property
@@ -73,6 +75,14 @@ class YouTubePodcast(models.Model):
     @property
     def feed_file_location(self):
         return f"{settings.MEDIA_ROOT}/{RSS_FEED_FOLDER_NAME}/{self.url_friendly_name}.xml"
+
+    @property
+    def rss_feed_available(self):
+        return len(self.name.strip()) > 0
+
+    @property
+    def files_to_delete_available(self):
+        return len(self.name.strip()) > 0
 
     @property
     def http_feed_location(self):
