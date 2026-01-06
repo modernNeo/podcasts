@@ -40,7 +40,7 @@
     {%  for prefix in podcast.youtubepodcasttitleprefix_set.all %}
         <p>{{ prefix.title_prefix }}</p>
     {%  endfor %}
-    {%  if self.rss_feed_available %}
+    {%  if podcast.rss_feed_available %}
         <a href="{{ podcast.http_feed_location }}" target="_blank">RSS Feed</a><br>
     {%  endif %}
     {%  if podcast.all_videos_count > 0 %}
