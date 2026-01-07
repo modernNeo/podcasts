@@ -191,7 +191,7 @@ class YouTubeVideo(models.Model):
         if self.original_title[:len(self.podcast.frontend_name)] == self.podcast.frontend_name:
             # needed cause if the episode title's prefix is the same as the podcast name, Apple Podcasts takes it upon
             # itself to cut down the episode name on the app
-            return f".{self.original_title}"
+            return f"Ep - {self.original_title}"
         return self.original_title
 
     @property
