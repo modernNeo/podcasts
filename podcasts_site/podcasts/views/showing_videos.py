@@ -46,9 +46,7 @@ def showing_videos(request):
                 new_name_usable = (
                         os.path.exists(current_video_file_location) and
                         not os.path.exists(new_video_file_location) and
-                        os.path.exists(current_archive_location) and
                         not os.path.exists(new_archive_location) and
-                        os.path.exists(current_rss_feed_file_location) and
                         not os.path.exists(new_rss_feed_file_location)
                 )
                 youtube_dlp_logger.info(f"{new_name_usable=}")
