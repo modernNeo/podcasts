@@ -43,7 +43,7 @@ def generate_rss_file(youtube_podcast: YouTubePodcast):
                 ),
                 publication_date=video.date,
             )
-            for video in videos.exclude(Q(hide=True) | Q(manually_hide=True))
+            for video in videos.exclude(Q(hide=True) | Q(manually_hide=True)).order_by('-date')
         ]
     )
     p.rss_file(youtube_podcast.feed_file_location)
