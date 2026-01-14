@@ -52,8 +52,10 @@ def showing_videos(request):
                 youtube_dlp_logger.info(f"{new_name_usable=}")
                 if new_name_usable:
                     os.rename(current_video_file_location, podcast.video_file_location)
-                    os.rename(current_archive_location, podcast.archive_file_location)
-                    os.rename(current_rss_feed_file_location, podcast.feed_file_location)
+                    if os.path.exists(current_archive_location):
+                        os.rename(current_archive_location, podcast.archive_file_location)
+                    if os.path.exists(current_rss_feed_file_location):
+                        os.rename(current_rss_feed_file_location, podcast.feed_file_location)
                 else:
                     podcast.custom_name = None
             podcast.cbc_news = request.POST.get('cbc_news', False) == 'on'
