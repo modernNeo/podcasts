@@ -23,7 +23,7 @@ def showing_videos(request):
             podcast.url = request.POST['url']
             podcast.index_range = None if len(index_range) == 0 else index_range
             podcast.when_to_pull = request.POST['when_to_pull']
-            current_name = podcast.name
+            current_name = podcast.frontend_name
             new_name = request.POST['name']
             name_changed = current_name != new_name and new_name.strip() != ''
             youtube_dlp_logger.info(f"{current_name=}")
