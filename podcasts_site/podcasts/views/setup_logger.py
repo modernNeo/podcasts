@@ -6,8 +6,7 @@ from logging.handlers import RotatingFileHandler
 
 import pytz
 
-from podcasts.models import LoggingFilePath, YouTubeDLPWarnError, YouTubePodcast
-
+from podcasts.models import LoggingFilePath, YouTubePodcast, WarnStreamHandlerRecord
 
 SYS_LOG_HANDLER_NAME = "sys"
 
@@ -27,9 +26,8 @@ class YoutubeDLPDebugStreamHandler(logging.StreamHandler):
             message = record.message
             podcast_being_processed = YouTubePodcast.objects.all().filter(being_processed=True).first()
             from podcasts.views.pull_videos import get_youtube_id
-            YouTubeDLPWarnError(
-                message=message, levelno=warn_logging_level, video_unavailable=False,
-                podcast=podcast_being_processed, video_id=get_youtube_id(message)
+            WarnStreamHandlerRecord(
+                message=message, podcast=podcast_being_processed, video_id=get_youtube_id(message)
             ).save()
         if record.levelno < error_logging_level:
             logging.StreamHandler.emit(self, record)

@@ -6,7 +6,7 @@ from pathlib import Path
 import yt_dlp
 from yt_dlp.utils import ExtractorError
 
-from podcasts.models import YouTubeDLPWarnError, YouTubePodcast, ARCHIVE_FOLDER_PATH
+from podcasts.models import YouTubePodcast, ARCHIVE_FOLDER_PATH, TroubleRecord
 from podcasts.views.automatically_hide_videos import automatically_hide_videos
 from podcasts.views.delete_videos_that_are_not_properly_tracked import delete_videos_that_are_not_properly_tracked
 from podcasts.views.generate_rss_file import generate_rss_file
@@ -87,7 +87,7 @@ class CustomDL(yt_dlp.YoutubeDL):
 
         if podcast_being_processed is None:
             podcast_being_processed = YouTubePodcast.objects.all().filter(being_processed=True).first()
-        YouTubeDLPWarnError(
+        TroubleRecord(
             message=message, levelno=log_level, video_unavailable=video_unavailable,
             podcast=podcast_being_processed, video_id=get_youtube_id(message)
         ).save()

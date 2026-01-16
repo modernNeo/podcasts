@@ -250,20 +250,23 @@ class VideoWithNewDateFormat(models.Model):
     def __str__(self):
         return f"Error [{self.video_title}] in podcast {self.podcast}"
 
-class YouTubeDLPWarnError(models.Model):
+
+class WarnStreamHandlerRecord(models.Model):
     message = models.CharField(
         max_length=10000
     )
-    request = models.CharField(
-        max_length=100000,
+    podcast = models.ForeignKey(YouTubePodcast, on_delete=models.CASCADE)
+    video_id = models.CharField(
+        max_length=100,
         default=None,
         null=True
     )
-    fixed = models.BooleanField(
-        default=False
-    )
-    processed = models.BooleanField(
-        default=False
+    def __str__(self):
+        return f"Error [{self.message}] in podcast {self.podcast}"
+
+class TroubleRecord(models.Model):
+    message = models.CharField(
+        max_length=10000
     )
     levelno = models.IntegerField(
         default=logging.WARNING
@@ -271,13 +274,11 @@ class YouTubeDLPWarnError(models.Model):
     video_unavailable = models.BooleanField(
         null=True
     )
+    podcast = models.ForeignKey(YouTubePodcast, on_delete=models.CASCADE)
     video_id = models.CharField(
         max_length=100,
         default=None,
         null=True
     )
-    podcast = models.ForeignKey(YouTubePodcast, on_delete=models.CASCADE)
-
-
     def __str__(self):
         return f"Error [{self.message}] in podcast {self.podcast}"
