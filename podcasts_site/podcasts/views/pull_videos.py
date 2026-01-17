@@ -127,6 +127,7 @@ def pull_videos(youtube_podcast):
             "playlistend": youtube_podcast.index_range,
             "logger" : Loggers.get_logger("youtube_dlp"),
             "ffmpeg_location" : "ffmpeg-master-latest-linux64-gpl/bin/ffmpeg",
+            "js_runtimes": "deno:/src/app/deno",
             "format_sort": ['vcodec:avc', 'res', 'acodec:aac'], # needed cause of
             # https://github.com/yt-dlp/yt-dlp/issues/11177#issuecomment-2395588715
             "extractor_args": {"youtube": {"player_client": ["default", "-tv_simply"]}}, # fixing latest yt-dlp bug

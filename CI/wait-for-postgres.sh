@@ -18,5 +18,8 @@ rm ffmpeg || true
 wget https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-gpl.tar.xz -O ffmpeg.tar.xz
 tar -xf ffmpeg.tar.xz
 
+wget https://github.com/denoland/deno/releases/latest/download/deno-aarch64-unknown-linux-gnu.zip -O deno.zip
+unzip deno.zip
+
 exec $cmd
 
