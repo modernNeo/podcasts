@@ -16,8 +16,8 @@ from podcasts.views.update_archive_file import update_archive_file
 from podcasts.views.youtube_video_post_processor import YouTubeVideoPostProcessor
 
 MESSAGES_TO_SKIP_PAST_AND_NOT_LOG = [
-'Unable to download format 95. Skipping...',
-'ERROR: \r[download] Got error: HTTP Error 403: Forbidden'
+# 'Unable to download format 95. Skipping...',
+# 'ERROR: \r[download] Got error: HTTP Error 403: Forbidden'
 ]
 
 def get_youtube_id(message):
