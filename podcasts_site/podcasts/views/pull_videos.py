@@ -136,7 +136,7 @@ def pull_videos(youtube_podcast):
             'format': 'bv+ba/b', # needed cause of https://github.com/yt-dlp/yt-dlp/issues/14462#issuecomment-3340774234
 
             # useful for debugging
-            "listformats" : True
+            # "listformats" : True
             # "skip_download" : True
         }
 
