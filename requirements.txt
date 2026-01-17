@@ -3,7 +3,7 @@ pillow==10.4.0
 
 podgen==1.1.0
 
-yt-dlp==2025.12.8
+yt-dlp[default]==2025.12.8
 # git+https://github.com/modernNeo/yt-dlp.git@701b2786f225caf1336eff31220afe0026fac238
 
 APScheduler==3.9.1
