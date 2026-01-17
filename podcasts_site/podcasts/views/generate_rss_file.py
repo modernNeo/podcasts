@@ -19,7 +19,7 @@ def generate_rss_file(youtube_podcast: YouTubePodcast):
         category = None
     except TypeError:
         return
-    videos = youtube_podcast.youtubevideo_set.all()
+    videos = youtube_podcast.youtubevideo_set.all().exclude(Q(hide=True) | Q(manually_hide=True)).order_by('-date')
     p = Podcast(
         name=youtube_podcast.frontend_name,
         description=youtube_podcast.description,
@@ -43,7 +43,7 @@ def generate_rss_file(youtube_podcast: YouTubePodcast):
                 ),
                 publication_date=video.date,
             )
-            for video in videos.exclude(Q(hide=True) | Q(manually_hide=True)).order_by('-date')
+            for video in videos
         ]
     )
     p.rss_file(youtube_podcast.feed_file_location)
