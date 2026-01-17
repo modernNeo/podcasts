@@ -15,6 +15,10 @@ from podcasts.views.setup_logger import Loggers, error_logging_level, warn_loggi
 from podcasts.views.update_archive_file import update_archive_file
 from podcasts.views.youtube_video_post_processor import YouTubeVideoPostProcessor
 
+MESSAGES_TO_SKIP_PAST_AND_NOT_LOG = [
+'Unable to download format 95. Skipping...',
+'ERROR: \r[download] Got error: HTTP Error 403: Forbidden'
+]
 
 def get_youtube_id(message):
     youtube_tag = " [youtube]"
@@ -32,7 +36,7 @@ class CustomDL(yt_dlp.YoutubeDL):
         Print the message to stderr, it will be prefixed with 'WARNING:'
         If stderr is a tty file the 'WARNING:' will be colored
         """
-        if message == 'Unable to download format 95. Skipping...' or message == 'ERROR: \r[download] Got error: HTTP Error 403: Forbidden':
+        if message in MESSAGES_TO_SKIP_PAST_AND_NOT_LOG:
             return
         if self.params.get('logger') is not None:
             podcast_being_processed = YouTubePodcast.objects.all().filter(being_processed=True).first()
@@ -64,7 +68,7 @@ class CustomDL(yt_dlp.YoutubeDL):
         video_unavailable = False
         podcast_being_processed = None
         log_level = error_logging_level
-        if message == 'ERROR: \r[download] Got error: HTTP Error 403: Forbidden' or message == 'ERROR: fragment 1 not found, unable to continue':
+        if message in MESSAGES_TO_SKIP_PAST_AND_NOT_LOG:
             return
 
         if sys.exc_info()[0]:
