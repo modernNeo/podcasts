@@ -32,6 +32,8 @@ class CustomDL(yt_dlp.YoutubeDL):
         Print the message to stderr, it will be prefixed with 'WARNING:'
         If stderr is a tty file the 'WARNING:' will be colored
         """
+        if message == 'Unable to download format 95. Skipping...' or message == 'ERROR: \r[download] Got error: HTTP Error 403: Forbidden':
+            return
         if self.params.get('logger') is not None:
             podcast_being_processed = YouTubePodcast.objects.all().filter(being_processed=True).first()
             if podcast_being_processed is not None:
@@ -62,6 +64,8 @@ class CustomDL(yt_dlp.YoutubeDL):
         video_unavailable = False
         podcast_being_processed = None
         log_level = error_logging_level
+        if message == 'ERROR: \r[download] Got error: HTTP Error 403: Forbidden' or message == 'ERROR: fragment 1 not found, unable to continue':
+            return
 
         if sys.exc_info()[0]:
             exception = sys.exc_info()[1]
