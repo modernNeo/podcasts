@@ -9,5 +9,4 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         LoggingFilePath.objects.all().delete()
         pull_latest_youtube_videos()
-        pull_latest_youtube_videos()
         email_errors()
