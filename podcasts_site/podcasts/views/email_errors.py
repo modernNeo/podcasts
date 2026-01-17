@@ -6,7 +6,6 @@ from podcasts.views.setup_logger import error_logging_level, warn_logging_level
 
 
 def email_errors():
-    troubles = TroubleRecord.objects.all()
 
     subject = ""
     email_body = ""
@@ -15,21 +14,23 @@ def email_errors():
     number_of_invalid_dates = invalid_dates.count()
     if number_of_invalid_dates > 0:
         subject = f"{number_of_invalid_dates} CBC videos with invalid date formats"
-        email_body = "Invalid Dates on CBC Vancouver News Videos\n\n"
+        email_body = "Invalid Dates on CBC Vancouver News Videos\n"
         for invalid_date in invalid_dates:
-            email_body += f"{invalid_date.video_title}\n"
+            email_body += f"\t{invalid_date.video_title}\n"
+        email_body += "\n"
 
+    troubles = TroubleRecord.objects.all()
     unavailable_videos = troubles.filter(video_unavailable=True)
 
     if len(unavailable_videos) > 0:
-        body_heading = "Unavailable Videos:\n\n"
-        email_body = f"{email_body}{body_heading}" if email_body else body_heading
+        email_body = f"{email_body}Unavailable Videos:\n"
         podcast_displayed = []
         for unavailable_video in unavailable_videos:
             if unavailable_video.podcast.id not in podcast_displayed:
                 email_body += (
-                    f"{unavailable_video.podcast.frontend_name}: "
+                    f"\t{unavailable_video.podcast.frontend_name}: "
                     f"https://www.youtube.com/watch?v={unavailable_video.video_id}\n")
+        email_body += "\n"
 
     other_troubles = troubles.filter(video_unavailable=False)
 
@@ -41,10 +42,10 @@ def email_errors():
             subject = f"{subject} {subject_line}"
         else:
             subject = subject_line
-        body_heading = 'Other Trouble Errors:\n\n'
-        email_body = f"{email_body}{body_heading}" if email_body else body_heading
+        email_body = f"{email_body}Other Trouble Errors:\n"
         for other_trouble_error in other_trouble_errors:
-            email_body += f"{other_trouble_error.message} for podcast {other_trouble_error.podcast}\n"
+            email_body += f"\t{other_trouble_error.message} for podcast {other_trouble_error.podcast}\n"
+        email_body += "\n"
 
     other_trouble_warnings = other_troubles.filter(levelno=warn_logging_level)
     number_of_other_trouble_warnings = other_trouble_warnings.count()
@@ -54,12 +55,10 @@ def email_errors():
             subject = f"{subject} {subject_line}"
         else:
             subject = subject_line
-
-        body_heading = "Other Trouble Warnings:\n\n"
-        email_body = f"{email_body}{body_heading}" if email_body else body_heading
+        email_body = f"{email_body}Other Trouble Warnings:\n"
         for other_trouble_warning in other_trouble_warnings:
-            email_body += f"{other_trouble_warning.message} for podcast {other_trouble_warning.podcast}\n\n"
-
+            email_body += f"{other_trouble_warning.message} for podcast {other_trouble_warning.podcast}\n"
+        email_body += "\n"
 
     warnings = WarnStreamHandlerRecord.objects.all()
     number_of_warnings = warnings.count()
@@ -69,11 +68,10 @@ def email_errors():
             subject = f"{subject} {subject_line}"
         else:
             subject = subject_line
-
-        body_heading = "Other Warnings:\n\n"
-        email_body = f"{email_body}{body_heading}" if email_body else body_heading
+        email_body = f"{email_body}Other Warnings:\n"
         for warning in warnings:
-            email_body += f"{warning.message} for podcast {warning.podcast}\n\n"
+            email_body += f"{warning.message} for podcast {warning.podcast}\n"
+        email_body += "\n"
 
     file_paths = LoggingFilePath.objects.all()
     logs_to_send = []
