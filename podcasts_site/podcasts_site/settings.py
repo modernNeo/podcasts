@@ -121,8 +121,8 @@ else:
 
 HOST = PROD_HOST if PROD_ENV else "localhost"
 ALLOWED_HOSTS = [HOST, LAN_HOST]
-HTTP_AND_FQDN = f"http://{HOST}" if PROD_ENV else f"http://{HOST}"
-XML_AND_VIDEO_FQDN = f"http://{HOST}" if PROD_ENV else f"http://{HOST}:8000"
+HTTP_AND_FQDN = f"https://{HOST}" if PROD_ENV else f"http://{HOST}"
+XML_AND_VIDEO_FQDN = f"https://{HOST}" if PROD_ENV else f"http://{HOST}:8000"
 CSRF_TRUSTED_ORIGINS = [HTTP_AND_FQDN]
 if not PROD_ENV:
     HTTP_AND_FQDN += ":8000"
