@@ -10,8 +10,10 @@ services:  #Services that are needed for the podcasts_site app
             - POSTGRES_PASSWORD
             - COMPOSE_PROJECT_NAME
             - ENV
-            - PROD_HOST
+            - CLOUDFLARE_FQDN
             - LAN_HOST
+            - CLOUDFLARE_FQDN_FOR_XML
+            - CLOUDFLARE_FQDN_FOR_VIDEO
             - TO_EMAIL
             - GMAIL_USERNAME
             - GMAIL_PASSWORD
@@ -42,9 +44,11 @@ services:  #Services that are needed for the podcasts_site app
             - POSTGRES_PASSWORD
             - COMPOSE_PROJECT_NAME
             - ENV
-            - PROD_HOST
+            - CLOUDFLARE_FQDN
             - LAN_HOST
             - TO_EMAIL
+            - CLOUDFLARE_FQDN_FOR_XML
+            - CLOUDFLARE_FQDN_FOR_VIDEO
             - GMAIL_USERNAME
             - GMAIL_PASSWORD
             - SECRET_KEY

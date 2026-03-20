@@ -96,11 +96,14 @@ print(f'[settings.py] URL_ROOT set to {URL_ROOT}')
 print(f'[settings.py] STATIC_URL set to {STATIC_URL}')
 print(f'[settings.py] MEDIA_URL set to {MEDIA_URL}')
 
-PROD_HOST = None
+CLOUDFLARE_FQDN = None
 LAN_HOST = None
+DEV_HOST = 'localhost'
 if PROD_ENV:
-    PROD_HOST = os.environ['PROD_HOST']
+    CLOUDFLARE_FQDN = os.environ['CLOUDFLARE_FQDN']
     LAN_HOST = os.environ['LAN_HOST']
+    CLOUDFLARE_FQDN_FOR_XML = os.environ['CLOUDFLARE_FQDN_FOR_XML'] == 'true'
+    CLOUDFLARE_FQDN_FOR_VIDEO = os.environ['CLOUDFLARE_FQDN_FOR_VIDEO'] == 'true'
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
@@ -111,6 +114,8 @@ if PROD_ENV:
             "PORT": "5432",
         }
     }
+    HTTP_XML_FQDN = f"https://{CLOUDFLARE_FQDN}" if CLOUDFLARE_FQDN_FOR_XML else f"http://{CLOUDFLARE_FQDN}:6001"
+    HTTP_VIDEO_FQDN = f"https://{CLOUDFLARE_FQDN}" if CLOUDFLARE_FQDN_FOR_VIDEO else f"http://{LAN_HOST}:6001"
 else:
     DATABASES = {
         'default': {
@@ -118,14 +123,23 @@ else:
             'NAME': f'{MEDIA_ROOT}/db.sqlite3',
         }
     }
+    HTTP_XML_FQDN = f"http://{DEV_HOST}:8000"
+    HTTP_VIDEO_FQDN = f"http://{DEV_HOST}:8000"
 
-HOST = PROD_HOST if PROD_ENV else "localhost"
-ALLOWED_HOSTS = [HOST, LAN_HOST]
-HTTP_AND_FQDN = f"https://{HOST}" if PROD_ENV else f"http://{HOST}"
-XML_AND_VIDEO_FQDN = f"https://{HOST}" if PROD_ENV else f"http://{HOST}:8000"
-CSRF_TRUSTED_ORIGINS = [HTTP_AND_FQDN]
-if not PROD_ENV:
-    HTTP_AND_FQDN += ":8000"
+
+
+# A list of strings representing the host/domain names that this Django site can serve.
+# This is a security measure to prevent HTTP Host header attacks, which are possible
+# even under many seemingly-safe web server configurations.
+ALLOWED_HOSTS = [CLOUDFLARE_FQDN, LAN_HOST, DEV_HOST]
+
+
+
+# A list of trusted origins for unsafe requests (e.g. POST).
+#
+# For requests that include the Origin header, Django’s CSRF protection requires that header
+# match the origin present in the Host header.
+CSRF_TRUSTED_ORIGINS = [HTTP_XML_FQDN, HTTP_VIDEO_FQDN]
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
