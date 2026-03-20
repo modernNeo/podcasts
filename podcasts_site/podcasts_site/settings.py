@@ -160,7 +160,8 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-
+FFMPEG_LOCATION_PATH = os.environ['FFMPEG_LOCATION_PATH']
+DENO_PATH = os.environ['DENO_PATH']
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/

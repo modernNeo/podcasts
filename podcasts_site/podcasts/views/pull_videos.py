@@ -4,6 +4,7 @@ import sys
 from pathlib import Path
 
 import yt_dlp
+from django.conf import settings
 from yt_dlp.utils import ExtractorError
 
 from podcasts.models import YouTubePodcast, ARCHIVE_FOLDER_PATH, TroubleRecord
@@ -126,8 +127,8 @@ def pull_videos(youtube_podcast):
             "sleep_interval_requests": 20,  # to avoid youtube trying to verify the requests are not coming from a bot
             "playlistend": youtube_podcast.index_range,
             "logger" : Loggers.get_logger("youtube_dlp"),
-            "ffmpeg_location" : "ffmpeg-master-latest-linux64-gpl/bin/ffmpeg",
-            "js_runtimes": {'deno': {'path': '/src/app/deno'}},
+            "ffmpeg_location" : settings.FFMPEG_LOCATION_PATH,
+            "js_runtimes": {'deno': {'path': settings.DENO_PATH}},
             "format_sort": ['vcodec:avc', 'res', 'acodec:aac'], # needed cause of
             # https://github.com/yt-dlp/yt-dlp/issues/11177#issuecomment-2395588715
             "extractor_args": {"youtube": {"player_client": ["default", "-tv_simply"]}}, # fixing latest yt-dlp bug

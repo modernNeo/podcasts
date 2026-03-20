@@ -23,5 +23,8 @@ rm deno || true
 wget https://github.com/denoland/deno/releases/latest/download/deno-x86_64-unknown-linux-gnu.zip -O deno.zip
 unzip deno.zip
 
+export FFMPEG_LOCATION_PATH="ffmpeg-master-latest-linux64-gpl/bin/ffmpeg"
+export DENO_PATH='/src/app/deno'
+
 exec $cmd
 
