@@ -15,7 +15,12 @@ done
 
 rm ffmpeg.tar.xz || true
 rm ffmpeg || true
-wget https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-gpl.tar.xz -O ffmpeg.tar.xz
+
+
+# 1. Fetch the exact filename/tag from the GitHub API, then download it
+URL=$(curl -s https://api.github.com/repos/BtbN/FFmpeg-Builds/releases | grep -oE "https://github.com/BtbN/FFmpeg-Builds/releases/download/[^\"]+linux64-gpl.tar.xz" | head -n 1)
+# 2. Download the file
+wget "$URL" -O ffmpeg.tar.xz
 tar -xf ffmpeg.tar.xz
 
 rm deno.zip || true
