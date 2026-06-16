@@ -35,7 +35,7 @@ pipeline {
                         export GMAIL_PASSWORD="'"${GMAIL_PASSWORD}"'";
                         export SECRET_KEY="'"${PODCASTS_SITE_SECRET_KEY}"'";
                         export CLOUDFLARE_FQDN_FOR_XML="true";
-                        export CLOUDFLARE_FQDN_FOR_VIDEO="false";
+                        export CLOUDFLARE_FQDN_FOR_VIDEO="true";
                         export ENV="PROD";
                         ./CI/deploy.sh;
                     \'"""
