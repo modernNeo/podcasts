@@ -20,6 +20,7 @@ COPY CI/wait-for-postgres.sh wait-for-postgres.sh
 RUN pip install --no-cache-dir -r requirements.txt
 RUN pip install --no-cache-dir -r db-requirements.txt
 
+RUN apk add curl
 
 CMD ["./wait-for-postgres.sh", "./run_docker.sh"]
 #CMD ["sh"]
