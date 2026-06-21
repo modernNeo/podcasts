@@ -20,6 +20,8 @@ def showing_videos(request):
         podcast = YouTubePodcast.objects.all().filter(id=int(request.POST['id'])).first()
         if podcast:
             index_range = request.POST['index_range'].strip()
+            prune = request.POST['prune'].strip()
+            prune = int(prune) if prune.isdigit() else None
             podcast.url = request.POST['url']
             podcast.index_range = None if len(index_range) == 0 else index_range
             podcast.when_to_pull = request.POST['when_to_pull']
@@ -58,6 +60,10 @@ def showing_videos(request):
                         os.rename(current_rss_feed_file_location, new_rss_feed_file_location)
                 else:
                     podcast.custom_name = None
+            elif prune:
+                videos_to_prune = podcast.youtubevideo_set.order_by("date")[:prune]
+                for video_to_prune in videos_to_prune:
+                    video_to_prune.delete()
             podcast.cbc_news = request.POST.get('cbc_news', False) == 'on'
             podcast.save()
             generate_rss_file(podcast)
