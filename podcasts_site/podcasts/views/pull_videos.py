@@ -17,18 +17,20 @@ from podcasts.views.update_archive_file import update_archive_file
 from podcasts.views.youtube_video_post_processor import YouTubeVideoPostProcessor
 
 MESSAGES_TO_SKIP_PAST_AND_NOT_LOG = [
-# 'Unable to download format 95. Skipping...',
-# 'ERROR: \r[download] Got error: HTTP Error 403: Forbidden'
+    # 'Unable to download format 95. Skipping...',
+    # 'ERROR: \r[download] Got error: HTTP Error 403: Forbidden'
 ]
+
 
 def get_youtube_id(message):
     youtube_tag = " [youtube]"
     if youtube_tag not in message:
         return None
     youtube_tag_index = message.index(youtube_tag)
-    tag_part_of_message = message[youtube_tag_index + len(youtube_tag)+1:]
+    tag_part_of_message = message[youtube_tag_index + len(youtube_tag) + 1:]
     end_index_of_tag = tag_part_of_message.index(":")
     return tag_part_of_message[:end_index_of_tag]
+
 
 class CustomDL(yt_dlp.YoutubeDL):
 
@@ -100,7 +102,7 @@ class CustomDL(yt_dlp.YoutubeDL):
             message=message, levelno=log_level, video_unavailable=video_unavailable,
             podcast=podcast_being_processed, video_id=get_youtube_id(message)
         ).save()
-        return # I decided I'd rather never call the super and instead look for more videos
+        return  # I decided I'd rather never call the super and instead look for more videos
         super().trouble(message=message, tb=tb, is_error=is_error)
 
 
@@ -120,18 +122,19 @@ def pull_videos(youtube_podcast):
         yt_opts = {
             'verbose': True,
             "match_filter": match_filter,
+            "ignore_no_formats_error": True,
             "outtmpl": '%(title)s.%(ext)s',  # done because if not specified, ytdlp adds the video ID to the filename
             "paths": {"home": f"{youtube_podcast.video_file_location}"},
             "download_archive": youtube_podcast.archive_file_location,  # done so that past downloaded videos
             # are not re-downloaded
             "sleep_interval_requests": 20,  # to avoid youtube trying to verify the requests are not coming from a bot
             "playlistend": youtube_podcast.index_range,
-            "logger" : Loggers.get_logger("youtube_dlp"),
-            "ffmpeg_location" : settings.FFMPEG_LOCATION_PATH,
+            "logger": Loggers.get_logger("youtube_dlp"),
+            "ffmpeg_location": settings.FFMPEG_LOCATION_PATH,
             "js_runtimes": {'deno': {'path': settings.DENO_PATH}},
-            "format_sort": ['vcodec:avc', 'res', 'acodec:aac'], # needed cause of
+            "format_sort": ['vcodec:avc', 'res', 'acodec:aac'],  # needed cause of
             # https://github.com/yt-dlp/yt-dlp/issues/11177#issuecomment-2395588715
-            "extractor_args": {"youtube": {"player_client": ["default", "-tv_simply"]}}, # fixing latest yt-dlp bug
+            "extractor_args": {"youtube": {"player_client": ["default", "-tv_simply"]}},  # fixing latest yt-dlp bug
             # with arg from https://github.com/yt-dlp/yt-dlp/issues/14456#issuecomment-3339654496
             "cookiefile" : os.environ.get('COOKIE_LOCATION', None),
             'format': 'bv+ba/b', # needed cause of https://github.com/yt-dlp/yt-dlp/issues/14462#issuecomment-3340774234
@@ -164,4 +167,3 @@ def pull_videos(youtube_podcast):
     generate_rss_file(youtube_podcast)
     youtube_podcast.being_processed = False
     youtube_podcast.save()
-
