@@ -41,6 +41,8 @@ class CustomDL(yt_dlp.YoutubeDL):
         """
         if message in MESSAGES_TO_SKIP_PAST_AND_NOT_LOG:
             return
+        if '[youtube] This live event will begin in' in message:
+            return
         if self.params.get('logger') is not None:
             podcast_being_processed = YouTubePodcast.objects.all().filter(being_processed=True).first()
             if podcast_being_processed is not None:
@@ -56,13 +58,22 @@ class CustomDL(yt_dlp.YoutubeDL):
                 )
                 trevor_noah_being_processed = podcast_being_processed.name == 'What Now With Trevor Noah - (Full Podcast Episodes)'
                 trevor_noah_issue = trevor_noah_hidden_log_messages and trevor_noah_being_processed
+
+
+                mehdi_hassan_common_data_retrieval_log_messages = (
+                        '[youtube:tab] YouTube said: INFO - 1 unavailable video is hidden' in message or
+                        '[youtube] Video unavailable. This video is private' in message
+                )
+                mehdi_hasan_being_processed = podcast_being_processed.name == "We're Not Kidding with Mehdi & Friends"
+                mehdi_hasan_issue = mehdi_hassan_common_data_retrieval_log_messages and mehdi_hasan_being_processed
                 if jon_stewart_issue:
                     # https://github.com/yt-dlp/yt-dlp/issues/11930#issuecomment-2564490472
                     self.params['logger'].info(message)
                     return
-                elif trevor_noah_issue:
+                elif trevor_noah_issue or mehdi_hasan_issue:
                     self.params['logger'].info(message)
                     return
+
                 else:
                     self.params['logger'].warning(f"warning below is for podcast [{podcast_being_processed.name}]")
         super().report_warning(message, only_once=only_once)
