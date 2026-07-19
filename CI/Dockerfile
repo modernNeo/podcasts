@@ -19,8 +19,7 @@ COPY CI/wait-for-postgres.sh wait-for-postgres.sh
 
 # Your environment is attempting to compile Pillow (the Python imaging library) from source,
 # but your underlying system is missing the development files for zlib (and likely libjpeg).
-RUN apt-get update && apt-get install -y \
-    gcc musl-dev zlib-dev jpeg-dev
+RUN apk add gcc musl-dev zlib-dev jpeg-dev
 
 RUN pip install --no-cache-dir -r requirements.txt
 RUN pip install --no-cache-dir -r db-requirements.txt
