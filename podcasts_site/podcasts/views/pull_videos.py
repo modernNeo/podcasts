@@ -102,7 +102,8 @@ class CustomDL(yt_dlp.YoutubeDL):
 
                 mehdi_hassan_common_data_retrieval_log_messages = (
                         '[youtube:tab] YouTube said: INFO - 1 unavailable video is hidden' in message or
-                        '[youtube] Video unavailable. This video is private' in message
+                        '[youtube] Video unavailable. This video is private' in message or
+                        "[youtube] Private video. Sign in if you've been granted access to this video." in message
                 )
                 mehdi_hasan_being_processed = podcast_being_processed.name == "We're Not Kidding with Mehdi & Friends"
                 mehdi_hasan_issue = mehdi_hassan_common_data_retrieval_log_messages and mehdi_hasan_being_processed
