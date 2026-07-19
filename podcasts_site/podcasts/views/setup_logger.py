@@ -25,9 +25,8 @@ class YoutubeDLPDebugStreamHandler(logging.StreamHandler):
         if record.levelno == warn_logging_level:
             message = record.message
             podcast_being_processed = YouTubePodcast.objects.all().filter(being_processed=True).first()
-            from podcasts.views.pull_videos import get_youtube_id
             WarnStreamHandlerRecord(
-                message=message, podcast=podcast_being_processed, video_id=get_youtube_id(message)
+                message=message, podcast=podcast_being_processed, video_id="blah"
             ).save()
         if record.levelno < error_logging_level:
             logging.StreamHandler.emit(self, record)
