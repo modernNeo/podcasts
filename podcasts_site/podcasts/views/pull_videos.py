@@ -18,7 +18,6 @@ from podcasts.views.update_archive_file import update_archive_file
 from podcasts.views.youtube_video_post_processor import YouTubeVideoPostProcessor
 
 MESSAGES_TO_SKIP_PAST_AND_NOT_LOG = [
-'[youtube] Video unavailable. This video has been removed by the uploader'
     # 'Unable to download format 95. Skipping...',
     # 'ERROR: \r[download] Got error: HTTP Error 403: Forbidden'
 ]
