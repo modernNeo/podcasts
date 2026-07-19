@@ -1,4 +1,4 @@
-FROM python:3.12.5-alpine
+FROM python:3.14.6-alpine
 RUN apk update && apk add alpine-conf
 RUN setup-timezone -z Canada/Pacific
 
