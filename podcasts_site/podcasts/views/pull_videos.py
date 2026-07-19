@@ -78,7 +78,10 @@ class CustomDL(yt_dlp.YoutubeDL):
         active_vid = self._get_active_video_id()
         if message == '[youtube] Video unavailable. This video has been removed by the uploader':
             # 2. Tell yt-dlp to immediately abandon this video and move on
-            raise ExtractorError("[CustomDL] Video removed by uploader")
+            raise ExtractorError(f"[CustomDL] Video removed by uploader: {active_vid}")
+        if "[youtube] Private video. Sign in if you've been granted access to this video." in message:
+            # 2. Tell yt-dlp to immediately abandon this video and move on
+            raise ExtractorError(f"[CustomDL] [youtube] Private video: {active_vid}")
         if message in MESSAGES_TO_SKIP_PAST_AND_NOT_LOG:
             return
         if '[youtube] This live event will begin in' in message:
@@ -118,6 +121,24 @@ class CustomDL(yt_dlp.YoutubeDL):
                 else:
                     self.params['logger'].warning(f"warning below is for podcast [{podcast_being_processed.name}]")
         super().report_warning(message, only_once=only_once)
+
+    def report_error(self, message, *args, **kwargs):
+        """Intercepts errors before they are logged or raised."""
+
+        # Check for your specific error string
+        if "[CustomDL]" in str(message):
+            if "[CustomDL] [youtube] Private video" in message:
+                self.params['logger'].info(f"private video encountered: {self._get_active_video_id()}")
+            else:
+                # Handle the interception here
+                print(f"[Intercepted] Safely caught the missing formats error for this video.")
+
+            # Return early if you want to completely suppress the error
+            # and prevent it from printing/raising an exception
+            return
+
+            # Otherwise, pass all other errors to the parent class behavior
+        super().report_error(message, *args, **kwargs)
 
     def trouble(self, message=None, tb=None, is_error=True):
         video_unavailable = False
