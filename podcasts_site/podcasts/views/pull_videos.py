@@ -214,7 +214,7 @@ def pull_videos(youtube_podcast):
             # https://github.com/yt-dlp/yt-dlp/issues/11177#issuecomment-2395588715
             "extractor_args": {"youtube": {"player_client": ["default", "-tv_simply"]}},  # fixing latest yt-dlp bug
             # with arg from https://github.com/yt-dlp/yt-dlp/issues/14456#issuecomment-3339654496
-            "cookiefile" : os.environ.get('COOKIE_LOCATION', None),
+            # "cookiefile" : os.environ.get('COOKIE_LOCATION', None), # currently unable to use cookies due to https://github.com/yt-dlp/yt-dlp/issues/12482
             'format': 'bv+ba/b', # needed cause of https://github.com/yt-dlp/yt-dlp/issues/14462#issuecomment-3340774234
 
             # useful for debugging
