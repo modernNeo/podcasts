@@ -211,6 +211,8 @@ def pull_videos(youtube_podcast):
             "js_runtimes": {'deno': {'path': settings.DENO_PATH}},
             "format_sort": ['vcodec:avc', 'res', 'acodec:aac'],  # needed cause of
             # https://github.com/yt-dlp/yt-dlp/issues/11177#issuecomment-2395588715
+            "extractor_args": {"youtube": {"player_client": ["web_embedded","web","tv"]}},  # fixing latest yt-dlp bug
+            # with arg from https://github.com/yt-dlp/yt-dlp/issues/17456#issuecomment-5335816720
             # "cookiefile" : os.environ.get('COOKIE_LOCATION', None), # currently unable to use cookies due to https://github.com/yt-dlp/yt-dlp/issues/12482
             'format': 'bv+ba/b', # needed cause of https://github.com/yt-dlp/yt-dlp/issues/14462#issuecomment-3340774234
 
