@@ -32,24 +32,24 @@ fi
 
 
 # 1. Loop until the container is no longer running
-while [ "$(docker inspect -f '{{.State.Running}}' "$prod_container_name" 2>/dev/null)" = "true" ]; do
-    docker logs  --tail 50 $prod_container_name
+while [ "$(docker inspect -f '{{.State.Running}}' "$prod_container_puller_name" 2>/dev/null)" = "true" ]; do
+    docker logs  --tail 50 $prod_container_puller_name
     sleep 2
 done
 
 
 # 2. Fetch the container's final exit code
-EXIT_CODE=$(docker inspect -f '{{.State.ExitCode}}' "$prod_container_name" 2>/dev/null)
+EXIT_CODE=$(docker inspect -f '{{.State.ExitCode}}' "$prod_container_puller_name" 2>/dev/null)
 
 # 3. Check if the container exists and if it exited successfully
 if [ -z "$EXIT_CODE" ]; then
-    echo "Error: Container '$prod_container_name' does not exist."
+    echo "Error: Container '$prod_container_puller_name' does not exist."
     exit 1
 elif [ "$EXIT_CODE" -eq 0 ]; then
     echo "Container finished successfully."
     exit 0
 else
     echo "Container failed with exit code: $EXIT_CODE"
-    docker logs  --tail 50 $prod_container_name
+    docker logs  --tail 50 $prod_container_puller_name
     exit "$EXIT_CODE"
 fi
