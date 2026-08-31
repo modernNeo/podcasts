@@ -65,6 +65,7 @@ def showing_videos(request):
                 for video_to_prune in videos_to_prune:
                     video_to_prune.delete()
             podcast.cbc_news = request.POST.get('cbc_news', False) == 'on'
+            podcast.youtube_id = request.POST.get('youtube_id', False) == 'on'
             podcast.save()
             generate_rss_file(podcast)
     elif request.POST.get("action", False) == 'Delete':

@@ -28,6 +28,7 @@
         <label>When To Pull: </label><input type="time" name="when_to_pull" value="{{ podcast.front_end_when_to_pull }}" required><br><br>
         <label>Number of Past Videos to Prune</label><input type="number" name="prune"><br><br>
         <label>CBC News: </label><input type="checkbox" name="cbc_news" {% if podcast.cbc_news %} checked {%  endif %}><br>
+        <label>YouTube ID </label><input type="checkbox" name="youtube_id" {% if podcast.youtube_id %} checked {%  endif %}><br>
         <label>Description</label>{{ podcast.description|safe|linebreaks }}
         <button name="action" value="Update" type="submit">Update</button>
         <button name="action" value="Reset" type="submit">Reset</button>

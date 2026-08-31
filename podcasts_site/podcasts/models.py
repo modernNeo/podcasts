@@ -49,6 +49,9 @@ class YouTubePodcast(models.Model):
     )
     cbc_news = models.BooleanField(default=False)
 
+    youtube_id = models.BooleanField(default=True)
+
+
 
     @property
     def front_end_when_to_pull(self):
