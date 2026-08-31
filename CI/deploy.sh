@@ -7,6 +7,10 @@ set -e -o xtrace
 
 export COMPOSE_PROJECT_NAME="podcasts_site"
 
+docker logs ${prod_container_name}
+
+docker ps -a ${prod_container_name}
+
 export prod_container_name="${COMPOSE_PROJECT_NAME}_app"
 export prod_container_puller_name="${COMPOSE_PROJECT_NAME}_one_off_puller"
 export prod_container_db_name="${COMPOSE_PROJECT_NAME}_db"
