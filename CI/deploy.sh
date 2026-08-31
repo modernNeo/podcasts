@@ -18,7 +18,7 @@ export prod_puller_image_name_lower_case=$(echo "$prod_container_puller_name" | 
 
 docker logs ${prod_container_name}
 
-docker ps -a ${prod_container_name}
+docker ps -a
 
 docker rm -f ${prod_container_name} || true
 docker rm -f ${prod_container_puller_name} || true
