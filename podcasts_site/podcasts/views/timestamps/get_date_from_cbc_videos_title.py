@@ -4,6 +4,7 @@ from podcasts.views.setup_logger import Loggers
 
 CBC_NEWS_TITLE_DATE_NORMALIZER = {
     "Sept.": "Sep",
+    "Sept": "Sep",
     "Aug." : "Aug",
     "Sep." : "Sep",
     "Oct." : "Oct",
