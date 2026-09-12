@@ -27,6 +27,7 @@ CBC_VANCOUVER_NEWS_DATE_FORMAT = [
     "%I %B %d", #used on 2025, July 7th
     "%I %b%d", #used on 2025, Sept 1,
     "%I, %b. %d", # used on 2025 december 19th
+    "%I, %b %d" # used on 2026 Sept 10
 ]
 
 def is_cbc_vancouver_video(current_file_name):
