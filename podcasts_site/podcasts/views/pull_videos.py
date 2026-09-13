@@ -84,6 +84,9 @@ class CustomDL(yt_dlp.YoutubeDL):
         if '[youtube] Video unavailable. This video is private' in message:
             # 2. Tell yt-dlp to immediately abandon this video and move on
             raise ExtractorError(f"[CustomDL] [youtube] Private video: {active_vid}")
+        if '[youtube] Private video' in message:
+            # 2. Tell yt-dlp to immediately abandon this video and move on
+            raise ExtractorError(f"[CustomDL] [youtube] Private video: {active_vid}")
         if message in MESSAGES_TO_SKIP_PAST_AND_NOT_LOG:
             return
         if '[youtube] This live event will begin in' in message:
