@@ -3,6 +3,7 @@ from podcasts.views.pstdatetimefield import pstdatetime
 from podcasts.views.setup_logger import Loggers
 
 CBC_NEWS_TITLE_DATE_NORMALIZER = {
+    "September" : "Sep",
     "Sept.": "Sep",
     "Sept": "Sep",
     "Aug." : "Aug",
