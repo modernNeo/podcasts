@@ -22,7 +22,7 @@
     {% csrf_token %}
      <input type="number" name="custom_list_id" value="{{ custom_list.list_info.id }}" hidden>
     <h4>{{ custom_list.list_info }}</h4>
-    {%  if podcast.rss_feed_available %}
+    {%  if custom_list.rss_feed_available %}
         <a href="{{ podcast.http_feed_location }}" target="_blank">RSS Feed</a><br>
     {%  endif %}
     {% for podcast in podcasts %}
