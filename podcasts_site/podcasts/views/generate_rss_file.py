@@ -79,7 +79,7 @@ def generate_custom_list_rss_file(custom_list_id):
         # owner=Person(youtube_podcast.author), commenting out cause it needs an email
         explicit=False,
         website="https://podcasts.modernneo.com/",
-        description="",
+        description=custom_list.name,
         episodes=episodes
     )
     p.rss_file(custom_list.feed_file_location)
