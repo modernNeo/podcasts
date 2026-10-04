@@ -10,3 +10,5 @@ APScheduler==3.9.1
 
 
 querystring_parser
+
+feedparser

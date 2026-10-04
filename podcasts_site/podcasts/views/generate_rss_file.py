@@ -1,6 +1,5 @@
 import datetime
 
-import feedparser
 from django.db.models import Q
 from podgen import Category, Podcast, Person, Episode, Media
 
