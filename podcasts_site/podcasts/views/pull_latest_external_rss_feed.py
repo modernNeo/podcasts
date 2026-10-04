@@ -1,13 +1,20 @@
 import datetime
 
 import feedparser
+import requests
 
 from podcasts.models import RSSPodcastFeed, RssPodcastEpisode
 from podcasts.views.generate_rss_file import generate_external_rss_feed_rss_file
 
 
 def pull_latest_external_rss_feed(rss_podcast_feed: RSSPodcastFeed):
-    parsed_feed = feedparser.parse(rss_podcast_feed.url)
+    # Provide a standard browser User-Agent to prevent the server from blocking the request
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    }
+    response = requests.get(rss_podcast_feed.url, headers=headers)
+    response.raise_for_status()  # Throws an exception if the request failed
+    parsed_feed = feedparser.parse(response.text)
 
     # 2. Initialize your podgen Podcast object
     rss_podcast_feed.name = parsed_feed.feed.get("title", "Unknown")
