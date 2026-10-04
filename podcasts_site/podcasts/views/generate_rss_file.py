@@ -3,7 +3,7 @@ import datetime
 from django.db.models import Q
 from podgen import Category, Podcast, Person, Episode, Media
 
-from podcasts.models import YouTubePodcast
+from podcasts.models import YouTubePodcast, CustomList
 
 
 def generate_rss_file(youtube_podcast: YouTubePodcast):
@@ -49,3 +49,36 @@ def generate_rss_file(youtube_podcast: YouTubePodcast):
     )
     p.rss_file(youtube_podcast.feed_file_location)
     print(f"done with {youtube_podcast.name}")
+
+
+def generate_custom_list_rss_file(custom_list_id):
+    custom_list = CustomList.objects.all().filter(id=custom_list_id).first()
+    episodes = []
+    for podcast in custom_list.customlistentry_set.all():
+        youtube_podcast = podcast.podcast
+        videos = youtube_podcast.youtubevideo_set.all().exclude(Q(hide=True) | Q(manually_hide=True))
+        episodes.extend([
+            Episode(
+                id=video.video_id if youtube_podcast.youtube_id else f"{video.date}-{video.get_title}",
+                title=video.get_title,
+                summary=video.description,
+                authors=[Person(youtube_podcast.author)],
+                image=video.image,
+                media=Media(
+                    duration=datetime.timedelta(seconds=video.duration),
+                    size=video.size,
+                    url=video.get_location
+                ),
+                publication_date=video.date,
+            )
+            for video in videos
+        ])
+    episodes.sort(key=lambda x: x.publication_date, reverse=True)
+    p = Podcast(
+        name=custom_list.name,
+        # owner=Person(youtube_podcast.author), commenting out cause it needs an email
+        explicit=False,
+        episodes=episodes
+    )
+    p.rss_file(custom_list.feed_file_location)
+    print(f"done with {custom_list.name}")

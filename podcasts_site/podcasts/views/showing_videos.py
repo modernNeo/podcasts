@@ -1,8 +1,10 @@
 import os
 
-from podcasts.models import YouTubePodcast, CronSchedule, YouTubeVideo
+from querystring_parser import parser
+
+from podcasts.models import YouTubePodcast, CronSchedule, YouTubeVideo, CustomList, CustomListEntry
 from podcasts.views.delete_podcast import delete_podcast
-from podcasts.views.generate_rss_file import generate_rss_file
+from podcasts.views.generate_rss_file import generate_rss_file, generate_custom_list_rss_file
 from podcasts.views.reset_podcast import reset_podcast
 from podcasts.views.setup_logger import Loggers
 
@@ -96,7 +98,73 @@ def showing_videos(request):
         cron_schedule.hour = request.POST['hour']
         cron_schedule.minute = request.POST['minute']
         cron_schedule.save()
+    elif request.POST.get("action", False) == "create_custom_list":
+        custom_list = CustomList()
+        post_dict = parser.parse(request.POST.urlencode())
+        custom_list.name = request.POST['name']
+        podcasts = get_list_of_checked_podcasts(post_dict)
+        if len(podcasts) > 0:
+            custom_list.save()
+            for podcast in podcasts:
+                CustomListEntry(podcast=podcast, custom_list=custom_list).save()
+        generate_custom_list_rss_file(custom_list.id)
+    elif request.POST.get("action", False) == "delete_custom_list":
+        post_dict = parser.parse(request.POST.urlencode())
+        if 'custom_list_id' in post_dict:
+            CustomList.objects.all().filter(id=post_dict['custom_list_id']).delete()
+    elif request.POST.get("action", False) == "update_custom_list":
+        post_dict = parser.parse(request.POST.urlencode())
+        if 'custom_list_id' in post_dict:
+            custom_list = CustomList.objects.all().filter(id=post_dict['custom_list_id']).first()
+            podcasts = get_list_of_checked_podcasts(post_dict)
+            if len(podcasts) == 0:
+                for podcast in custom_list.customlistentry_set.all():
+                    podcast.delete()
+            else:
+                current_list_entries = custom_list.customlistentry_set.all()
+                # delete current ones that were unchecked
+                for current_list_entry in current_list_entries:
+                    if current_list_entry not in podcasts:
+                        current_list_entry.delete()
+
+                # add new ones
+                for podcast in podcasts:
+                    if podcast not in current_list_entries:
+                        CustomListEntry(podcast=podcast, custom_list=custom_list).save()
+            generate_custom_list_rss_file(custom_list.id)
+
+
+
+
+    custom_lists = []
+    for custom_list in CustomList.objects.all():
+        names = []
+        for podcast in custom_list.customlistentry_set.all():
+            podcast = podcast.podcast
+            names.append(podcast.frontend_name)
+        custom_lists.append({
+            "list_info" : custom_list,
+            "podcast_names" : names,
+        })
+
     return {
+        "custom_lists": custom_lists,
         "podcasts" : YouTubePodcast.objects.all().order_by("-id"),
         "cron_schedule" : cron_schedule
     }
+
+def get_list_of_checked_podcasts(post_dict):
+    if 'checked_podcasts' not in post_dict:
+        return []
+    list_of_checked_podcasts = post_dict['checked_podcasts']
+    podcasts = []
+    if type(list_of_checked_podcasts) is str:
+        podcast = YouTubePodcast.objects.all().filter(id=list_of_checked_podcasts).first()
+        if podcast:
+            podcasts.append(podcast)
+    else:
+        for checked_podcasts in list_of_checked_podcasts:
+            podcast = YouTubePodcast.objects.all().filter(id=checked_podcasts).first()
+            if podcast:
+                podcasts.append(podcast)
+    return podcasts

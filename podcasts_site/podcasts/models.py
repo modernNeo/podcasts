@@ -285,3 +285,36 @@ class TroubleRecord(models.Model):
     )
     def __str__(self):
         return f"Error [{self.message}] in podcast {self.podcast}"
+
+
+class CustomList(models.Model):
+    name = models.CharField(max_length=1000)
+
+    @property
+    def url_friendly_name(self):
+        if len(self.name.strip()) == 0:
+            raise Exception("no name detected")
+        return string_cleaner(self.name)
+
+    @property
+    def rss_feed_available(self):
+        return len(self.name.strip()) > 0
+
+    @property
+    def feed_file_location(self):
+        return f"{settings.MEDIA_ROOT}/{RSS_FEED_FOLDER_NAME}/{self.url_friendly_name}.xml"
+
+    @property
+    def http_feed_location(self):
+        return f"{settings.HTTP_XML_FQDN}{settings.MEDIA_URL}{RSS_FEED_FOLDER_NAME}/{self.url_friendly_name}.xml"
+
+    def __str__(self) -> str:
+        return f"Custom List: {self.name}"
+
+
+class CustomListEntry(models.Model):
+    custom_list = models.ForeignKey(CustomList, on_delete=models.CASCADE)
+    podcast = models.ForeignKey(YouTubePodcast, on_delete=models.CASCADE)
+
+    def __str__(self) -> str:
+        return f"Custom List {self.custom_list} entry: {self.podcast}"

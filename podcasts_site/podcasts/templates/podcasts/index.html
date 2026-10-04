@@ -14,6 +14,40 @@
     <button name="action" value="Create" type="submit">Create</button>
 </form>
 
+<h1>Custom Lists</h1>
+
+
+{%  for custom_list in custom_lists %}
+    <form method="post">
+    {% csrf_token %}
+     <input type="number" name="custom_list_id" value="{{ custom_list.list_info.id }}" hidden>
+    <h4>{{ custom_list.list_info }}</h4>
+    {%  if podcast.rss_feed_available %}
+        <a href="{{ podcast.http_feed_location }}" target="_blank">RSS Feed</a><br>
+    {%  endif %}
+    {% for podcast in podcasts %}
+        <input type="checkbox" {%  if podcast.frontend_name in custom_list.podcast_names %}  checked {%  endif %} name="[checked_podcasts]{{ podcast.frontend_name }}" value="{{ podcast.id }}">
+        <label> {{ podcast.frontend_name }}</label><br>
+    {%  endfor %}
+     <button name="action" value=update_custom_list type="submit">Update Custom List</button>
+    <button name="action" value=delete_custom_list type="submit">Delete Custom List</button>
+    <br><br>
+    </form>
+{% endfor %}
+
+<form method="post">
+<h2>Create Custom List</h2>
+    {% csrf_token %}
+    <label>Name:</label><input type="text" name="name"><br>
+    <h3>Podcasts</h3>
+    {% for podcast in podcasts %}
+        <input type="checkbox" name="[checked_podcasts]{{ podcast.frontend_name }}" value="{{ podcast.id }}">
+        <label> {{ podcast.frontend_name }}</label><br>
+    {%  endfor %}
+    <button name="action" value="create_custom_list" type="submit">Create Custom List</button>
+</form>
+
+
 {%  for podcast in podcasts %}
     <form method="post">
         {% csrf_token %}
