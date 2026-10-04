@@ -14,6 +14,31 @@
     <button name="action" value="Create" type="submit">Create</button>
 </form>
 
+
+<h1>Track RSS Feed</h1>
+
+<form method="post">
+    {% csrf_token %}
+    <label>URL:</label><input type="text" name="url">
+    <button name="action" value="track_rss_feed" type="submit">Track RSS Feed</button>
+</form>
+
+<h1>Tracked RSS Feeds</h1>
+
+    {%  for rss_podcast_feed in rss_podcast_feeds %}
+        <form method="post">
+        {% csrf_token %}
+        <input type="number" name="rss_feed_id" value="{{ rss_podcast_feed.id }}" hidden>
+        <label> {{ rss_podcast_feed.name }}</label><br>
+        {%  if rss_podcast_feed.rss_feed_available %}
+            <a href="{{ rss_podcast_feed.http_feed_location }}" target="_blank">RSS Feed</a><br>
+        {%  endif %}
+        <button name="action" value="delete_rss_feed" type="submit">Delete RSS Feed</button>
+        </form>
+    {%  endfor %}
+
+
+
 <h1>Custom Lists</h1>
 
 
@@ -25,9 +50,15 @@
     {%  if custom_list.list_info.rss_feed_available %}
         <a href="{{ custom_list.list_info.http_feed_location }}" target="_blank">RSS Feed</a><br>
     {%  endif %}
+    <h5>Podcasts</h5>
     {% for podcast in podcasts %}
         <input type="checkbox" {%  if podcast.frontend_name in custom_list.podcast_names %}  checked {%  endif %} name="[checked_podcasts]{{ podcast.frontend_name }}" value="{{ podcast.id }}">
         <label> {{ podcast.frontend_name }}</label><br>
+    {%  endfor %}
+    <h5>RSS Podcast Feeds</h5>
+    {% for rss_podcast_feed in rss_podcast_feeds %}
+        <input type="checkbox" {%  if rss_podcast_feed.name in custom_list.podcast_names %}  checked {%  endif %} name="[checked_rss_podcast_feeds]{{ rss_podcast_feed.name }}" value="{{ rss_podcast_feed.id }}">
+        <label> {{ rss_podcast_feed.name }}</label><br>
     {%  endfor %}
      <button name="action" value=update_custom_list type="submit">Update Custom List</button>
     <button name="action" value=delete_custom_list type="submit">Delete Custom List</button>
@@ -43,6 +74,11 @@
     {% for podcast in podcasts %}
         <input type="checkbox" name="[checked_podcasts]{{ podcast.frontend_name }}" value="{{ podcast.id }}">
         <label> {{ podcast.frontend_name }}</label><br>
+    {%  endfor %}
+    <h3>RSS Podcast Feeds</h3>
+    {% for rss_podcast_feed in rss_podcast_feeds %}
+        <input type="checkbox" name="[checked_rss_podcast_feeds]{{ rss_podcast_feed.name }}" value="{{ rss_podcast_feed.id }}">
+        <label> {{ rss_podcast_feed.name }}</label><br>
     {%  endfor %}
     <button name="action" value="create_custom_list" type="submit">Create Custom List</button>
 </form>

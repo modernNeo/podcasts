@@ -27,6 +27,59 @@ def string_cleaner(name):
     return (name.replace(':', '').replace(' ', '_').replace(',', '').replace("/", "_")
             .replace("%", "").replace(";", "").replace("#", "").replace("?", ""))
 
+class RSSPodcastFeed(models.Model):
+    name = models.CharField(max_length=1000)
+    description = models.CharField(max_length=5000)
+    image = models.CharField(max_length=10000, null=True)
+    url = models.CharField(max_length=10000)
+    language = models.CharField(max_length=5)
+    category = models.CharField(max_length=1000)
+    owner_name = models.CharField(max_length=10000)
+    owner_email = models.CharField(max_length=10000)
+
+    @property
+    def frontend_name(self):
+        if len(self.name.strip()) == 0:
+            raise Exception("no name detected")
+        return self.name
+
+
+    @property
+    def rss_feed_available(self):
+        return len(self.name.strip()) > 0
+
+    @property
+    def url_friendly_name(self):
+        if len(self.name.strip()) == 0:
+            raise Exception("no name detected")
+        return string_cleaner(self.name)
+
+    @property
+    def feed_file_location(self):
+        return f"{settings.MEDIA_ROOT}/{RSS_FEED_FOLDER_NAME}/{self.url_friendly_name}.xml"
+
+    @property
+    def http_feed_location(self):
+        return f"{settings.HTTP_XML_FQDN}{settings.MEDIA_URL}{RSS_FEED_FOLDER_NAME}/{self.url_friendly_name}.xml"
+
+    def __str__(self) -> str:
+        return f"RSS Podcast Feed {self.name}"
+
+class RssPodcastEpisode(models.Model):
+    podcast = models.ForeignKey(RSSPodcastFeed, on_delete=models.CASCADE)
+    video_id = models.CharField(max_length=1000, unique=True)
+    original_title = models.CharField(max_length=1000)
+    description = models.CharField(max_length=5000)
+    image = models.CharField(max_length=10000, null=True)
+    duration = models.PositiveBigIntegerField()
+    date = pstdatetimefield.PSTDateTimeField()
+    size = models.PositiveBigIntegerField()
+    link = models.CharField(max_length=5000)
+
+    def __str__(self) -> str:
+        return f"{self.podcast}, Ep: {self.original_title}"
+
+
 class YouTubePodcast(models.Model):
     # class Meta:
     #     constraints = [
@@ -314,7 +367,23 @@ class CustomList(models.Model):
 
 class CustomListEntry(models.Model):
     custom_list = models.ForeignKey(CustomList, on_delete=models.CASCADE)
-    podcast = models.ForeignKey(YouTubePodcast, on_delete=models.CASCADE)
+    podcast = models.ForeignKey(
+        YouTubePodcast,
+        null=True,
+        blank=True,
+        default=None,
+        on_delete=models.CASCADE
+    )
+    external_podcast = models.ForeignKey(
+        RSSPodcastFeed,
+        null=True,
+        blank=True,
+        default=None,
+        on_delete=models.CASCADE
+    )
 
     def __str__(self) -> str:
-        return f"Custom List {self.custom_list} entry: {self.podcast}"
+        if self.podcast is None:
+            return f"Custom List {self.custom_list} entry: {self.external_podcast}"
+        else:
+            return f"Custom List {self.custom_list} entry: {self.podcast}"

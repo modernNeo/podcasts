@@ -2,7 +2,7 @@ import os
 
 from querystring_parser import parser
 
-from podcasts.models import YouTubePodcast, CronSchedule, YouTubeVideo, CustomList, CustomListEntry
+from podcasts.models import YouTubePodcast, CronSchedule, YouTubeVideo, CustomList, CustomListEntry, RSSPodcastFeed
 from podcasts.views.delete_podcast import delete_podcast
 from podcasts.views.generate_rss_file import generate_rss_file, generate_custom_list_rss_file
 from podcasts.views.reset_podcast import reset_podcast
@@ -102,12 +102,14 @@ def showing_videos(request):
         custom_list = CustomList()
         post_dict = parser.parse(request.POST.urlencode())
         custom_list.name = request.POST['name']
-        podcasts = get_list_of_checked_podcasts(post_dict)
-        if len(podcasts) > 0:
+        podcasts, rss_podcast_feeds = get_list_of_checked_podcasts(post_dict)
+        if len(podcasts) > 0 or len(rss_podcast_feeds) > 0:
             custom_list.save()
             for podcast in podcasts:
                 CustomListEntry(podcast=podcast, custom_list=custom_list).save()
-        generate_custom_list_rss_file(custom_list.id)
+            for rss_podcast_feed in rss_podcast_feeds:
+                CustomListEntry(external_podcast=rss_podcast_feed, custom_list=custom_list).save()
+            generate_custom_list_rss_file(custom_list.id)
     elif request.POST.get("action", False) == "delete_custom_list":
         post_dict = parser.parse(request.POST.urlencode())
         if 'custom_list_id' in post_dict:
@@ -116,32 +118,45 @@ def showing_videos(request):
         post_dict = parser.parse(request.POST.urlencode())
         if 'custom_list_id' in post_dict:
             custom_list = CustomList.objects.all().filter(id=post_dict['custom_list_id']).first()
-            podcasts = get_list_of_checked_podcasts(post_dict)
-            if len(podcasts) == 0:
+            podcasts, rss_podcast_feeds = get_list_of_checked_podcasts(post_dict)
+            if len(podcasts) == 0 and len(rss_podcast_feeds) == 0:
                 for podcast in custom_list.customlistentry_set.all():
                     podcast.delete()
             else:
                 current_list_entries = custom_list.customlistentry_set.all()
+                podcasts_current_list_entries = current_list_entries.filter(podcast__isnull=False)
+                podcasts_current_list_entries_ids = list(podcasts_current_list_entries.values_list(
+                    'podcast_id',flat=True ))
+                external_current_list_entries = current_list_entries.filter(external_podcast__isnull=False)
+                external_current_list_entries_ids = list(external_current_list_entries.values_list('podcast_id',flat=True))
+
                 # delete current ones that were unchecked
-                for current_list_entry in current_list_entries:
-                    if current_list_entry not in podcasts:
+                for current_list_entry in podcasts_current_list_entries:
+                    if current_list_entry.podcast not in podcasts:
+                        current_list_entry.delete()
+                for current_list_entry in external_current_list_entries:
+                    if current_list_entry.external_podcast not in rss_podcast_feeds:
                         current_list_entry.delete()
 
                 # add new ones
                 for podcast in podcasts:
-                    if podcast not in current_list_entries:
+                    if podcast.id not in podcasts_current_list_entries_ids:
                         CustomListEntry(podcast=podcast, custom_list=custom_list).save()
+                for rss_podcast_feed in rss_podcast_feeds:
+                    if rss_podcast_feed.id not in external_current_list_entries_ids:
+                        CustomListEntry(external_podcast=rss_podcast_feed, custom_list=custom_list).save()
             generate_custom_list_rss_file(custom_list.id)
-
-
-
+    elif request.POST.get("action", False) == "track_rss_feed":
+        RSSPodcastFeed(url=request.POST['url']).save()
+    elif request.POST.get("action", False) == "delete_rss_feed":
+        RSSPodcastFeed(id=request.POST['rss_feed_id']).delete()
 
     custom_lists = []
     for custom_list in CustomList.objects.all():
         names = []
         for podcast in custom_list.customlistentry_set.all():
-            podcast = podcast.podcast
-            names.append(podcast.frontend_name)
+            podcast = podcast.podcast.frontend_name if podcast.podcast else podcast.external_podcast.name
+            names.append(podcast)
         custom_lists.append({
             "list_info" : custom_list,
             "podcast_names" : names,
@@ -149,22 +164,37 @@ def showing_videos(request):
 
     return {
         "custom_lists": custom_lists,
+        "rss_podcast_feeds" : RSSPodcastFeed.objects.all(),
         "podcasts" : YouTubePodcast.objects.all().order_by("-id"),
         "cron_schedule" : cron_schedule
     }
 
 def get_list_of_checked_podcasts(post_dict):
-    if 'checked_podcasts' not in post_dict:
+    if 'checked_podcasts' not in post_dict and 'checked_rss_podcast_feeds' not in post_dict:
         return []
-    list_of_checked_podcasts = post_dict['checked_podcasts']
     podcasts = []
-    if type(list_of_checked_podcasts) is str:
-        podcast = YouTubePodcast.objects.all().filter(id=list_of_checked_podcasts).first()
-        if podcast:
-            podcasts.append(podcast)
-    else:
-        for checked_podcasts in list_of_checked_podcasts:
-            podcast = YouTubePodcast.objects.all().filter(id=checked_podcasts).first()
+    rss_podcast_feeds = []
+    if 'checked_podcasts' in post_dict:
+        list_of_checked_podcasts = post_dict['checked_podcasts']
+        if type(list_of_checked_podcasts) is str:
+            podcast = YouTubePodcast.objects.all().filter(id=list_of_checked_podcasts).first()
             if podcast:
                 podcasts.append(podcast)
-    return podcasts
+        else:
+            for checked_podcast in list_of_checked_podcasts:
+                podcast = YouTubePodcast.objects.all().filter(id=checked_podcast).first()
+                if podcast:
+                    podcasts.append(podcast)
+
+    if 'checked_rss_podcast_feeds' in post_dict:
+        list_of_checked_rss_podcast_feeds = post_dict['checked_rss_podcast_feeds']
+        if type(list_of_checked_rss_podcast_feeds) is str:
+            podcast = RSSPodcastFeed.objects.all().filter(id=list_of_checked_rss_podcast_feeds).first()
+            if podcast:
+                rss_podcast_feeds.append(podcast)
+        else:
+            for checked_rss_podcast_feed in list_of_checked_rss_podcast_feeds:
+                podcast = RSSPodcastFeed.objects.all().filter(id=checked_rss_podcast_feed).first()
+                if podcast:
+                    rss_podcast_feeds.append(podcast)
+    return podcasts, rss_podcast_feeds
