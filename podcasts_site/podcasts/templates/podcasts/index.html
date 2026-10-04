@@ -22,8 +22,8 @@
     {% csrf_token %}
      <input type="number" name="custom_list_id" value="{{ custom_list.list_info.id }}" hidden>
     <h4>{{ custom_list.list_info }}</h4>
-    {%  if custom_list.rss_feed_available %}
-        <a href="{{ podcast.http_feed_location }}" target="_blank">RSS Feed</a><br>
+    {%  if custom_list.list_info.rss_feed_available %}
+        <a href="{{ custom_list.list_info.http_feed_location }}" target="_blank">RSS Feed</a><br>
     {%  endif %}
     {% for podcast in podcasts %}
         <input type="checkbox" {%  if podcast.frontend_name in custom_list.podcast_names %}  checked {%  endif %} name="[checked_podcasts]{{ podcast.frontend_name }}" value="{{ podcast.id }}">
