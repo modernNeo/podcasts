@@ -123,7 +123,11 @@ def generate_external_rss_feed_rss_file(rss_podcast_feed: RSSPodcastFeed):
         episode.title = entry.original_title
         episode.summary = entry.description
         episode.authors = [person]
-        episode.image = entry.image
+        last_index = entry.image.rfind(".")
+        if entry.image[last_index:] not in [".jpg", ".jpeg", ".png"]:
+            episode.image = entry.image.split("?")[0]
+        else:
+            episode.image = entry.image
         episode.publication_date = entry.date
         episode.media = Media(
             duration=datetime.timedelta(seconds=entry.duration),
