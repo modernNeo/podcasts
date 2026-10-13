@@ -18,7 +18,6 @@ pipeline {
                 string(credentialsId: 'PODCASTS_SITE_CLOUDFLARE_FQDN', variable: 'CLOUDFLARE_FQDN'),
                 string(credentialsId: 'LAN_HOST', variable: 'LAN_HOST'),
                 string(credentialsId: 'TO_EMAIL', variable: 'TO_EMAIL'),
-                string(credentialsId: 'COOKIE_LOCATION', variable: 'COOKIE_LOCATION'),
                 string(credentialsId: 'GMAIL_USERNAME', variable: 'GMAIL_USERNAME'),
                 string(credentialsId: 'GMAIL_PASSWORD', variable: 'GMAIL_PASSWORD'),
                 string(credentialsId: 'PODCASTS_SITE_SECRET_KEY', variable: 'PODCASTS_SITE_SECRET_KEY')]
@@ -30,7 +29,6 @@ pipeline {
                         export CLOUDFLARE_FQDN="'"${CLOUDFLARE_FQDN}"'";
                         export LAN_HOST="'"${LAN_HOST}"'";
                         export TO_EMAIL="'"${TO_EMAIL}"'";
-                        export COOKIE_LOCATION="'"${COOKIE_LOCATION}"'";
                         export GMAIL_USERNAME="'"${GMAIL_USERNAME}"'";
                         export GMAIL_PASSWORD="'"${GMAIL_PASSWORD}"'";
                         export SECRET_KEY="'"${PODCASTS_SITE_SECRET_KEY}"'";
