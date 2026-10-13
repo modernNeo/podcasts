@@ -16,8 +16,8 @@ export prod_puller_image_name_lower_case=$(echo "$prod_container_puller_name" | 
 
 docker rm -f ${prod_container_name} || true
 docker rm -f ${prod_container_puller_name} || true
-docker image rm -f $(docker images  | grep -i "${prod_image_name_lower_case}" | awk '{print $3}') || true
-docker image rm -f $(docker images  | grep -i "${prod_puller_image_name_lower_case}" | awk '{print $3}') || true
+docker image rm -f $(docker images  | grep -i "${prod_image_name_lower_case}" | awk '{print $1}') || true
+docker image rm -f $(docker images  | grep -i "${prod_puller_image_name_lower_case}" | awk '{print $1}') || true
 docker volume create --name="${COMPOSE_PROJECT_NAME}_logs"
 docker compose -f "${docker_compose_file}" up -d
 
