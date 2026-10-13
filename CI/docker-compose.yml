@@ -29,7 +29,7 @@ services:  #Services that are needed for the podcasts_site app
         networks:
             - podcasts_site_network
         ports:
-            -   "6001:8000"
+            -   "6003:8000"
 #        stdin_open: true # docker run -i
 #        tty: true        # docker run -t
     podcast_youtube_one_off_puller:
