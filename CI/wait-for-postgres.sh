@@ -17,7 +17,7 @@ rm ffmpeg.tar.xz || true
 rm ffmpeg || true
 
 # 1. Fetch the exact filename/tag from the GitHub API, then download it
-URL=$(curl -s https://api.github.com/repos/BtbN/FFmpeg-Builds/releases | grep -oE "https://github.com/BtbN/FFmpeg-Builds/releases/download/[^\"]+linux64-gpl.tar.xz" | head -n 1)
+URL=$(curl -s https://api.github.com/repos/yt-dlp/FFmpeg-Builds/releases | grep -oE "https://github.com/yt-dlp/FFmpeg-Builds/releases/download/[^\"]+linux64-gpl.tar.xz" | head -n 1)
 # 2. Download the file
 wget "$URL" -O ffmpeg.tar.xz
 tar -xf ffmpeg.tar.xz
