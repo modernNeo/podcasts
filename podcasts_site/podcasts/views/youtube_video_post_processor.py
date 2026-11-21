@@ -118,6 +118,7 @@ class YouTubeVideoPostProcessor(postprocessor.common.PostProcessor):
                     youtube_podcast_video.size = file_size
                     youtube_podcast_video.extension = new_file_name[index_of_last_period:]
                     youtube_podcast_video.duration = duration
+                    youtube_podcast_video.published = podcast_being_processed.automatically_publish
                     youtube_podcast_video.save()
                     youtube_dlp_logger.info(f"[youtube_video_post_processor.py run()] {youtube_podcast_video} saved")
                     if cbc_vancouver_news_video:

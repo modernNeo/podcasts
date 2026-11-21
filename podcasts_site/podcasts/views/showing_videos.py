@@ -16,7 +16,7 @@ def showing_videos(request):
         index_range = request.POST['index_range'].strip()
         YouTubePodcast(
             url = request.POST['url'], index_range=None if len(index_range) == 0 else index_range,
-            when_to_pull=request.POST['when_to_pull']
+            when_to_pull=request.POST['when_to_pull'], automatically_publish=request.POST.get('automatically_publish', False) == 'on'
         ).save()
     elif request.POST.get("action", False) == "Update":
         podcast = YouTubePodcast.objects.all().filter(id=int(request.POST['id'])).first()
@@ -27,6 +27,7 @@ def showing_videos(request):
             podcast.url = request.POST['url']
             podcast.index_range = None if len(index_range) == 0 else index_range
             podcast.when_to_pull = request.POST['when_to_pull']
+            podcast.automatically_publish = request.POST.get('automatically_publish', False) == 'on'
             current_name = podcast.frontend_name
             new_name = request.POST['name']
             name_changed = current_name != new_name and new_name.strip() != ''
@@ -92,6 +93,20 @@ def showing_videos(request):
             generate_rss_file(youtube_podcast)
         else:
             youtube_dlp_logger.error(f"could not find a video with ID [{video_id}]")
+    elif request.POST.get("action", False) == "unpublish" or request.POST.get("action", False) == "publish":
+        video_id = request.POST['video_id']
+        youtube_dlp_logger.info(f"processing video with ID of [{video_id}]")
+        youtube_video = YouTubeVideo.objects.all().filter(id=int(video_id)).first()
+        youtube_podcast = youtube_video.podcast
+        if youtube_video:
+            youtube_video.published = request.POST.get("action", False) == "publish"
+            youtube_dlp_logger.info(f"video [{youtube_video}] with id {video_id} is set as {'' if youtube_video.published else 'not '}published")
+            youtube_video.save()
+            youtube_podcast.refresh_from_db()
+            generate_rss_file(youtube_podcast)
+        else:
+            youtube_dlp_logger.error(f"could not find a video with ID [{video_id}]")
+
     elif request.POST.get("action", False) == "update_cron":
         if cron_schedule is None:
             cron_schedule = CronSchedule()

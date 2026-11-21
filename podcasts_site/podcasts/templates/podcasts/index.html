@@ -11,6 +11,7 @@
     <label>URL:</label><input type="text" name="url">
     <label>Number of Past Items to Process:</label><input type="number" name="index_range">
     <label>When To Pull: </label><input type="time" name="when_to_pull" required><br><br>
+    <label>Automatically Publish:</label><input type="checkbox" checked name="automatically_publish"><br><br>
     <button name="action" value="Create" type="submit">Create</button>
 </form>
 
@@ -102,6 +103,7 @@
         <label>Number of Past Videos to Prune</label><input type="number" name="prune"><br><br>
         <label>CBC News: </label><input type="checkbox" name="cbc_news" {% if podcast.cbc_news %} checked {%  endif %}><br>
         <label>YouTube ID </label><input type="checkbox" name="youtube_id" {% if podcast.youtube_id %} checked {%  endif %}><br>
+        <label>Automatically Publish </label><input type="checkbox" name="automatically_publish" {% if podcast.automatically_publish %} checked {%  endif %}><br>
         <label>Description</label>{{ podcast.description|safe|linebreaks }}
         <button name="action" value="Update" type="submit">Update</button>
         <button name="action" value="Reset" type="submit">Reset</button>
@@ -137,6 +139,11 @@
                         <button name="action" value="Unhide" type="submit">Unhide</button>
                     {%  else %}
                         <button name="action" value="Hide" type="submit">Hide</button>
+                    {%  endif %}
+                    {%  if video.published %}
+                        <button name="action" value="unpublish" type="submit">Unpublish</button>
+                    {% else %}
+                        <button name="action" value="publish" type="submit">Publish</button>
                     {%  endif %}
                     <br>
                 </form>

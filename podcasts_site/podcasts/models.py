@@ -104,6 +104,8 @@ class YouTubePodcast(models.Model):
 
     youtube_id = models.BooleanField(default=True)
 
+    automatically_publish = models.BooleanField(default=True)
+
 
 
     @property
@@ -231,6 +233,7 @@ class YouTubeVideo(models.Model):
     manually_hide = models.BooleanField(default=False)
     duration = models.PositiveBigIntegerField()
     file_not_found = models.BooleanField(default=False)
+    published = models.BooleanField(default=True)
 
     def delete(self, *args, **kwargs):
         if self.is_present():
