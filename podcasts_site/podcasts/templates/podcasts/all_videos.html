@@ -65,11 +65,6 @@
                 {%  else %}
                     <button name="action" value="Hide" type="submit">Hide</button>
                 {%  endif %}
-                {%  if video.published %}
-                    <button name="action" value="unpublish" type="submit">Unpublish</button>
-                {% else %}
-                    <button name="action" value="publish" type="submit">Publish</button>
-                {%  endif %}
                 {%  if not podcast.automatically_publish %}
                     {%  if video.published %}
                         <button name="action" value="unpublish" type="submit">Unpublish</button>
