@@ -108,7 +108,7 @@ def generate_custom_list_rss_file(custom_list_id):
 def generate_external_rss_feed_rss_file(rss_podcast_feed: RSSPodcastFeed):
     my_podcast = Podcast()
     my_podcast.name = rss_podcast_feed.name
-    my_podcast.description = rss_podcast_feed.description
+    my_podcast.description = rss_podcast_feed.description if len(rss_podcast_feed.description) > 0 else "Description"
     my_podcast.website = rss_podcast_feed.url
     my_podcast.language = "en"
     person = Person(name=rss_podcast_feed.owner_name, email=rss_podcast_feed.owner_email)
@@ -135,6 +135,5 @@ def generate_external_rss_feed_rss_file(rss_podcast_feed: RSSPodcastFeed):
             url=entry.link
         )
         my_podcast.add_episode(episode)
-    print(f"saving to {rss_podcast_feed.feed_file_location}")
     my_podcast.rss_file(rss_podcast_feed.feed_file_location)
     print(f"done with {my_podcast.name}")
