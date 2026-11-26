@@ -25,6 +25,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 RUN pip install --no-cache-dir -r db-requirements.txt
 
 RUN apk add curl
+RUN apk add --no-cache tar xz
 
 CMD ["./wait-for-postgres.sh", "./run_docker.sh"]
 #CMD ["sh"]
