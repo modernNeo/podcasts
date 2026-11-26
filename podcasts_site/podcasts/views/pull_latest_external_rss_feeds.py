@@ -5,4 +5,5 @@ from podcasts.views.pull_latest_external_rss_feed import pull_latest_external_rs
 def pull_latest_external_rss_feeds():
     rss_podcast_feeds = RSSPodcastFeed.objects.all()
     for rss_podcast_feed in rss_podcast_feeds:
+        print(f"pulling {rss_podcast_feed}")
         pull_latest_external_rss_feed(rss_podcast_feed)
