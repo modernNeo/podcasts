@@ -135,5 +135,6 @@ def generate_external_rss_feed_rss_file(rss_podcast_feed: RSSPodcastFeed):
             url=entry.link
         )
         my_podcast.add_episode(episode)
+    print(f"saving to {rss_podcast_feed.feed_file_location}")
     my_podcast.rss_file(rss_podcast_feed.feed_file_location)
     print(f"done with {my_podcast.name}")
